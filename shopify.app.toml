@@ -1,0 +1,59 @@
+# Shopify App Configuration
+# Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "TurboCart"
+client_id = "" # Will be filled by Shopify CLI
+application_url = "https://your-app-url.com"
+embedded = true
+
+[access_scopes]
+# Required scopes for TurboCart
+scopes = "read_products,write_products,read_orders,write_cart_transforms,read_customers,write_customers,read_analytics"
+
+[auth]
+redirect_urls = [
+  "https://your-app-url.com/api/auth/callback",
+  "http://localhost:3000/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-01"
+
+# Required GDPR webhooks
+[[webhooks.subscriptions]]
+topics = ["customers/data_request"]
+uri = "/api/webhooks/gdpr/data-request"
+
+[[webhooks.subscriptions]]
+topics = ["customers/redact"]
+uri = "/api/webhooks/gdpr/customers-redact"
+
+[[webhooks.subscriptions]]
+topics = ["shop/redact"]
+uri = "/api/webhooks/gdpr/shop-redact"
+
+# App lifecycle webhooks
+[[webhooks.subscriptions]]
+topics = ["app/uninstalled"]
+uri = "/api/webhooks/app-uninstalled"
+
+# Product webhooks
+[[webhooks.subscriptions]]
+topics = ["products/create"]
+uri = "/api/webhooks/products-create"
+
+[[webhooks.subscriptions]]
+topics = ["products/update"]
+uri = "/api/webhooks/products-update"
+
+[[webhooks.subscriptions]]
+topics = ["products/delete"]
+uri = "/api/webhooks/products-delete"
+
+# Order webhooks (for conversion tracking)
+[[webhooks.subscriptions]]
+topics = ["orders/create"]
+uri = "/api/webhooks/orders-create"
+
+[pos]
+embedded = false

@@ -1,0 +1,50 @@
+{% comment %}
+  TurboCart - Discount Banner Upsell Display
+  Single prominent upsell with discount messaging
+{% endcomment %}
+
+<div class="turbocart-banner" data-turbocart-block="banner">
+  <div class="turbocart-banner__content" data-turbocart-upsells>
+    <!-- Single upsell product will be injected here via JavaScript -->
+    <div class="turbocart-banner__loading">
+      <div class="turbocart-spinner"></div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "TurboCart Banner",
+  "target": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_urgency",
+      "label": "Show urgency message",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "urgency_text",
+      "label": "Urgency message",
+      "default": "LIMITED TIME OFFER"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "Banner style",
+      "options": [
+        {
+          "value": "minimal",
+          "label": "Minimal"
+        },
+        {
+          "value": "bold",
+          "label": "Bold"
+        }
+      ],
+      "default": "minimal"
+    }
+  ]
+}
+{% endschema %}
