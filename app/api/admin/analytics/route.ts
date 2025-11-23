@@ -8,6 +8,9 @@ import { withAuth } from '@/lib/shopify/middleware';
 import { getAnalyticsSummary } from '@/lib/db/queries';
 import { query } from '@/lib/db';
 
+// Force dynamic rendering for API routes that use authentication
+export const dynamic = 'force-dynamic';
+
 /**
  * Get analytics data
  * GET /api/admin/analytics?startDate=...&endDate=...

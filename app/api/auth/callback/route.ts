@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { exchangeCodeForToken, verifyHmac } from '@/lib/shopify/auth';
 import { createShop } from '@/lib/db/queries';
 
+// Force dynamic rendering for OAuth routes
+export const dynamic = 'force-dynamic';
+
 /**
  * OAuth callback endpoint
  * GET /api/auth/callback?code=...&hmac=...&shop=...&state=...

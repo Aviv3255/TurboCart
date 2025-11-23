@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/shopify/middleware';
 import { updateShopSettings, type ShopSettings } from '@/lib/db/queries';
 
+// Force dynamic rendering for API routes that use authentication
+export const dynamic = 'force-dynamic';
+
 /**
  * Get current shop settings
  * GET /api/admin/settings

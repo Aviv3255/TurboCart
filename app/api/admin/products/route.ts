@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/shopify/middleware';
 import { createShopifyClient } from '@/lib/shopify/auth';
 
+// Force dynamic rendering for API routes that use authentication
+export const dynamic = 'force-dynamic';
+
 /**
  * Get products from Shopify
  * GET /api/admin/products?query=...&collection=...

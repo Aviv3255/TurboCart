@@ -12,6 +12,9 @@ import {
   getPlanFromSubscriptionName,
 } from '@/lib/shopify/billing';
 
+// Force dynamic rendering for API routes that use authentication
+export const dynamic = 'force-dynamic';
+
 /**
  * Get current billing status
  * GET /api/admin/billing

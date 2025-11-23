@@ -5,11 +5,11 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Page, Banner, Spinner } from '@shopify/polaris';
 
-export default function BillingCallbackPage() {
+function BillingCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -55,5 +55,19 @@ export default function BillingCallbackPage() {
         <p style={{ marginTop: '16px' }}>Activating your subscription...</p>
       </div>
     </Page>
+  );
+}
+
+export default function BillingCallbackPage() {
+  return (
+    <Suspense fallback={
+      <Page title="Loading">
+        <div style={{ padding: '60px', textAlign: 'center' }}>
+          <Spinner size="large" />
+        </div>
+      </Page>
+    }>
+      <BillingCallbackContent />
+    </Suspense>
   );
 }

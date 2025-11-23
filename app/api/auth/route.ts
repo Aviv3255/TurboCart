@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthorizationUrl, generateState, verifyHmac } from '@/lib/shopify/auth';
 
+// Force dynamic rendering for OAuth routes
+export const dynamic = 'force-dynamic';
+
 /**
  * OAuth initiation endpoint
  * GET /api/auth?shop=store.myshopify.com
