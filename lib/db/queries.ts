@@ -172,6 +172,13 @@ export async function removeUpsellProduct(
   );
 }
 
+export async function deactivateAllUpsells(shopId: string): Promise<void> {
+  await query(
+    'UPDATE upsell_products SET is_active = false WHERE shop_id = $1',
+    [shopId]
+  );
+}
+
 // ============================================
 // ANALYTICS QUERIES
 // ============================================

@@ -4,6 +4,7 @@
  */
 
 import { getActiveUpsells, getProductAffinities, type UpsellProduct } from '../db/queries';
+import { query } from '../db';
 
 export interface CartItem {
   id: number;
@@ -119,8 +120,8 @@ export class RecommendationEngine {
     }
 
     // Historical performance boost (from analytics)
-    // This will come from the analytics table - for now, placeholder
-    const performanceBoost = 0; // TODO: Implement based on conversion rates
+    // Boost score based on past conversion rates
+    const performanceBoost = await this.getPerformanceBoost(upsell.id);
     score += performanceBoost;
 
     // Calculate confidence (0-1)
@@ -221,6 +222,42 @@ export class RecommendationEngine {
 
     // Scale affinity score to 0-20 points
     return maxAffinity * 20;
+  }
+
+  /**
+   * Get performance boost based on historical conversion rates
+   * Products with high conversion rates get priority
+   */
+  private async getPerformanceBoost(upsellProductId: string): Promise<number> {
+    try {
+      const result = await query<{
+        conversion_rate: number;
+      }>(
+        `SELECT
+          CASE
+            WHEN SUM(impressions) > 0
+            THEN (SUM(adds)::decimal / SUM(impressions)::decimal)
+            ELSE 0
+          END as conversion_rate
+        FROM analytics_daily
+        WHERE upsell_product_id = $1
+        AND date >= CURRENT_DATE - INTERVAL '30 days'`,
+        [upsellProductId]
+      );
+
+      if (result.rows.length === 0) {
+        return 0;
+      }
+
+      const conversionRate = Number(result.rows[0]?.conversion_rate || 0);
+
+      // Scale conversion rate to 0-10 points
+      // 10% conversion = 10 points, 5% = 5 points, etc.
+      return Math.min(conversionRate * 100, 10);
+    } catch (error) {
+      console.error('Error fetching performance boost:', error);
+      return 0;
+    }
   }
 
   /**

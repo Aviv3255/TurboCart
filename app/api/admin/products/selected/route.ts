@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/shopify/middleware';
-import { addUpsellProduct, getActiveUpsells } from '@/lib/db/queries';
+import { addUpsellProduct, getActiveUpsells, deactivateAllUpsells } from '@/lib/db/queries';
 
 /**
  * Get selected upsell products
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       }
 
       // First, deactivate all existing upsells
-      await req.shop; // TODO: Implement deactivation in queries.ts
+      await deactivateAllUpsells(req.shop.id);
 
       // Then add new selections
       for (const product of products) {
