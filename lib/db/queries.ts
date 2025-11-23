@@ -75,6 +75,25 @@ export async function markShopUninstalled(shopId: string): Promise<void> {
   );
 }
 
+export async function updateShopBilling(
+  shopId: string,
+  plan: string,
+  planStatus: 'trial' | 'active' | 'cancelled' | 'expired',
+  billingId?: number,
+  trialEndsAt?: Date
+): Promise<void> {
+  await query(
+    `UPDATE shops
+     SET plan = $1,
+         plan_status = $2,
+         billing_id = $3,
+         trial_ends_at = $4,
+         updated_at = NOW()
+     WHERE id = $5`,
+    [plan, planStatus, billingId || null, trialEndsAt || null, shopId]
+  );
+}
+
 // ============================================
 // UPSELL PRODUCT QUERIES
 // ============================================

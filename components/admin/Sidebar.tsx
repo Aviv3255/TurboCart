@@ -11,6 +11,7 @@ import {
   HomeIcon,
   ProductIcon,
   AnalyticsIcon,
+  CreditCardIcon,
   SettingsIcon,
 } from '@shopify/polaris-icons';
 
@@ -40,6 +41,11 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Analytics',
     href: '/analytics',
     icon: AnalyticsIcon,
+  },
+  {
+    label: 'Billing',
+    href: '/billing',
+    icon: CreditCardIcon,
   },
   {
     label: 'Settings',
