@@ -131,16 +131,16 @@ export default function BillingPage() {
                     Current Plan: {currentPlan.name}
                   </h2>
                   <p style={{ fontSize: '24px', fontWeight: '700', color: 'var(--cosmic-from)', marginTop: '8px' }}>
-                    {formatPrice(billingStatus.price)}/month
+                    {formatPrice(billingStatus?.price || 0)}/month
                   </p>
-                  {billingStatus.trial && (
+                  {billingStatus?.trial && (
                     <div style={{ marginTop: '12px' }}>
                       <Badge tone="info">
-                        Trial - {billingStatus.trialDaysRemaining} days remaining
+                        {`Trial - ${billingStatus?.trialDaysRemaining || 0} days remaining`}
                       </Badge>
                     </div>
                   )}
-                  {billingStatus.test && (
+                  {billingStatus?.test && (
                     <div style={{ marginTop: '8px' }}>
                       <Badge tone="warning">Test Mode</Badge>
                     </div>
@@ -171,7 +171,7 @@ export default function BillingPage() {
       {/* Trial Banner */}
       {billingStatus?.status === 'no_subscription' && (
         <div style={{ marginBottom: '20px' }}>
-          <Banner status="info" title="Start Your Free Trial">
+          <Banner tone="info" title="Start Your Free Trial">
             <p>Choose a plan below to start your 14-day free trial. No credit card required!</p>
           </Banner>
         </div>

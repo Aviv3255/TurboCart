@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
   ProductIcon,
-  AnalyticsIcon,
+  ChartVerticalIcon,
   CreditCardIcon,
   SettingsIcon,
 } from '@shopify/polaris-icons';
@@ -40,7 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: 'Analytics',
     href: '/analytics',
-    icon: AnalyticsIcon,
+    icon: ChartVerticalIcon,
   },
   {
     label: 'Billing',

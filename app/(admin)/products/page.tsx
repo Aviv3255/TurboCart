@@ -156,7 +156,7 @@ export default function ProductsPage() {
         <div style={{ marginBottom: '20px' }}>
           <Banner
             title={`${selectionCount} products selected`}
-            status={isValidSelection ? 'success' : 'warning'}
+            tone={isValidSelection ? 'success' : 'warning'}
           >
             {selectionCount < 10 && <p>Select at least {10 - selectionCount} more products</p>}
             {selectionCount > 50 && <p>You can select maximum 50 products (remove {selectionCount - 50})</p>}
@@ -230,7 +230,7 @@ export default function ProductsPage() {
             resourceName={{ singular: 'product', plural: 'products' }}
             items={filteredProducts}
             selectedItems={selectedProducts}
-            onSelectionChange={setSelectedProducts}
+            onSelectionChange={(items) => setSelectedProducts(items as string[])}
             selectable
             renderItem={(product) => {
               const { id, title, image, price, currency, inventory, productType, vendor, status } =
@@ -247,6 +247,7 @@ export default function ProductsPage() {
                   id={id}
                   media={media}
                   accessibilityLabel={`Select ${title}`}
+                  url="#"
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ flex: 1 }}>
@@ -262,7 +263,7 @@ export default function ProductsPage() {
                           <Badge>Draft</Badge>
                         )}
                         {inventory > 0 ? (
-                          <Badge tone="success">{inventory} in stock</Badge>
+                          <Badge tone="success">{`${inventory} in stock`}</Badge>
                         ) : (
                           <Badge tone="critical">Out of stock</Badge>
                         )}

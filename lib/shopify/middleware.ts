@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateSessionToken } from './auth';
-import { getShopByDomain } from '../db/queries';
+import { getShopByDomain, type Shop } from '../db/queries';
 
 export interface AuthenticatedRequest extends NextRequest {
-  shop?: {
-    id: string;
-    domain: string;
-    accessToken: string;
-  };
+  shop?: Shop;
 }
 
 /**
@@ -33,11 +29,7 @@ export async function withAuth(
           );
         }
 
-        (request as AuthenticatedRequest).shop = {
-          id: shopRecord.id,
-          domain: shopRecord.shop_domain,
-          accessToken: shopRecord.access_token,
-        };
+        (request as AuthenticatedRequest).shop = shopRecord;
 
         return handler(request as AuthenticatedRequest);
       } catch (error) {
@@ -59,11 +51,7 @@ export async function withAuth(
           );
         }
 
-        (request as AuthenticatedRequest).shop = {
-          id: shopRecord.id,
-          domain: shopRecord.shop_domain,
-          accessToken: shopRecord.access_token,
-        };
+        (request as AuthenticatedRequest).shop = shopRecord;
 
         return handler(request as AuthenticatedRequest);
       } catch (error) {

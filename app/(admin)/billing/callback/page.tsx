@@ -41,7 +41,7 @@ export default function BillingCallbackPage() {
   if (error) {
     return (
       <Page title="Billing">
-        <Banner status="critical" title="Subscription Error">
+        <Banner tone="critical" title="Subscription Error">
           <p>{error}</p>
         </Banner>
       </Page>

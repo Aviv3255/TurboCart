@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
 
       // Get current subscription
       const subscription = await getCurrentSubscription(
-        req.shop.domain,
-        req.shop.accessToken
+        req.shop.shop_domain,
+        req.shop.access_token
       );
 
       if (!subscription) {
@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
 
       // Cancel the subscription
       await cancelSubscription(
-        req.shop.domain,
-        req.shop.accessToken,
+        req.shop.shop_domain,
+        req.shop.access_token,
         subscription.id
       );
 

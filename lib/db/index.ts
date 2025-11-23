@@ -26,7 +26,7 @@ export function getPool(): Pool {
 /**
  * Execute a query with automatic connection management
  */
-export async function query<T = unknown>(
+export async function query<T extends Record<string, any> = any>(
   text: string,
   params?: unknown[]
 ): Promise<QueryResult<T>> {

@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Create Shopify GraphQL client
-      const client = createShopifyClient(req.shop.domain, req.shop.accessToken);
+      const client = createShopifyClient(req.shop.shop_domain, req.shop.access_token);
 
       // Build GraphQL query
       let searchQuery = '';

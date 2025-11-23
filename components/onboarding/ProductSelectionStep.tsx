@@ -70,7 +70,7 @@ export default function ProductSelectionStep({
           <div style={{ marginBottom: '20px' }}>
             {selectedProducts.length > 0 && (
               <Banner
-                status={isValid ? 'success' : 'warning'}
+                tone={isValid ? 'success' : 'warning'}
                 title={`${selectedProducts.length} products selected`}
               >
                 {selectedProducts.length < 10 && (
@@ -121,7 +121,7 @@ export default function ProductSelectionStep({
                 );
 
                 return (
-                  <ResourceItem id={product.id} media={media}>
+                  <ResourceItem id={product.id} media={media} url="#">
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <div>
                         <h3 style={{ fontSize: '14px', fontWeight: '600' }}>{product.title}</h3>

@@ -4,7 +4,7 @@
 
 'use client';
 
-import { Card, RadioButton, Stack } from '@shopify/polaris';
+import { Card, RadioButton, BlockStack } from '@shopify/polaris';
 
 type DisplayStyle = 'carousel' | 'list' | 'banner' | 'cards' | 'frequently-bought';
 
@@ -76,7 +76,7 @@ export default function DisplayStyleStep({
             Select how upsells will appear to your customers in the cart
           </p>
 
-          <Stack vertical spacing="loose">
+          <BlockStack gap="400">
             {STYLE_OPTIONS.map((option) => (
               <div
                 key={option.value}
@@ -102,7 +102,7 @@ export default function DisplayStyleStep({
                 </div>
               </div>
             ))}
-          </Stack>
+          </BlockStack>
         </div>
       </Card>
 

@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
 
       // Create subscription
       const subscription = await createSubscription(
-        req.shop.domain,
-        req.shop.accessToken,
+        req.shop.shop_domain,
+        req.shop.access_token,
         tier,
         annual,
         returnUrl

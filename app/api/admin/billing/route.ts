@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
 
       // Get current subscription from Shopify
       const subscription = await getCurrentSubscription(
-        req.shop.domain,
-        req.shop.accessToken
+        req.shop.shop_domain,
+        req.shop.access_token
       );
 
       if (!subscription) {

@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Page, Card, RadioButton, Stack, Button, Banner } from '@shopify/polaris';
+import { Page, Card, RadioButton, Button, Banner, BlockStack } from '@shopify/polaris';
 
 type DisplayStyle = 'carousel' | 'list' | 'banner' | 'cards' | 'frequently-bought';
 
@@ -144,7 +144,7 @@ export default function SettingsPage() {
     >
       {saved && (
         <div style={{ marginBottom: '20px' }}>
-          <Banner status="success" title="Settings saved successfully!">
+          <Banner tone="success" title="Settings saved successfully!">
             <p>Your display style has been updated.</p>
           </Banner>
         </div>
@@ -159,7 +159,7 @@ export default function SettingsPage() {
             Choose how upsells appear to your customers
           </p>
 
-          <Stack vertical spacing="loose">
+          <BlockStack gap="400">
             {STYLE_OPTIONS.map((option) => (
               <div
                 key={option.value}
@@ -185,7 +185,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             ))}
-          </Stack>
+          </BlockStack>
         </div>
       </Card>
 

@@ -185,11 +185,14 @@ export async function getCurrentSubscription(
 
   // Get the first active subscription
   const sub = subscriptions[0];
+  if (!sub) {
+    return null;
+  }
 
   return {
     id: sub.id.replace('gid://shopify/AppSubscription/', ''),
     name: sub.name,
-    price: parseFloat(sub.lineItems[0].plan.pricingDetails.price.amount),
+    price: parseFloat(sub.lineItems[0]?.plan?.pricingDetails?.price?.amount || '0'),
     status: sub.status as BillingSubscription['status'],
     trialDays: sub.trialDays,
     createdAt: new Date(sub.createdAt),
