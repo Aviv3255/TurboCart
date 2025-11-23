@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     // Track the event
     await trackEvent(shopId, {
       upsell_product_id: upsellProductId,
-      event_type: event_type as any,
+      event_type: event_type as 'impression' | 'click' | 'add' | 'purchase' | 'remove',
       session_id: session_id || 'unknown',
       customer_id: customer_id || null,
       cart_token: cart_token || null,

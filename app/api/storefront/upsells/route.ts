@@ -41,14 +41,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Convert Shopify cart format to our format
-    const formattedCartItems: CartItem[] = cart_items.map((item: any) => ({
-      id: item.id || item.key,
+    const formattedCartItems: CartItem[] = cart_items.map((item: {
+      id?: number;
+      key?: string;
+      product_id: number;
+      variant_id?: number;
+      title?: string;
+      product_title?: string;
+      product_type?: string;
+      vendor?: string;
+      collection_id?: number;
+      price: number;
+      quantity?: number;
+    }) => ({
+      id: Number(item.id || item.key || 0),
       product_id: item.product_id,
-      variant_id: item.variant_id || item.id,
-      title: item.title || item.product_title,
-      product_type: item.product_type,
-      vendor: item.vendor,
-      collection_id: item.collection_id,
+      variant_id: item.variant_id || item.id || 0,
+      title: item.title || item.product_title || '',
+      product_type: item.product_type || undefined,
+      vendor: item.vendor || undefined,
+      collection_id: item.collection_id || undefined,
       price: item.price,
       quantity: item.quantity || 1,
     }));

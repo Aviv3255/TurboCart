@@ -23,7 +23,7 @@ interface SidebarProps {
 interface NavItem {
   label: string;
   href: string;
-  icon: any;
+  icon: React.ComponentType<{ [key: string]: unknown }>;
 }
 
 const NAV_ITEMS: NavItem[] = [
