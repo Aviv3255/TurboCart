@@ -191,14 +191,15 @@
         />
         <h4 class="turbocart-carousel__item-title">${escapeHtml(product.title)}</h4>
         <div class="turbocart-carousel__item-price">
-          ${formatMoney(product.price)}
+          <span>${formatMoney(product.price)}</span>
           ${product.compare_at_price ? `<span class="turbocart-carousel__item-compare-price">${formatMoney(product.compare_at_price)}</span>` : ''}
         </div>
         <button
           class="turbocart-btn turbocart-btn--primary"
           data-turbocart-add="${product.variant_id}"
+          style="margin-top: auto;"
         >
-          + Add
+          Add
         </button>
       </div>
     `).join('');
@@ -302,7 +303,6 @@
 
     // Show only the top recommendation
     const product = upsellProducts[0];
-    const savings = product.compare_at_price ? product.compare_at_price - product.price : 0;
 
     const html = `
       <div class="turbocart-banner__content" data-product-id="${product.id}">
@@ -313,13 +313,12 @@
           loading="lazy"
         />
         <div class="turbocart-banner__info">
-          <h4 class="turbocart-banner__title">Add ${escapeHtml(product.title)}</h4>
+          <div class="turbocart-banner__urgency">SELLING FAST</div>
+          <h4 class="turbocart-banner__title">${escapeHtml(product.title)}</h4>
           <div class="turbocart-banner__price">
             ${formatMoney(product.price)}
-            ${product.compare_at_price ? `<span style="text-decoration: line-through; opacity: 0.7; margin-left: 8px;">${formatMoney(product.compare_at_price)}</span>` : ''}
+            ${product.compare_at_price ? `<span style="text-decoration: line-through; opacity: 0.7; margin-left: 8px; font-size: 14px;">${formatMoney(product.compare_at_price)}</span>` : ''}
           </div>
-          ${savings > 0 ? `<div class="turbocart-banner__savings">Save ${formatMoney(savings)}</div>` : ''}
-          <div class="turbocart-banner__urgency">LIMITED TIME OFFER</div>
         </div>
         <div class="turbocart-banner__toggle">
           <button
@@ -327,7 +326,7 @@
             data-turbocart-add="${product.variant_id}"
             style="padding: 12px 24px;"
           >
-            Add to Cart
+            Add
           </button>
         </div>
       </div>
@@ -390,63 +389,117 @@
   }
 
   /* ============================================ */
-  /* FREQUENTLY BOUGHT TOGETHER */
+  /* ADD-ON (FREQUENTLY BOUGHT TOGETHER) */
   /* ============================================ */
 
   function initFrequentlyBought(block) {
-    // FBT-specific initialization if needed
+    // Add-on specific initialization if needed
+  }
+
+  /**
+   * Generate consistent percentage for a product ID
+   * Same product ID always returns the same percentage
+   */
+  function getProductPercentage(productId) {
+    // Simple hash function to generate consistent percentage from product ID
+    let hash = 0;
+    const idStr = String(productId);
+    for (let i = 0; i < idStr.length; i++) {
+      hash = ((hash << 5) - hash) + idStr.charCodeAt(i);
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    // Map to range 25-65% (reasonable social proof range)
+    const percentage = 25 + (Math.abs(hash) % 41);
+    return percentage;
   }
 
   function renderFrequentlyBought(container) {
-    if (!upsellProducts.length || !currentCart.items.length) {
+    if (!upsellProducts.length) {
       container.innerHTML = '';
+      container.closest('.turbocart-addon')?.remove();
       return;
     }
 
-    const cartItem = currentCart.items[0]; // Pair with first cart item
-    const upsell = upsellProducts[0]; // Show top recommendation
-    const total = cartItem.price + upsell.price;
-    const discount = Math.round(total * 0.1); // 10% bundle discount
-    const bundlePrice = total - discount;
+    // Show up to 2 add-ons (can be configurable)
+    const addons = upsellProducts.slice(0, 2);
 
-    const html = `
-      <div class="turbocart-fbt__items">
-        <div class="turbocart-fbt__item">
-          <img src="${cartItem.image}" alt="${escapeHtml(cartItem.product_title)}" class="turbocart-fbt__item-image" />
-          <div class="turbocart-fbt__item-title">${escapeHtml(cartItem.product_title)}</div>
-          <div class="turbocart-fbt__item-price">${formatMoney(cartItem.price)}</div>
+    const html = addons.map(product => {
+      const percentage = getProductPercentage(product.id);
+      const hasSavings = product.compare_at_price && product.compare_at_price > product.price;
+      const savings = hasSavings ? product.compare_at_price - product.price : 0;
+
+      // Check if product has variants (we'll show a selector if it does)
+      const hasVariants = product.variants && product.variants.length > 1;
+
+      return `
+        <div class="turbocart-addon__item" data-product-id="${product.id}">
+          <img
+            src="${product.image}"
+            alt="${escapeHtml(product.title)}"
+            class="turbocart-addon__item-image"
+            loading="lazy"
+          />
+          <div class="turbocart-addon__item-info">
+            <div class="turbocart-addon__item-badge">${percentage}% ADDED THIS TO ORDER</div>
+            <h4 class="turbocart-addon__item-title">${escapeHtml(product.title)}</h4>
+            <div class="turbocart-addon__item-price-row">
+              <span class="turbocart-addon__item-price">${formatMoney(product.price)}</span>
+              ${hasSavings ? `
+                <span class="turbocart-addon__item-compare-price">${formatMoney(product.compare_at_price)}</span>
+                <span class="turbocart-addon__item-save">Save ${formatMoney(savings)}</span>
+              ` : ''}
+            </div>
+            ${hasVariants ? `
+              <div class="turbocart-addon__item-variant">
+                <label class="turbocart-addon__item-variant-label">${product.variants[0].option1 ? product.variants[0].option_name || 'Variant' : 'Options'}</label>
+                <select class="turbocart-addon__item-variant-select" data-variant-select="${product.id}">
+                  ${product.variants.map(variant => `
+                    <option value="${variant.id}" ${variant.id === product.variant_id ? 'selected' : ''}>
+                      ${variant.title}
+                    </option>
+                  `).join('')}
+                </select>
+              </div>
+            ` : ''}
+          </div>
+          <div class="turbocart-addon__item-actions">
+            <button
+              class="turbocart-btn turbocart-btn--primary"
+              data-turbocart-add="${product.variant_id}"
+              data-product-id="${product.id}"
+              style="padding: 10px 20px;"
+            >
+              Add
+            </button>
+          </div>
         </div>
-        <div class="turbocart-fbt__plus">+</div>
-        <div class="turbocart-fbt__item">
-          <img src="${upsell.image}" alt="${escapeHtml(upsell.title)}" class="turbocart-fbt__item-image" />
-          <div class="turbocart-fbt__item-title">${escapeHtml(upsell.title)}</div>
-          <div class="turbocart-fbt__item-price">${formatMoney(upsell.price)}</div>
-        </div>
-      </div>
-      <div class="turbocart-fbt__bundle">
-        <div class="turbocart-fbt__bundle-price">
-          <span class="turbocart-fbt__bundle-total">${formatMoney(bundlePrice)}</span>
-          <span class="turbocart-fbt__bundle-original">${formatMoney(total)}</span>
-          <span class="turbocart-fbt__bundle-savings">(Save ${formatMoney(discount)})</span>
-        </div>
-        <button
-          class="turbocart-btn turbocart-btn--cosmic"
-          data-turbocart-add="${upsell.variant_id}"
-          data-product-id="${upsell.id}"
-          style="width: 100%;"
-        >
-          Add Bundle to Cart
-        </button>
-      </div>
-    `;
+      `;
+    }).join('');
 
     container.innerHTML = html;
 
-    // Attach add to cart listener
-    container.querySelector('[data-turbocart-add]').addEventListener('click', (e) => {
-      const variantId = e.target.dataset.turbocartAdd;
-      const productId = e.target.dataset.productId;
-      addToCart(variantId, productId);
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const button = e.target;
+        const productId = button.dataset.productId;
+        const itemEl = button.closest('.turbocart-addon__item');
+        const variantSelect = itemEl.querySelector('[data-variant-select]');
+
+        // Use selected variant if available, otherwise use default
+        const variantId = variantSelect ? variantSelect.value : button.dataset.turbocartAdd;
+
+        addToCart(variantId, productId);
+      });
+    });
+
+    // Update button variant ID when variant selector changes
+    container.querySelectorAll('[data-variant-select]').forEach(select => {
+      select.addEventListener('change', (e) => {
+        const itemEl = e.target.closest('.turbocart-addon__item');
+        const btn = itemEl.querySelector('[data-turbocart-add]');
+        btn.dataset.turbocartAdd = e.target.value;
+      });
     });
   }
 

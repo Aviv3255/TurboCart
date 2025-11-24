@@ -315,20 +315,18 @@ function ListPreview() {
 
 function BannerPreview() {
   const product = SAMPLE_PRODUCTS[0]!;
-  const savings = product.compareAtPrice ? product.compareAtPrice - product.price : 10;
 
   return (
     <div className="preview-container">
       <img src={product.image} alt={product.title} className="image" />
       <div className="content">
-        <span className="badge">Limited</span>
+        <span className="badge">SELLING FAST</span>
         <h3 className="name">{product.title}</h3>
         <div className="price-row">
           {product.compareAtPrice && (
             <span className="old">${product.compareAtPrice.toFixed(2)}</span>
           )}
           <span className="price">${product.price.toFixed(2)}</span>
-          <span className="save">Save ${savings.toFixed(2)}</span>
         </div>
       </div>
       <button className="btn">Add</button>
@@ -520,145 +518,115 @@ function CardsPreview() {
 }
 
 function FrequentlyBoughtPreview() {
-  const cartItem = SAMPLE_PRODUCTS[0]!;
-  const upsellItem = SAMPLE_PRODUCTS[1]!;
-  const bundlePrice = cartItem.price + upsellItem.price;
-  const savings = 15.99;
-  const finalPrice = bundlePrice - savings;
+  const product1 = SAMPLE_PRODUCTS[1]!;
+  const product2 = SAMPLE_PRODUCTS[2]!;
 
   return (
     <div className="preview-container">
-      <h3 className="title">Frequently bought together</h3>
-
-      <div className="bundle">
-        <div className="item">
-          <input type="checkbox" checked disabled className="check" />
-          <img src={cartItem.image} alt={cartItem.title} className="image" />
-          <div className="info">
-            <h4 className="name">{cartItem.title}</h4>
-            <span className="price">${cartItem.price.toFixed(2)}</span>
+      <div className="addon-item">
+        <img src={product1.image} alt={product1.title} className="image" />
+        <div className="info">
+          <span className="badge">43% ADDED THIS</span>
+          <h4 className="name">{product1.title}</h4>
+          <div className="price-row">
+            {product1.compareAtPrice && (
+              <span className="old">${product1.compareAtPrice.toFixed(2)}</span>
+            )}
+            <span className="price">${product1.price.toFixed(2)}</span>
           </div>
         </div>
-
-        <div className="plus">+</div>
-
-        <div className="item">
-          <input type="checkbox" defaultChecked className="check" />
-          <img src={upsellItem.image} alt={upsellItem.title} className="image" />
-          <div className="info">
-            <h4 className="name">{upsellItem.title}</h4>
-            <span className="price">${upsellItem.price.toFixed(2)}</span>
-          </div>
-        </div>
+        <button className="btn">Add</button>
       </div>
 
-      <div className="footer">
-        <div className="total">
-          Total: <strong>${finalPrice.toFixed(2)}</strong>
-          <span className="save"> (Save ${savings.toFixed(2)})</span>
+      <div className="addon-item">
+        <img src={product2.image} alt={product2.title} className="image" />
+        <div className="info">
+          <span className="badge">38% ADDED THIS</span>
+          <h4 className="name">{product2.title}</h4>
+          <div className="price-row">
+            {product2.compareAtPrice && (
+              <span className="old">${product2.compareAtPrice.toFixed(2)}</span>
+            )}
+            <span className="price">${product2.price.toFixed(2)}</span>
+          </div>
         </div>
-        <button className="btn">Add Both</button>
+        <button className="btn">Add</button>
       </div>
 
       <style jsx>{`
         .preview-container {
           background: white;
-          padding: 12px;
-        }
-
-        .title {
-          font-size: 13px;
-          font-weight: 600;
-          color: #000;
-          margin: 0 0 10px 0;
-        }
-
-        .bundle {
+          padding: 0;
           display: flex;
-          align-items: flex-start;
+          flex-direction: column;
           gap: 8px;
-          margin-bottom: 10px;
         }
 
-        .item {
-          flex: 1;
+        .addon-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px;
           border: 1px solid #e0e0e0;
-          border-radius: 4px;
-          padding: 6px;
-          text-align: center;
-        }
-
-        .check {
-          width: 14px;
-          height: 14px;
-          margin-bottom: 4px;
+          border-radius: 6px;
+          background: white;
         }
 
         .image {
           width: 50px;
           height: 50px;
-          border-radius: 3px;
+          border-radius: 4px;
           object-fit: cover;
-          margin-bottom: 4px;
+          flex-shrink: 0;
         }
 
         .info {
-          width: 100%;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .badge {
+          display: inline-block;
+          padding: 2px 6px;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+          color: #8b5cf6;
+          font-size: 8px;
+          font-weight: 700;
+          border-radius: 3px;
+          margin-bottom: 4px;
+          letter-spacing: 0.3px;
         }
 
         .name {
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 3px 0;
+          margin: 0 0 4px 0;
           overflow: hidden;
           text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
+          white-space: nowrap;
+        }
+
+        .price-row {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .old {
+          font-size: 10px;
+          color: #999;
+          text-decoration: line-through;
         }
 
         .price {
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 700;
           color: #000;
-        }
-
-        .plus {
-          font-size: 16px;
-          font-weight: 700;
-          color: #000;
-          align-self: center;
-          margin-top: 14px;
-        }
-
-        .footer {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding-top: 10px;
-          border-top: 1px solid #e0e0e0;
-        }
-
-        .total {
-          flex: 1;
-          font-size: 10px;
-          color: #666;
-        }
-
-        .total strong {
-          font-size: 13px;
-          color: #000;
-        }
-
-        .save {
-          font-size: 10px;
-          font-weight: 600;
-          color: #10b981;
         }
 
         .btn {
-          padding: 6px 12px;
+          padding: 6px 14px;
           background: #000;
           color: white;
           border: none;
@@ -666,7 +634,7 @@ function FrequentlyBoughtPreview() {
           font-size: 10px;
           font-weight: 600;
           cursor: pointer;
-          white-space: nowrap;
+          flex-shrink: 0;
         }
       `}</style>
     </div>

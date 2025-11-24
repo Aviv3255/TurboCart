@@ -1,16 +1,12 @@
 {% comment %}
-  TurboCart - Frequently Bought Together Display
-  Bundle-style upsell with contextual pairing
+  TurboCart - Add On Display
+  Clean individual add-ons with social proof
 {% endcomment %}
 
-<div class="turbocart-fbt" data-turbocart-block="frequently-bought">
-  <div class="turbocart-fbt__header">
-    <h3 class="turbocart-fbt__title">{{ block.settings.heading | default: "Customers also bought" }}</h3>
-  </div>
-
-  <div class="turbocart-fbt__content" data-turbocart-upsells>
-    <!-- Bundle display will be injected here via JavaScript -->
-    <div class="turbocart-fbt__loading">
+<div class="turbocart-addon" data-turbocart-block="frequently-bought">
+  <div class="turbocart-addon__content" data-turbocart-upsells>
+    <!-- Add-on items will be injected here via JavaScript -->
+    <div class="turbocart-addon__loading">
       <div class="turbocart-spinner"></div>
     </div>
   </div>
@@ -18,29 +14,23 @@
 
 {% schema %}
 {
-  "name": "TurboCart Frequently Bought",
+  "name": "TurboCart Add On",
   "target": "section",
   "settings": [
     {
-      "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Customers also bought"
-    },
-    {
       "type": "checkbox",
-      "id": "show_bundle_discount",
-      "label": "Show bundle discount",
+      "id": "show_percentage",
+      "label": "Show social proof percentage",
       "default": true
     },
     {
       "type": "range",
-      "id": "discount_percentage",
-      "min": 0,
-      "max": 25,
-      "step": 5,
-      "label": "Bundle discount percentage",
-      "default": 10
+      "id": "max_items",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "label": "Maximum add-ons to display",
+      "default": 2
     }
   ]
 }

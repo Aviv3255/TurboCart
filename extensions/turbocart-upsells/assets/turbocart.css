@@ -128,9 +128,11 @@
   background: var(--tc-background);
   border: 1px solid var(--tc-border);
   border-radius: 6px;
-  padding: 8px;
+  padding: 10px;
   transition: var(--tc-transition);
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
 .turbocart-carousel__item:hover {
@@ -151,24 +153,31 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--tc-text);
-  margin: 0 0 3px 0;
+  margin: 0 0 6px 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
+  min-height: 31px;
 }
 
 .turbocart-carousel__item-price {
   font-size: 14px;
   font-weight: 700;
   color: var(--tc-text);
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .turbocart-carousel__item-compare-price {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--tc-text-secondary);
   text-decoration: line-through;
-  margin-left: 6px;
 }
 
 .turbocart-carousel__nav {
@@ -351,10 +360,14 @@
 }
 
 .turbocart-banner__urgency {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .turbocart-banner__toggle {
@@ -434,105 +447,130 @@
 }
 
 /* =============================================== */
-/* FREQUENTLY BOUGHT TOGETHER STYLES */
+/* ADD-ON STYLES */
 /* =============================================== */
 
-.turbocart-fbt {
+.turbocart-addon {
   margin: 12px 0;
-  padding: 12px;
-  background: var(--tc-background);
-  border: 1px solid var(--tc-border);
-  border-radius: 8px;
 }
 
-.turbocart-fbt__header {
-  margin-bottom: 10px;
-}
-
-.turbocart-fbt__title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--tc-text);
-  margin: 0;
-}
-
-.turbocart-fbt__content {
+.turbocart-addon__content {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.turbocart-fbt__items {
+.turbocart-addon__item {
+  background: var(--tc-background);
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 12px;
+  transition: var(--tc-transition);
 }
 
-.turbocart-fbt__item {
-  flex: 1;
-  min-width: 100px;
-  text-align: center;
+.turbocart-addon__item:hover {
+  border-color: var(--tc-accent-purple);
+  box-shadow: var(--tc-shadow-cosmic);
 }
 
-.turbocart-fbt__item-image {
-  width: 100%;
-  max-width: 80px;
-  aspect-ratio: 1;
+.turbocart-addon__item-image {
+  width: 70px;
+  height: 70px;
   object-fit: cover;
-  border-radius: 4px;
-  margin: 0 auto 6px;
-}
-
-.turbocart-fbt__item-title {
-  font-size: 11px;
-  color: var(--tc-text);
-  margin: 0 0 3px 0;
-}
-
-.turbocart-fbt__item-price {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--tc-text);
-}
-
-.turbocart-fbt__plus {
-  font-size: 18px;
-  color: var(--tc-text-secondary);
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
-.turbocart-fbt__bundle {
-  padding: 10px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-  border-radius: 6px;
-  border: 1px solid var(--tc-accent-purple);
+.turbocart-addon__item-info {
+  flex: 1;
+  min-width: 0;
 }
 
-.turbocart-fbt__bundle-price {
+.turbocart-addon__item-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  color: var(--tc-accent-purple);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.turbocart-addon__item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tc-text);
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.turbocart-addon__item-price-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
-  justify-content: center;
   margin-bottom: 8px;
 }
 
-.turbocart-fbt__bundle-total {
-  font-size: 18px;
+.turbocart-addon__item-price {
+  font-size: 16px;
   font-weight: 700;
   color: var(--tc-text);
 }
 
-.turbocart-fbt__bundle-original {
+.turbocart-addon__item-compare-price {
   font-size: 14px;
   color: var(--tc-text-secondary);
   text-decoration: line-through;
 }
 
-.turbocart-fbt__bundle-savings {
+.turbocart-addon__item-save {
+  font-size: 12px;
   color: var(--tc-accent-purple);
   font-weight: 600;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.turbocart-addon__item-variant {
+  margin-bottom: 8px;
+}
+
+.turbocart-addon__item-variant-label {
+  font-size: 11px;
+  color: var(--tc-text-secondary);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.turbocart-addon__item-variant-select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--tc-border);
+  border-radius: 4px;
   font-size: 13px;
+  font-family: inherit;
+  color: var(--tc-text);
+  background: var(--tc-background);
+  cursor: pointer;
+  transition: var(--tc-transition);
+}
+
+.turbocart-addon__item-variant-select:hover,
+.turbocart-addon__item-variant-select:focus {
+  border-color: var(--tc-accent-purple);
+  outline: none;
+}
+
+.turbocart-addon__item-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 /* =============================================== */
@@ -548,12 +586,13 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .turbocart-fbt__items {
-    flex-direction: column;
+  .turbocart-addon__item {
+    flex-wrap: wrap;
   }
 
-  .turbocart-fbt__plus {
-    transform: rotate(90deg);
+  .turbocart-addon__item-image {
+    width: 60px;
+    height: 60px;
   }
 }
 
@@ -565,5 +604,27 @@
   .turbocart-list__item {
     flex-direction: column;
     text-align: center;
+  }
+
+  .turbocart-addon__item {
+    padding: 10px;
+  }
+
+  .turbocart-addon__item-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .turbocart-addon__item-title {
+    font-size: 13px;
+  }
+
+  .turbocart-addon__item-actions {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .turbocart-addon__item-actions .turbocart-btn {
+    width: 100%;
   }
 }
