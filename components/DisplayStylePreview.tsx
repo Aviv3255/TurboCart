@@ -130,7 +130,7 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
 
         .mobile-device-frame {
           width: 100%;
-          max-width: 420px;
+          max-width: 460px;
           background: #f5f5f5;
           border: 2px solid #000;
           border-radius: 16px;
@@ -418,7 +418,7 @@ function CarouselPreview() {
         }
 
         .carousel-card {
-          flex: 0 0 160px;
+          flex: 0 0 240px;
           border: 1px solid #000;
           border-radius: 8px;
           overflow: hidden;
@@ -427,7 +427,7 @@ function CarouselPreview() {
 
         .product-image-wrapper {
           width: 100%;
-          height: 160px;
+          height: 200px;
           overflow: hidden;
           background: #f5f5f5;
         }
