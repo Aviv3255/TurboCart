@@ -111,36 +111,39 @@ function CarouselPreview() {
       <style jsx>{`
         .preview-container {
           background: white;
-          padding: 12px;
+          padding: 16px;
         }
 
         .title {
           font-size: 13px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 10px 0;
+          margin: 0 0 14px 0;
         }
 
         .carousel {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 10px;
         }
 
         .arrow {
-          width: 24px;
-          height: 24px;
+          width: 28px;
+          height: 28px;
           border: 1px solid #ddd;
           background: white;
           border-radius: 50%;
           font-size: 12px;
           cursor: pointer;
           flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .track {
           display: flex;
-          gap: 8px;
+          gap: 10px;
           flex: 1;
           overflow: hidden;
         }
@@ -148,25 +151,26 @@ function CarouselPreview() {
         .card {
           flex: 1;
           border: 1px solid #e0e0e0;
-          border-radius: 4px;
+          border-radius: 6px;
           overflow: hidden;
+          min-width: 0;
         }
 
         .image {
           width: 100%;
-          height: 100px;
+          height: 120px;
           object-fit: cover;
         }
 
         .info {
-          padding: 8px;
+          padding: 10px;
         }
 
         .name {
           font-size: 11px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 4px 0;
+          margin: 0 0 5px 0;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -174,8 +178,8 @@ function CarouselPreview() {
 
         .price-row {
           display: flex;
-          gap: 4px;
-          margin-bottom: 6px;
+          gap: 5px;
+          margin-bottom: 8px;
         }
 
         .old {
@@ -192,7 +196,7 @@ function CarouselPreview() {
 
         .btn {
           width: 100%;
-          padding: 5px;
+          padding: 6px;
           background: #000;
           color: white;
           border: none;
@@ -559,22 +563,22 @@ function FrequentlyBoughtPreview() {
           padding: 0;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 7.5px;
         }
 
         .addon-item {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 10px;
+          gap: 9.3px;
+          padding: 9.3px;
           border: 1px solid #e0e0e0;
           border-radius: 6px;
           background: white;
         }
 
         .image {
-          width: 55px;
-          height: 55px;
+          width: 68px;
+          height: 68px;
           border-radius: 4px;
           object-fit: cover;
           flex-shrink: 0;
@@ -587,21 +591,21 @@ function FrequentlyBoughtPreview() {
 
         .badge {
           display: inline-block;
-          padding: 2px 6px;
+          padding: 1.86px 5.58px;
           background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
           color: #8b5cf6;
-          font-size: 8px;
+          font-size: 7.44px;
           font-weight: 700;
           border-radius: 3px;
-          margin-bottom: 4px;
+          margin-bottom: 3.72px;
           letter-spacing: 0.3px;
         }
 
         .name {
-          font-size: 11px;
+          font-size: 10.23px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 4px 0;
+          margin: 0 0 3.72px 0;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -610,28 +614,28 @@ function FrequentlyBoughtPreview() {
         .price-row {
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: 3.72px;
         }
 
         .old {
-          font-size: 10px;
+          font-size: 9.3px;
           color: #999;
           text-decoration: line-through;
         }
 
         .price {
-          font-size: 12px;
+          font-size: 11.16px;
           font-weight: 700;
           color: #000;
         }
 
         .btn {
-          padding: 6px 14px;
+          padding: 5.58px 13.02px;
           background: #000;
           color: white;
           border: none;
           border-radius: 3px;
-          font-size: 10px;
+          font-size: 9.3px;
           font-weight: 600;
           cursor: pointer;
           flex-shrink: 0;
