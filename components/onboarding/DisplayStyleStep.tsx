@@ -5,6 +5,7 @@
 'use client';
 
 import { Card, RadioButton, BlockStack } from '@shopify/polaris';
+import DisplayStylePreview from '@/components/DisplayStylePreview';
 
 type DisplayStyle = 'carousel' | 'list' | 'banner' | 'cards' | 'frequently-bought';
 
@@ -98,7 +99,7 @@ export default function DisplayStyleStep({
                 <p className="style-description">{option.description}</p>
 
                 <div className="style-preview">
-                  <code>{option.preview}</code>
+                  <DisplayStylePreview style={option.value} />
                 </div>
               </div>
             ))}
@@ -171,18 +172,10 @@ export default function DisplayStyleStep({
         }
 
         .style-preview {
-          margin: 12px 0 0 32px;
-          padding: 16px;
-          background: var(--bg-secondary);
+          margin: 16px 0 0 32px;
+          padding: 0;
           border-radius: 8px;
-          border-left: 4px solid var(--cosmic-from);
-        }
-
-        .style-preview code {
-          font-family: 'SF Mono', 'Monaco', monospace;
-          font-size: 12px;
-          color: var(--text-secondary);
-          white-space: pre-wrap;
+          overflow: hidden;
         }
 
         .badge-cosmic {
