@@ -284,12 +284,28 @@ body {
   display: inline-block;
   padding: 4px 12px;
   border-radius: var(--radius-lg);
-  background: var(--cosmic-gradient);
-  color: white;
+  background: #000;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  background-image: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+}
+
+.badge-cosmic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  border-radius: var(--radius-lg);
+  z-index: -1;
 }
 
 .badge-success {

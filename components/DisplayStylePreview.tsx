@@ -43,20 +43,340 @@ interface DisplayStylePreviewProps {
 }
 
 export default function DisplayStylePreview({ style }: DisplayStylePreviewProps) {
-  switch (style) {
-    case 'carousel':
-      return <CarouselPreview />;
-    case 'list':
-      return <ListPreview />;
-    case 'banner':
-      return <BannerPreview />;
-    case 'cards':
-      return <CardsPreview />;
-    case 'frequently-bought':
-      return <FrequentlyBoughtPreview />;
-    default:
-      return null;
-  }
+  const getPreviewComponent = () => {
+    switch (style) {
+      case 'carousel':
+        return <CarouselPreview />;
+      case 'list':
+        return <ListPreview />;
+      case 'banner':
+        return <BannerPreview />;
+      case 'cards':
+        return <CardsPreview />;
+      case 'frequently-bought':
+        return <FrequentlyBoughtPreview />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="mobile-product-page-wrapper">
+      <div className="mobile-device-frame">
+        <div className="mobile-header">
+          <span className="mobile-icon">📱</span>
+          <span className="mobile-title">Mobile Product Page</span>
+        </div>
+
+        <div className="mobile-content">
+          {/* Product Details Section */}
+          <div className="product-main-section">
+            <div className="product-header">
+              <h2 className="product-name">Premium Product Name</h2>
+            </div>
+
+            <div className="product-image-main">
+              <img
+                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
+                alt="Product"
+                className="main-product-img"
+              />
+            </div>
+
+            <div className="product-info-section">
+              <div className="price-section">
+                <span className="current-price">$49.99</span>
+                <span className="original-price">$62.49</span>
+              </div>
+
+              <div className="size-selector-section">
+                <label className="selector-label">Size</label>
+                <div className="size-buttons">
+                  <button className="size-btn">S</button>
+                  <button className="size-btn selected">M</button>
+                  <button className="size-btn">L</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Upsell Position Indicator */}
+          <div className="upsell-position-indicator">
+            <div className="indicator-arrow">↓</div>
+            <span className="indicator-text">Your upsell appears here</span>
+            <div className="indicator-arrow">↓</div>
+          </div>
+
+          {/* The actual preview component */}
+          <div className="upsell-preview-section">
+            {getPreviewComponent()}
+          </div>
+
+          {/* Continue with cart section */}
+          <div className="cart-actions-section">
+            <div className="quantity-selector">
+              <label className="selector-label">Quantity</label>
+              <div className="quantity-controls">
+                <button className="qty-btn">−</button>
+                <span className="qty-value">1</span>
+                <button className="qty-btn">+</button>
+              </div>
+            </div>
+
+            <button className="add-to-cart-btn">
+              Add to Cart · $49.99
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .mobile-product-page-wrapper {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          padding: 8px;
+        }
+
+        .mobile-device-frame {
+          width: 100%;
+          max-width: 420px;
+          background: #f5f5f5;
+          border: 2px solid #000;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .mobile-header {
+          background: #000;
+          color: white;
+          padding: 8px 16px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .mobile-icon {
+          font-size: 14px;
+        }
+
+        .mobile-title {
+          color: white;
+        }
+
+        .mobile-content {
+          background: white;
+          max-height: 600px;
+          overflow-y: auto;
+        }
+
+        .product-main-section {
+          padding: 16px;
+        }
+
+        .product-header {
+          margin-bottom: 12px;
+        }
+
+        .product-name {
+          font-size: 16px;
+          font-weight: 700;
+          color: #000;
+          margin: 0;
+        }
+
+        .product-image-main {
+          width: 100%;
+          aspect-ratio: 1;
+          background: #f0f0f0;
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 16px;
+          border: 1px solid #ddd;
+        }
+
+        .main-product-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .product-info-section {
+          margin-bottom: 16px;
+        }
+
+        .price-section {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 16px;
+        }
+
+        .current-price {
+          font-size: 20px;
+          font-weight: 700;
+          color: #000;
+        }
+
+        .original-price {
+          font-size: 16px;
+          color: #999;
+          text-decoration: line-through;
+        }
+
+        .size-selector-section {
+          margin-bottom: 12px;
+        }
+
+        .selector-label {
+          display: block;
+          font-size: 13px;
+          font-weight: 600;
+          color: #000;
+          margin-bottom: 8px;
+        }
+
+        .size-buttons {
+          display: flex;
+          gap: 8px;
+        }
+
+        .size-btn {
+          flex: 1;
+          padding: 10px;
+          border: 2px solid #ddd;
+          background: white;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .size-btn.selected {
+          border-color: #000;
+          background: #000;
+          color: white;
+        }
+
+        .upsell-position-indicator {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          padding: 8px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          margin: 16px 0;
+        }
+
+        .indicator-arrow {
+          font-size: 18px;
+          color: white;
+          font-weight: 700;
+        }
+
+        .indicator-text {
+          font-size: 12px;
+          font-weight: 700;
+          color: white;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .upsell-preview-section {
+          padding: 0 16px;
+          margin-bottom: 16px;
+        }
+
+        .cart-actions-section {
+          padding: 16px;
+          border-top: 1px solid #eee;
+          background: #fafafa;
+        }
+
+        .quantity-selector {
+          margin-bottom: 16px;
+        }
+
+        .quantity-controls {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          justify-content: center;
+          padding: 12px;
+          background: white;
+          border: 2px solid #ddd;
+          border-radius: 8px;
+        }
+
+        .qty-btn {
+          width: 32px;
+          height: 32px;
+          border: 2px solid #000;
+          background: white;
+          border-radius: 50%;
+          font-size: 18px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .qty-btn:hover {
+          background: #000;
+          color: white;
+        }
+
+        .qty-value {
+          font-size: 16px;
+          font-weight: 600;
+          color: #000;
+          min-width: 24px;
+          text-align: center;
+        }
+
+        .add-to-cart-btn {
+          width: 100%;
+          padding: 16px;
+          background: #000;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .add-to-cart-btn:hover {
+          background: #333;
+        }
+
+        /* Scrollbar for mobile content */
+        .mobile-content::-webkit-scrollbar {
+          width: 4px;
+        }
+
+        .mobile-content::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+
+        .mobile-content::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 4px;
+        }
+
+        .mobile-content::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+      `}</style>
+    </div>
+  );
 }
 
 function CarouselPreview() {
@@ -446,14 +766,30 @@ function BannerPreview() {
         .banner-badge {
           display: inline-block;
           padding: 4px 12px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
+          background: #000;
           font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
           border-radius: 12px;
           margin-bottom: 8px;
           letter-spacing: 0.5px;
+          background-image: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          position: relative;
+        }
+
+        .banner-badge::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: #000;
+          border-radius: 12px;
+          z-index: -1;
         }
 
         .banner-title {
