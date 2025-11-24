@@ -23,13 +23,13 @@
 
 /* Loading Spinner */
 .turbocart-spinner {
-  border: 3px solid rgba(139, 92, 246, 0.1);
+  border: 2px solid rgba(139, 92, 246, 0.1);
   border-top-color: var(--tc-accent-purple);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   animation: tc-spin 1s linear infinite;
-  margin: 20px auto;
+  margin: 12px auto;
 }
 
 @keyframes tc-spin {
@@ -38,10 +38,10 @@
 
 /* Button Styles */
 .turbocart-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: var(--tc-transition);
   border: none;
@@ -86,19 +86,19 @@
 /* =============================================== */
 
 .turbocart-carousel {
-  margin: 20px 0;
-  padding: 20px;
+  margin: 12px 0;
+  padding: 12px;
   background: var(--tc-background);
   border: 1px solid var(--tc-border);
-  border-radius: var(--tc-radius);
+  border-radius: 8px;
 }
 
 .turbocart-carousel__header {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .turbocart-carousel__title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--tc-text);
   margin: 0;
@@ -108,7 +108,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .turbocart-carousel__track {
@@ -118,17 +118,17 @@
 
 .turbocart-carousel__items {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   transition: transform 0.3s ease;
 }
 
 .turbocart-carousel__item {
-  flex: 0 0 calc(33.333% - 8px);
+  flex: 0 0 calc(33.333% - 6px);
   min-width: 0;
   background: var(--tc-background);
-  border: 2px solid var(--tc-border);
-  border-radius: 10px;
-  padding: 12px;
+  border: 1px solid var(--tc-border);
+  border-radius: 6px;
+  padding: 8px;
   transition: var(--tc-transition);
   cursor: pointer;
 }
@@ -143,25 +143,25 @@
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
 }
 
 .turbocart-carousel__item-title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--tc-text);
-  margin: 0 0 4px 0;
+  margin: 0 0 3px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .turbocart-carousel__item-price {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--tc-text);
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
 }
 
 .turbocart-carousel__item-compare-price {
@@ -172,17 +172,18 @@
 }
 
 .turbocart-carousel__nav {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--tc-background);
-  border: 2px solid var(--tc-border);
+  border: 1px solid var(--tc-border);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: var(--tc-transition);
   flex-shrink: 0;
+  font-size: 14px;
 }
 
 .turbocart-carousel__nav:hover {
@@ -199,13 +200,13 @@
 .turbocart-carousel__dots {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .turbocart-carousel__dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--tc-border);
   cursor: pointer;
@@ -214,8 +215,8 @@
 
 .turbocart-carousel__dot--active {
   background: var(--tc-gradient-cosmic);
-  width: 24px;
-  border-radius: 4px;
+  width: 18px;
+  border-radius: 3px;
 }
 
 /* =============================================== */
@@ -223,19 +224,19 @@
 /* =============================================== */
 
 .turbocart-list {
-  margin: 20px 0;
-  padding: 20px;
+  margin: 12px 0;
+  padding: 12px;
   background: var(--tc-background);
   border: 1px solid var(--tc-border);
-  border-radius: var(--tc-radius);
+  border-radius: 8px;
 }
 
 .turbocart-list__header {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .turbocart-list__title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--tc-text);
   margin: 0;
@@ -244,16 +245,16 @@
 .turbocart-list__items {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .turbocart-list__item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border: 2px solid var(--tc-border);
-  border-radius: 10px;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--tc-border);
+  border-radius: 6px;
   transition: var(--tc-transition);
 }
 
@@ -263,17 +264,17 @@
 }
 
 .turbocart-list__item-checkbox {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
   accent-color: var(--tc-accent-purple);
 }
 
 .turbocart-list__item-image {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
@@ -283,20 +284,20 @@
 }
 
 .turbocart-list__item-title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--tc-text);
-  margin: 0 0 4px 0;
+  margin: 0 0 3px 0;
 }
 
 .turbocart-list__item-price {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--tc-text);
 }
 
 .turbocart-list__footer {
-  margin-top: 16px;
+  margin-top: 10px;
   text-align: center;
 }
 
@@ -305,26 +306,26 @@
 /* =============================================== */
 
 .turbocart-banner {
-  margin: 20px 0;
+  margin: 12px 0;
   position: relative;
   overflow: hidden;
 }
 
 .turbocart-banner__content {
   background: var(--tc-gradient-cosmic);
-  padding: 20px;
-  border-radius: var(--tc-radius);
+  padding: 12px;
+  border-radius: 8px;
   color: white;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .turbocart-banner__image {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
@@ -333,27 +334,27 @@
 }
 
 .turbocart-banner__title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
-  margin: 0 0 4px 0;
+  margin: 0 0 3px 0;
 }
 
 .turbocart-banner__price {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
-  margin: 4px 0;
+  margin: 3px 0;
 }
 
 .turbocart-banner__savings {
-  font-size: 14px;
+  font-size: 12px;
   opacity: 0.9;
 }
 
 .turbocart-banner__urgency {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .turbocart-banner__toggle {
@@ -365,19 +366,19 @@
 /* =============================================== */
 
 .turbocart-cards {
-  margin: 20px 0;
-  padding: 20px;
+  margin: 12px 0;
+  padding: 12px;
   background: var(--tc-background);
   border: 1px solid var(--tc-border);
-  border-radius: var(--tc-radius);
+  border-radius: 8px;
 }
 
 .turbocart-cards__header {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .turbocart-cards__title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--tc-text);
   margin: 0;
@@ -385,15 +386,15 @@
 
 .turbocart-cards__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
 }
 
 .turbocart-cards__item {
   background: var(--tc-background);
-  border: 2px solid var(--tc-border);
-  border-radius: 10px;
-  padding: 12px;
+  border: 1px solid var(--tc-border);
+  border-radius: 6px;
+  padding: 8px;
   text-align: center;
   transition: var(--tc-transition);
   cursor: pointer;
@@ -409,15 +410,15 @@
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
 }
 
 .turbocart-cards__item-title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--tc-text);
-  margin: 0 0 4px 0;
+  margin: 0 0 3px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -426,10 +427,10 @@
 }
 
 .turbocart-cards__item-price {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--tc-text);
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
 }
 
 /* =============================================== */
@@ -437,19 +438,19 @@
 /* =============================================== */
 
 .turbocart-fbt {
-  margin: 20px 0;
-  padding: 20px;
+  margin: 12px 0;
+  padding: 12px;
   background: var(--tc-background);
   border: 1px solid var(--tc-border);
-  border-radius: var(--tc-radius);
+  border-radius: 8px;
 }
 
 .turbocart-fbt__header {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .turbocart-fbt__title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--tc-text);
   margin: 0;
@@ -458,72 +459,72 @@
 .turbocart-fbt__content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .turbocart-fbt__items {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .turbocart-fbt__item {
   flex: 1;
-  min-width: 150px;
+  min-width: 100px;
   text-align: center;
 }
 
 .turbocart-fbt__item-image {
   width: 100%;
-  max-width: 120px;
+  max-width: 80px;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 8px;
-  margin: 0 auto 8px;
+  border-radius: 4px;
+  margin: 0 auto 6px;
 }
 
 .turbocart-fbt__item-title {
-  font-size: 13px;
+  font-size: 11px;
   color: var(--tc-text);
-  margin: 0 0 4px 0;
+  margin: 0 0 3px 0;
 }
 
 .turbocart-fbt__item-price {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--tc-text);
 }
 
 .turbocart-fbt__plus {
-  font-size: 24px;
+  font-size: 18px;
   color: var(--tc-text-secondary);
   flex-shrink: 0;
 }
 
 .turbocart-fbt__bundle {
-  padding: 16px;
+  padding: 10px;
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-  border-radius: 10px;
-  border: 2px solid var(--tc-accent-purple);
+  border-radius: 6px;
+  border: 1px solid var(--tc-accent-purple);
 }
 
 .turbocart-fbt__bundle-price {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 8px;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .turbocart-fbt__bundle-total {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--tc-text);
 }
 
 .turbocart-fbt__bundle-original {
-  font-size: 18px;
+  font-size: 14px;
   color: var(--tc-text-secondary);
   text-decoration: line-through;
 }
@@ -531,6 +532,7 @@
 .turbocart-fbt__bundle-savings {
   color: var(--tc-accent-purple);
   font-weight: 600;
+  font-size: 13px;
 }
 
 /* =============================================== */
