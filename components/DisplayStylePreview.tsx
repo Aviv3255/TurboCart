@@ -67,7 +67,7 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
       <style jsx>{`
         .preview-wrapper {
           width: 100%;
-          max-width: 340px;
+          max-width: 380px;
           background: white;
           border-radius: 8px;
           overflow: hidden;
@@ -150,7 +150,6 @@ function CarouselPreview() {
 
         .card {
           flex: 1;
-          aspect-ratio: 1;
           border: 1px solid #e0e0e0;
           border-radius: 6px;
           overflow: hidden;
@@ -163,50 +162,61 @@ function CarouselPreview() {
           width: 100%;
           aspect-ratio: 1;
           object-fit: cover;
+          flex-shrink: 0;
         }
 
         .info {
-          padding: 10px;
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          flex-grow: 1;
         }
 
         .name {
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 5px 0;
+          margin: 0 0 8px 0;
           overflow: hidden;
           text-overflow: ellipsis;
-          white-space: nowrap;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          line-height: 1.4;
+          flex-grow: 1;
         }
 
         .price-row {
           display: flex;
-          gap: 5px;
-          margin-bottom: 8px;
+          gap: 6px;
+          margin-bottom: 10px;
+          align-items: center;
+          flex-shrink: 0;
         }
 
         .old {
-          font-size: 10px;
+          font-size: 11px;
           color: #999;
           text-decoration: line-through;
         }
 
         .price {
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 700;
           color: #000;
         }
 
         .btn {
           width: 100%;
-          padding: 6px;
+          padding: 8px;
           background: #000;
           color: white;
           border: none;
-          border-radius: 3px;
-          font-size: 10px;
+          border-radius: 4px;
+          font-size: 12px;
           font-weight: 600;
           cursor: pointer;
+          flex-shrink: 0;
         }
       `}</style>
     </div>
