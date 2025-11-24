@@ -7,7 +7,7 @@
 import { Card, RadioButton, BlockStack } from '@shopify/polaris';
 import DisplayStylePreview from '@/components/DisplayStylePreview';
 
-type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought';
+type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'masonry-grid' | 'carousel-arrows' | 'vertical-scroll' | 'spotlight' | 'sticky-tabs';
 
 interface StyleOption {
   value: DisplayStyle;
@@ -21,7 +21,7 @@ const STYLE_OPTIONS: StyleOption[] = [
   {
     value: 'minimal-strip',
     label: 'Minimal Strip',
-    description: 'Clean horizontal row of products. Modern, subtle design with no navigation arrows.',
+    description: 'Clean horizontal row of products. Modern, subtle design with no navigation arrows. up to 25 products.',
     preview: '[Product A] [Product B] [Product C]',
     recommended: true,
   },
@@ -48,6 +48,36 @@ const STYLE_OPTIONS: StyleOption[] = [
     label: 'Frequently Bought Together',
     description: 'Bundle-style display showing cart item + upsell. Contextual pairing.',
     preview: '[Cart Item] + [Upsell] = Bundle Price',
+  },
+  {
+    value: 'masonry-grid',
+    label: 'Masonry Grid',
+    description: 'Pinterest-style masonry layout with varying card heights. Dynamic, visually engaging multi-row display.',
+    preview: '[Card 1 Tall]\n[Card 2] [Card 3]\n[Card 4]',
+  },
+  {
+    value: 'carousel-arrows',
+    label: 'Classic Carousel',
+    description: 'Traditional carousel with navigation arrows and dots. Interactive browsing experience with manual control.',
+    preview: '← [Product A] [Product B] [Product C] →\n● ○ ○',
+  },
+  {
+    value: 'vertical-scroll',
+    label: 'Vertical Scroll Gallery',
+    description: 'Tall vertical gallery with large product images. Immersive scrollable experience, great for visual products.',
+    preview: '[Large Image A]\n[Large Image B]\n[Large Image C]',
+  },
+  {
+    value: 'spotlight',
+    label: 'Featured Spotlight',
+    description: 'Rotating featured product with auto-transition. Single large showcase that changes every few seconds.',
+    preview: '★ [Featured Product - Auto-rotating] ★',
+  },
+  {
+    value: 'sticky-tabs',
+    label: 'Category Tabs',
+    description: 'Tabbed interface with product categories. Organized navigation for browsing by type or collection.',
+    preview: '[Tab: Best Sellers] [Tab: New] [Tab: Sale]\n[Product A] [Product B] [Product C]',
   },
 ];
 
