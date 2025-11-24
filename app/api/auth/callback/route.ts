@@ -11,14 +11,24 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
+    console.log('[OAuth Callback] Starting callback processing');
+
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
     const hmac = searchParams.get('hmac');
     const shop = searchParams.get('shop');
     const state = searchParams.get('state');
 
+    console.log('[OAuth Callback] Parameters received:', {
+      hasCode: !!code,
+      hasHmac: !!hmac,
+      shop,
+      hasState: !!state
+    });
+
     // Validate required parameters
     if (!code || !hmac || !shop || !state) {
+      console.error('[OAuth Callback] Missing required parameters');
       return NextResponse.json(
         { error: 'Missing required parameters' },
         { status: 400 }

@@ -10,16 +10,41 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
+    console.log('[OAuth] Starting OAuth initiation');
+
     const searchParams = request.nextUrl.searchParams;
     const shop = searchParams.get('shop');
     const hmac = searchParams.get('hmac');
 
+    console.log('[OAuth] Shop parameter:', shop);
+    console.log('[OAuth] Has HMAC:', !!hmac);
+
     if (!shop) {
+      console.error('[OAuth] Missing shop parameter');
       return NextResponse.json(
         { error: 'Missing shop parameter' },
         { status: 400 }
       );
     }
+
+    // Verify environment variables are set
+    const apiKey = process.env.SHOPIFY_API_KEY;
+    const apiSecret = process.env.SHOPIFY_API_SECRET;
+    const appUrl = process.env.SHOPIFY_APP_URL;
+
+    if (!apiKey || !apiSecret || !appUrl) {
+      console.error('[OAuth] Missing environment variables:', {
+        hasApiKey: !!apiKey,
+        hasApiSecret: !!apiSecret,
+        hasAppUrl: !!appUrl
+      });
+      return NextResponse.json(
+        { error: 'Server configuration error - missing credentials' },
+        { status: 500 }
+      );
+    }
+
+    console.log('[OAuth] Environment variables OK');
 
     // Sanitize shop domain
     const shopDomain = shop.replace(/^https?:\/\//, '').replace(/\/$/, '');
@@ -49,11 +74,14 @@ export async function GET(request: NextRequest) {
 
     // Generate state parameter for CSRF protection
     const state = generateState();
+    console.log('[OAuth] Generated state parameter');
+
+    // Get authorization URL
+    const authUrl = getAuthorizationUrl(shopDomain, state);
+    console.log('[OAuth] Authorization URL generated:', authUrl.substring(0, 50) + '...');
 
     // Store state in a cookie
-    const response = NextResponse.redirect(
-      getAuthorizationUrl(shopDomain, state)
-    );
+    const response = NextResponse.redirect(authUrl);
 
     response.cookies.set('shopify_oauth_state', state, {
       httpOnly: true,
@@ -71,11 +99,19 @@ export async function GET(request: NextRequest) {
       path: '/',
     });
 
+    console.log('[OAuth] Redirecting to Shopify OAuth');
     return response;
   } catch (error) {
-    console.error('OAuth initiation error:', error);
+    console.error('[OAuth] Initiation error:', error);
+    console.error('[OAuth] Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
-      { error: 'Authentication failed' },
+      {
+        error: 'Authentication failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
