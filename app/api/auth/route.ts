@@ -92,18 +92,19 @@ export async function GET(request: NextRequest) {
     // Store state in a cookie
     const response = NextResponse.redirect(authUrl);
 
+    // Use SameSite=None for embedded app compatibility
     response.cookies.set('shopify_oauth_state', state, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true, // Required for SameSite=None
+      sameSite: 'none', // Required for embedded apps
       maxAge: 60 * 10, // 10 minutes
       path: '/',
     });
 
     response.cookies.set('shopify_shop', shopDomain, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true, // Required for SameSite=None
+      sameSite: 'none', // Required for embedded apps
       maxAge: 60 * 10,
       path: '/',
     });

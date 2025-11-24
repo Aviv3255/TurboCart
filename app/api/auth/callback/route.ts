@@ -89,15 +89,17 @@ export async function GET(request: NextRequest) {
     // Create response with redirect to Shopify admin (embedded)
     const response = NextResponse.redirect(shopifyAdminUrl);
 
-    // Set session cookie
+    // Set session cookie with correct attributes for embedded apps
+    // SameSite=None is required for cross-origin iframe (Shopify embedded app)
+    // Secure=true is required when using SameSite=None
     response.cookies.set('shopify_session', JSON.stringify({
       shop: shop,
       shopId: shopRecord.id,
       accessToken: access_token,
     }), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true, // Always true for SameSite=None
+      sameSite: 'none', // Required for embedded apps in iframe
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
     });
