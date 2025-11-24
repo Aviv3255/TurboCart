@@ -13,15 +13,33 @@ function HomeContent() {
   useEffect(() => {
     // If accessed with shop parameter, initiate OAuth
     if (shop && !error) {
-      // Use window.top to break out of iframe for OAuth redirect
-      // This prevents X-Frame-Options errors from Shopify
-      if (window.top) {
-        window.top.location.href = `/api/auth?shop=${shop}`;
+      console.log('[Home] Initiating OAuth for shop:', shop);
+
+      // Check if we're embedded in an iframe
+      const isEmbedded = searchParams.get('embedded') === '1' || window.self !== window.top;
+
+      if (isEmbedded) {
+        console.log('[Home] Detected embedded app, using ExitIframe route');
+
+        // Build ExitIframe URL with all necessary parameters
+        const exitIframeUrl = new URL('/api/auth/exit-iframe', window.location.origin);
+        exitIframeUrl.searchParams.set('shop', shop);
+
+        // Pass host parameter if present (needed for App Bridge)
+        const host = searchParams.get('host');
+        if (host) {
+          exitIframeUrl.searchParams.set('host', host);
+        }
+
+        console.log('[Home] Redirecting to ExitIframe:', exitIframeUrl.toString());
+        window.location.href = exitIframeUrl.toString();
       } else {
+        console.log('[Home] Not embedded, redirecting directly to OAuth');
+        // Not embedded, redirect directly
         window.location.href = `/api/auth?shop=${shop}`;
       }
     }
-  }, [shop, error]);
+  }, [shop, error, searchParams]);
 
   // Show error if present
   if (error) {
