@@ -125,6 +125,7 @@
 .turbocart-carousel__item {
   flex: 0 0 calc(33.333% - 8px);
   min-width: 0;
+  aspect-ratio: 1;
   background: var(--tc-background);
   border: 1px solid var(--tc-border);
   border-radius: 8px;

@@ -150,10 +150,13 @@ function CarouselPreview() {
 
         .card {
           flex: 1;
+          aspect-ratio: 1;
           border: 1px solid #e0e0e0;
           border-radius: 6px;
           overflow: hidden;
           min-width: 0;
+          display: flex;
+          flex-direction: column;
         }
 
         .image {
