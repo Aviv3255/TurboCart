@@ -11,9 +11,22 @@ function HomeContent() {
   const errorMessage = searchParams.get('message');
 
   useEffect(() => {
-    // If accessed with shop parameter, initiate OAuth
+    // If accessed with shop parameter, check session first
     if (shop && !error) {
       console.log('[Home] Initiating OAuth for shop:', shop);
+
+      // Check if we already have a session (avoid OAuth loop)
+      const hasSession = document.cookie.includes('shopify_session');
+      if (hasSession) {
+        console.log('[Home] Session exists, redirecting to dashboard');
+        // Already authenticated, go to dashboard
+        const dashboardUrl = `/dashboard?shop=${shop}`;
+        window.location.href = dashboardUrl;
+        return;
+      }
+
+      // No session, need to do OAuth
+      console.log('[Home] No session, starting OAuth flow');
 
       // Check if we're embedded in an iframe
       const isEmbedded = searchParams.get('embedded') === '1' || window.self !== window.top;
