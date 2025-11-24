@@ -33,9 +33,9 @@ const STYLE_OPTIONS: StyleOption[] = [
   },
   {
     value: 'banner',
-    label: 'Discount Banner',
-    description: 'Single prominent upsell with savings message. High visibility, focused attention.',
-    preview: '[Image] Add Product - Save $6.00! [Add to Cart]',
+    label: 'Selling Fast',
+    description: 'Single prominent upsell with urgency indicator. High visibility, focused attention.',
+    preview: '[Image] Add Product - SELLING FAST! [Add to Cart]',
   },
   {
     value: 'cards',

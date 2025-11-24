@@ -526,7 +526,7 @@ function FrequentlyBoughtPreview() {
       <div className="addon-item">
         <img src={product1.image} alt={product1.title} className="image" />
         <div className="info">
-          <span className="badge">43% ADDED THIS</span>
+          <span className="badge">57% ADDED THIS</span>
           <h4 className="name">{product1.title}</h4>
           <div className="price-row">
             {product1.compareAtPrice && (
@@ -541,7 +541,7 @@ function FrequentlyBoughtPreview() {
       <div className="addon-item">
         <img src={product2.image} alt={product2.title} className="image" />
         <div className="info">
-          <span className="badge">38% ADDED THIS</span>
+          <span className="badge">49% ADDED THIS</span>
           <h4 className="name">{product2.title}</h4>
           <div className="price-row">
             {product2.compareAtPrice && (
@@ -573,8 +573,8 @@ function FrequentlyBoughtPreview() {
         }
 
         .image {
-          width: 50px;
-          height: 50px;
+          width: 55px;
+          height: 55px;
           border-radius: 4px;
           object-fit: cover;
           flex-shrink: 0;

@@ -408,8 +408,8 @@
       hash = ((hash << 5) - hash) + idStr.charCodeAt(i);
       hash = hash & hash; // Convert to 32bit integer
     }
-    // Map to range 25-65% (reasonable social proof range)
-    const percentage = 25 + (Math.abs(hash) % 41);
+    // Map to range 35-75% (reasonable social proof range)
+    const percentage = 35 + (Math.abs(hash) % 41);
     return percentage;
   }
 
