@@ -67,15 +67,27 @@ export async function GET(request: NextRequest) {
     }
 
     // Exchange code for access token
+    console.log('[OAuth Callback] Exchanging code for access token');
     const { access_token, scope } = await exchangeCodeForToken(shop, code);
+    console.log('[OAuth Callback] Access token received, scope:', scope);
 
     // Save shop to database
+    console.log('[OAuth Callback] Saving shop to database');
     const shopRecord = await createShop(shop, access_token);
+    console.log('[OAuth Callback] Shop saved successfully, ID:', shopRecord.id);
+
+    // Create dashboard URL with shop parameter
+    const dashboardUrl = new URL('/dashboard', request.url);
+    dashboardUrl.searchParams.set('shop', shop);
+
+    // Encode host parameter for App Bridge
+    const hostParam = Buffer.from(`${shop}/admin`).toString('base64');
+    dashboardUrl.searchParams.set('host', hostParam);
+
+    console.log('[OAuth Callback] Redirecting to dashboard:', dashboardUrl.pathname);
 
     // Create session
-    const response = NextResponse.redirect(
-      new URL('/dashboard', request.url)
-    );
+    const response = NextResponse.redirect(dashboardUrl);
 
     // Set session cookie
     response.cookies.set('shopify_session', JSON.stringify({
@@ -94,12 +106,28 @@ export async function GET(request: NextRequest) {
     response.cookies.delete('shopify_oauth_state');
     response.cookies.delete('shopify_shop');
 
+    console.log('[OAuth Callback] OAuth flow completed successfully');
     return response;
   } catch (error) {
-    console.error('OAuth callback error:', error);
-    return NextResponse.json(
-      { error: 'Authentication callback failed' },
-      { status: 500 }
-    );
+    console.error('[OAuth Callback] Fatal error:', error);
+    console.error('[OAuth Callback] Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
+
+    // Create error page URL
+    const errorUrl = new URL('/', request.url);
+    errorUrl.searchParams.set('error', 'auth_failed');
+    errorUrl.searchParams.set('message', error instanceof Error ? error.message : 'Unknown error');
+
+    // Redirect to error page
+    const response = NextResponse.redirect(errorUrl);
+
+    // Clear any OAuth cookies
+    response.cookies.delete('shopify_oauth_state');
+    response.cookies.delete('shopify_shop');
+
+    return response;
   }
 }
