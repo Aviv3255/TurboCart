@@ -11,46 +11,77 @@ function HomeContent() {
   const errorMessage = searchParams.get('message');
 
   useEffect(() => {
-    // If accessed with shop parameter, check session first
+    // If accessed with shop parameter, check session via API
     if (shop && !error) {
-      console.log('[Home] Initiating OAuth for shop:', shop);
+      console.log('[Home] Shop parameter detected:', shop);
+      console.log('[Home] Full URL params:', {
+        shop,
+        host: searchParams.get('host'),
+        embedded: searchParams.get('embedded'),
+        isInIframe: window.self !== window.top
+      });
 
-      // Check if we already have a session (avoid OAuth loop)
-      const hasSession = document.cookie.includes('shopify_session');
-      if (hasSession) {
-        console.log('[Home] Session exists, redirecting to dashboard');
-        // Already authenticated, go to dashboard
-        const dashboardUrl = `/dashboard?shop=${shop}`;
-        window.location.href = dashboardUrl;
-        return;
-      }
+      // Check session via API call instead of cookies (more reliable)
+      fetch(`/api/auth/check-session?shop=${shop}`)
+        .then(res => {
+          console.log('[Home] Session check response status:', res.status);
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          console.log('[Home] Session check result:', data);
 
-      // No session, need to do OAuth
-      console.log('[Home] No session, starting OAuth flow');
+          if (data.hasSession) {
+            console.log('[Home] ✅ Session exists! Redirecting to dashboard');
 
-      // Check if we're embedded in an iframe
-      const isEmbedded = searchParams.get('embedded') === '1' || window.self !== window.top;
+            // Build dashboard URL with all necessary parameters
+            const dashboardUrl = new URL('/dashboard', window.location.origin);
+            dashboardUrl.searchParams.set('shop', shop);
 
-      if (isEmbedded) {
-        console.log('[Home] Detected embedded app, using ExitIframe route');
+            const host = searchParams.get('host');
+            if (host) {
+              dashboardUrl.searchParams.set('host', host);
+            }
 
-        // Build ExitIframe URL with all necessary parameters
-        const exitIframeUrl = new URL('/api/auth/exit-iframe', window.location.origin);
-        exitIframeUrl.searchParams.set('shop', shop);
+            console.log('[Home] Dashboard URL:', dashboardUrl.toString());
+            window.location.href = dashboardUrl.toString();
+          } else {
+            console.log('[Home] ❌ No session found, starting OAuth flow');
 
-        // Pass host parameter if present (needed for App Bridge)
-        const host = searchParams.get('host');
-        if (host) {
-          exitIframeUrl.searchParams.set('host', host);
-        }
+            // Check if we're embedded in an iframe
+            const isEmbedded = searchParams.get('embedded') === '1' || window.self !== window.top;
 
-        console.log('[Home] Redirecting to ExitIframe:', exitIframeUrl.toString());
-        window.location.href = exitIframeUrl.toString();
-      } else {
-        console.log('[Home] Not embedded, redirecting directly to OAuth');
-        // Not embedded, redirect directly
-        window.location.href = `/api/auth?shop=${shop}`;
-      }
+            if (isEmbedded) {
+              console.log('[Home] Detected embedded app, using ExitIframe route');
+              const exitIframeUrl = new URL('/api/auth/exit-iframe', window.location.origin);
+              exitIframeUrl.searchParams.set('shop', shop);
+
+              const host = searchParams.get('host');
+              if (host) {
+                exitIframeUrl.searchParams.set('host', host);
+              }
+
+              console.log('[Home] Redirecting to ExitIframe:', exitIframeUrl.toString());
+              window.location.href = exitIframeUrl.toString();
+            } else {
+              console.log('[Home] Not embedded, redirecting directly to OAuth');
+              window.location.href = `/api/auth?shop=${shop}`;
+            }
+          }
+        })
+        .catch(error => {
+          console.error('[Home] ⚠️ Session check failed with error:', error);
+          console.error('[Home] Error details:', {
+            message: error.message,
+            stack: error.stack
+          });
+
+          // On error, assume no session and try OAuth
+          console.log('[Home] Falling back to OAuth due to error');
+          window.location.href = `/api/auth?shop=${shop}`;
+        });
     }
   }, [shop, error, searchParams]);
 

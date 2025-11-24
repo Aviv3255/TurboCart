@@ -72,9 +72,18 @@ export async function GET(request: NextRequest) {
     console.log('[OAuth Callback] Access token received, scope:', scope);
 
     // Save shop to database
-    console.log('[OAuth Callback] Saving shop to database');
+    console.log('[OAuth Callback] ========================================');
+    console.log('[OAuth Callback] Saving shop to database:', shop);
     const shopRecord = await createShop(shop, access_token);
-    console.log('[OAuth Callback] Shop saved successfully, ID:', shopRecord.id);
+    console.log('[OAuth Callback] ✅ Shop saved successfully!');
+    console.log('[OAuth Callback] Shop details:', {
+      id: shopRecord.id,
+      shop_domain: shopRecord.shop_domain,
+      installed_at: shopRecord.installed_at,
+      uninstalled_at: shopRecord.uninstalled_at,
+      hasAccessToken: !!shopRecord.access_token
+    });
+    console.log('[OAuth Callback] ========================================');
 
     // Get API key for redirect
     const apiKey = process.env.SHOPIFY_API_KEY;
