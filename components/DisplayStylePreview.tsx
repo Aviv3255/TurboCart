@@ -72,7 +72,7 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
           {/* Cart Header */}
           <div className="cart-header-section">
             <h2 className="cart-title">Your Cart</h2>
-            <span className="cart-count">3 items</span>
+            <span className="cart-count">2 items</span>
           </div>
 
           {/* Cart Items (without images) */}
@@ -83,14 +83,6 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
                 <h4 className="cart-item-title">Product Name</h4>
                 <p className="cart-item-variant">Size: M</p>
                 <p className="cart-item-price">$49.99</p>
-              </div>
-            </div>
-            <div className="cart-item">
-              <div className="cart-item-placeholder"></div>
-              <div className="cart-item-details">
-                <h4 className="cart-item-title">Another Product</h4>
-                <p className="cart-item-variant">Color: Blue</p>
-                <p className="cart-item-price">$29.99</p>
               </div>
             </div>
           </div>
@@ -111,7 +103,7 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
           <div className="cart-footer-section">
             <div className="cart-subtotal">
               <span className="subtotal-label">Subtotal</span>
-              <span className="subtotal-price">$79.98</span>
+              <span className="subtotal-price">$49.99</span>
             </div>
             <button className="checkout-btn">
               Checkout
@@ -130,12 +122,12 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
 
         .mobile-device-frame {
           width: 100%;
-          max-width: 460px;
+          max-width: 420px;
           background: #f5f5f5;
           border: 2px solid #000;
           border-radius: 16px;
           overflow: hidden;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
         .mobile-header {
@@ -159,47 +151,56 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
 
         .mobile-content {
           background: white;
-          max-height: 750px;
-          overflow-y: auto;
+          height: 580px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
         }
 
         .cart-header-section {
-          padding: 16px;
+          padding: 12px 16px;
           border-bottom: 1px solid #eee;
           display: flex;
           justify-content: space-between;
           align-items: center;
+          flex-shrink: 0;
         }
 
         .cart-title {
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 700;
           color: #000;
           margin: 0;
         }
 
         .cart-count {
-          font-size: 14px;
+          font-size: 13px;
           color: #666;
         }
 
         .cart-items-section {
-          padding: 16px;
+          padding: 12px 16px;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
+          flex-shrink: 0;
         }
 
         .cart-item {
           display: flex;
-          gap: 12px;
-          padding-bottom: 12px;
+          gap: 10px;
+          padding-bottom: 10px;
           border-bottom: 1px solid #eee;
         }
 
+        .cart-item:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+
         .cart-item-placeholder {
-          width: 60px;
-          height: 60px;
+          width: 50px;
+          height: 50px;
           background: #e0e0e0;
           border-radius: 4px;
           flex-shrink: 0;
@@ -210,20 +211,20 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
         }
 
         .cart-item-title {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 4px 0;
+          margin: 0 0 3px 0;
         }
 
         .cart-item-variant {
-          font-size: 12px;
+          font-size: 11px;
           color: #666;
-          margin: 0 0 4px 0;
+          margin: 0 0 3px 0;
         }
 
         .cart-item-price {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 700;
           color: #000;
           margin: 0;
@@ -231,22 +232,23 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
 
         .upsell-position-indicator {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-          padding: 8px 16px;
+          padding: 6px 16px;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 12px;
-          margin: 16px 0;
+          gap: 10px;
+          margin: 12px 0;
+          flex-shrink: 0;
         }
 
         .indicator-arrow {
-          font-size: 18px;
+          font-size: 16px;
           color: white;
           font-weight: 700;
         }
 
         .indicator-text {
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 700;
           color: white;
           text-transform: uppercase;
@@ -255,42 +257,46 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
 
         .upsell-preview-section {
           padding: 0 16px;
-          margin-bottom: 16px;
+          flex: 1;
+          min-height: 0;
+          overflow: hidden;
         }
 
         .cart-footer-section {
-          padding: 16px;
+          padding: 12px 16px;
           border-top: 1px solid #eee;
           background: #fafafa;
+          flex-shrink: 0;
+          margin-top: auto;
         }
 
         .cart-subtotal {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
         }
 
         .subtotal-label {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
           color: #000;
         }
 
         .subtotal-price {
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 700;
           color: #000;
         }
 
         .checkout-btn {
           width: 100%;
-          padding: 16px;
+          padding: 12px;
           background: #000;
           color: white;
           border: none;
-          border-radius: 8px;
-          font-size: 16px;
+          border-radius: 6px;
+          font-size: 14px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
@@ -299,30 +305,15 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
         .checkout-btn:hover {
           background: #333;
         }
-
-        /* Scrollbar for mobile content */
-        .mobile-content::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        .mobile-content::-webkit-scrollbar-track {
-          background: #f1f1f1;
-        }
-
-        .mobile-content::-webkit-scrollbar-thumb {
-          background: #888;
-          border-radius: 4px;
-        }
-
-        .mobile-content::-webkit-scrollbar-thumb:hover {
-          background: #555;
-        }
       `}</style>
     </div>
   );
 }
 
 function CarouselPreview() {
+  // Show only first 2 products for static preview
+  const displayProducts = SAMPLE_PRODUCTS.slice(0, 2);
+
   return (
     <div className="preview-container">
       <div className="preview-header">
@@ -333,7 +324,7 @@ function CarouselPreview() {
         <button className="carousel-arrow" aria-label="Previous">←</button>
 
         <div className="carousel-track">
-          {SAMPLE_PRODUCTS.map((product) => (
+          {displayProducts.map((product) => (
             <div key={product.id} className="carousel-card">
               <div className="product-image-wrapper">
                 <img src={product.image} alt={product.title} className="product-image" />
@@ -346,7 +337,7 @@ function CarouselPreview() {
                   )}
                   <span className="product-price">${product.price.toFixed(2)}</span>
                 </div>
-                <button className="add-button">Add to Cart</button>
+                <button className="add-button">Add</button>
               </div>
             </div>
           ))}
@@ -358,17 +349,19 @@ function CarouselPreview() {
       <style jsx>{`
         .preview-container {
           background: white;
-          padding: 24px;
+          padding: 16px;
           border-radius: 8px;
           border: 1px solid #000;
+          height: 100%;
+          overflow: hidden;
         }
 
         .preview-header {
-          margin-bottom: 20px;
+          margin-bottom: 14px;
         }
 
         .preview-title {
-          font-size: 18px;
+          font-size: 15px;
           font-weight: 600;
           color: #000;
           margin: 0;
@@ -381,18 +374,18 @@ function CarouselPreview() {
         .carousel-container {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
         }
 
         .carousel-arrow {
           flex-shrink: 0;
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           border: 2px solid #000;
           background: white;
           border-radius: 50%;
           cursor: pointer;
-          font-size: 18px;
+          font-size: 16px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -406,28 +399,22 @@ function CarouselPreview() {
 
         .carousel-track {
           display: flex;
-          gap: 16px;
-          overflow-x: auto;
-          scroll-behavior: smooth;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-
-        .carousel-track::-webkit-scrollbar {
-          display: none;
+          gap: 12px;
+          flex: 1;
+          overflow: hidden;
         }
 
         .carousel-card {
-          flex: 0 0 240px;
+          flex: 1;
           border: 1px solid #000;
-          border-radius: 8px;
+          border-radius: 6px;
           overflow: hidden;
           background: white;
         }
 
         .product-image-wrapper {
           width: 100%;
-          height: 200px;
+          height: 140px;
           overflow: hidden;
           background: #f5f5f5;
         }
@@ -439,14 +426,14 @@ function CarouselPreview() {
         }
 
         .product-info {
-          padding: 12px;
+          padding: 10px;
         }
 
         .product-title {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 8px 0;
+          margin: 0 0 6px 0;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -455,30 +442,30 @@ function CarouselPreview() {
         .product-price-row {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-bottom: 12px;
+          gap: 6px;
+          margin-bottom: 10px;
         }
 
         .compare-price {
-          font-size: 13px;
+          font-size: 11px;
           color: #999;
           text-decoration: line-through;
         }
 
         .product-price {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 700;
           color: #000;
         }
 
         .add-button {
           width: 100%;
-          padding: 8px 16px;
+          padding: 7px 12px;
           background: #000;
           color: white;
           border: none;
           border-radius: 4px;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
@@ -502,8 +489,7 @@ function ListPreview() {
       <div className="list-container">
         {SAMPLE_PRODUCTS.map((product, index) => (
           <div key={product.id} className="list-item">
-            <input type="checkbox" id={`product-${index}`} className="checkbox" />
-            <label htmlFor={`product-${index}`} className="list-item-content">
+            <div className="list-item-content">
               <div className="list-item-image-wrapper">
                 <img src={product.image} alt={product.title} className="list-item-image" />
               </div>
@@ -517,7 +503,7 @@ function ListPreview() {
                 </div>
               </div>
               <button className="list-add-button">Add</button>
-            </label>
+            </div>
           </div>
         ))}
       </div>
@@ -525,17 +511,19 @@ function ListPreview() {
       <style jsx>{`
         .preview-container {
           background: white;
-          padding: 24px;
+          padding: 16px;
           border-radius: 8px;
           border: 1px solid #000;
+          height: 100%;
+          overflow: hidden;
         }
 
         .preview-header {
-          margin-bottom: 20px;
+          margin-bottom: 14px;
         }
 
         .preview-title {
-          font-size: 18px;
+          font-size: 15px;
           font-weight: 600;
           color: #000;
           margin: 0;
@@ -548,34 +536,23 @@ function ListPreview() {
         .list-container {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
         }
 
         .list-item {
           display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .checkbox {
-          width: 20px;
-          height: 20px;
-          border: 2px solid #000;
-          border-radius: 4px;
-          cursor: pointer;
-          flex-shrink: 0;
         }
 
         .list-item-content {
           flex: 1;
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 12px;
+          gap: 10px;
+          padding: 10px;
           border: 1px solid #000;
           border-radius: 6px;
-          cursor: pointer;
           transition: all 0.2s;
+          background: white;
         }
 
         .list-item-content:hover {
@@ -583,8 +560,8 @@ function ListPreview() {
         }
 
         .list-item-image-wrapper {
-          width: 60px;
-          height: 60px;
+          width: 50px;
+          height: 50px;
           border-radius: 4px;
           overflow: hidden;
           flex-shrink: 0;
@@ -602,7 +579,7 @@ function ListPreview() {
         }
 
         .list-item-title {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
           color: #000;
           margin: 0 0 4px 0;
@@ -611,28 +588,28 @@ function ListPreview() {
         .list-item-price-row {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
         }
 
         .compare-price {
-          font-size: 12px;
+          font-size: 11px;
           color: #999;
           text-decoration: line-through;
         }
 
         .list-item-price {
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 700;
           color: #000;
         }
 
         .list-add-button {
-          padding: 8px 20px;
+          padding: 7px 16px;
           background: #000;
           color: white;
           border: none;
           border-radius: 4px;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
@@ -675,21 +652,26 @@ function BannerPreview() {
       <style jsx>{`
         .preview-container {
           background: white;
-          padding: 20px;
+          padding: 16px;
           border-radius: 8px;
           border: 2px solid #000;
+          height: 100%;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
         }
 
         .banner-container {
           display: flex;
           align-items: center;
-          gap: 20px;
+          gap: 14px;
+          width: 100%;
         }
 
         .banner-image-wrapper {
-          width: 120px;
-          height: 120px;
-          border-radius: 8px;
+          width: 100px;
+          height: 100px;
+          border-radius: 6px;
           overflow: hidden;
           flex-shrink: 0;
           background: #f5f5f5;
@@ -704,70 +686,55 @@ function BannerPreview() {
 
         .banner-content {
           flex: 1;
+          min-width: 0;
         }
 
         .banner-badge {
           display: inline-block;
-          padding: 4px 12px;
+          padding: 3px 10px;
           background: #000;
-          font-size: 11px;
+          color: white;
+          font-size: 10px;
           font-weight: 700;
           text-transform: uppercase;
-          border-radius: 12px;
-          margin-bottom: 8px;
+          border-radius: 10px;
+          margin-bottom: 6px;
           letter-spacing: 0.5px;
-          background-image: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          position: relative;
-        }
-
-        .banner-badge::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: #000;
-          border-radius: 12px;
-          z-index: -1;
         }
 
         .banner-title {
-          font-size: 18px;
+          font-size: 15px;
           font-weight: 700;
           color: #000;
-          margin: 0 0 6px 0;
+          margin: 0 0 4px 0;
         }
 
         .banner-description {
-          font-size: 13px;
+          font-size: 11px;
           color: #666;
-          margin: 0 0 12px 0;
+          margin: 0 0 8px 0;
         }
 
         .banner-price-row {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
         }
 
         .banner-compare-price {
-          font-size: 14px;
+          font-size: 12px;
           color: #999;
           text-decoration: line-through;
         }
 
         .banner-price {
-          font-size: 22px;
+          font-size: 18px;
           font-weight: 700;
           color: #000;
         }
 
         .banner-savings {
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 600;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
           -webkit-background-clip: text;
@@ -776,12 +743,12 @@ function BannerPreview() {
         }
 
         .banner-button {
-          padding: 14px 32px;
+          padding: 10px 20px;
           background: #000;
           color: white;
           border: none;
-          border-radius: 6px;
-          font-size: 15px;
+          border-radius: 4px;
+          font-size: 12px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
@@ -791,7 +758,6 @@ function BannerPreview() {
 
         .banner-button:hover {
           background: #333;
-          transform: translateY(-1px);
         }
       `}</style>
     </div>
@@ -819,7 +785,7 @@ function CardsPreview() {
                 )}
                 <span className="card-price">${product.price.toFixed(2)}</span>
               </div>
-              <button className="card-button">Quick Add</button>
+              <button className="card-button">Add</button>
             </div>
           </div>
         ))}
@@ -828,17 +794,19 @@ function CardsPreview() {
       <style jsx>{`
         .preview-container {
           background: white;
-          padding: 24px;
+          padding: 16px;
           border-radius: 8px;
           border: 1px solid #000;
+          height: 100%;
+          overflow: hidden;
         }
 
         .preview-header {
-          margin-bottom: 20px;
+          margin-bottom: 14px;
         }
 
         .preview-title {
-          font-size: 18px;
+          font-size: 15px;
           font-weight: 600;
           color: #000;
           margin: 0;
@@ -851,12 +819,12 @@ function CardsPreview() {
         .cards-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
+          gap: 12px;
         }
 
         .card {
           border: 1px solid #000;
-          border-radius: 8px;
+          border-radius: 6px;
           overflow: hidden;
           transition: all 0.2s;
           background: white;
@@ -881,14 +849,14 @@ function CardsPreview() {
         }
 
         .card-content {
-          padding: 12px;
+          padding: 10px;
         }
 
         .card-title {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 8px 0;
+          margin: 0 0 6px 0;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -898,29 +866,29 @@ function CardsPreview() {
           display: flex;
           align-items: center;
           gap: 6px;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .compare-price {
-          font-size: 11px;
+          font-size: 10px;
           color: #999;
           text-decoration: line-through;
         }
 
         .card-price {
-          font-size: 15px;
+          font-size: 13px;
           font-weight: 700;
           color: #000;
         }
 
         .card-button {
           width: 100%;
-          padding: 8px;
+          padding: 7px;
           background: #000;
           color: white;
           border: none;
           border-radius: 4px;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
@@ -981,31 +949,35 @@ function FrequentlyBoughtPreview() {
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="bundle-equals">=</div>
-
+      <div className="bundle-footer">
         <div className="bundle-total">
-          <div className="bundle-total-label">Bundle Price</div>
-          <div className="bundle-total-price">${finalPrice.toFixed(2)}</div>
-          <div className="bundle-total-savings">Save ${savings.toFixed(2)}</div>
-          <button className="bundle-button">Add Both to Cart</button>
+          <span className="bundle-total-label">Total: </span>
+          <span className="bundle-total-price">${finalPrice.toFixed(2)}</span>
+          <span className="bundle-total-savings"> (Save ${savings.toFixed(2)})</span>
         </div>
+        <button className="bundle-button">Add Both</button>
       </div>
 
       <style jsx>{`
         .preview-container {
           background: white;
-          padding: 24px;
+          padding: 16px;
           border-radius: 8px;
           border: 1px solid #000;
+          height: 100%;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
         }
 
         .preview-header {
-          margin-bottom: 20px;
+          margin-bottom: 14px;
         }
 
         .preview-title {
-          font-size: 18px;
+          font-size: 15px;
           font-weight: 600;
           color: #000;
           margin: 0;
@@ -1017,8 +989,9 @@ function FrequentlyBoughtPreview() {
 
         .bundle-container {
           display: flex;
-          align-items: center;
-          gap: 16px;
+          align-items: flex-start;
+          gap: 10px;
+          margin-bottom: 12px;
         }
 
         .bundle-item {
@@ -1028,20 +1001,20 @@ function FrequentlyBoughtPreview() {
         .bundle-checkbox-wrapper {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-bottom: 8px;
+          gap: 6px;
+          margin-bottom: 6px;
         }
 
         .bundle-checkbox {
-          width: 18px;
-          height: 18px;
+          width: 16px;
+          height: 16px;
           border: 2px solid #000;
           border-radius: 3px;
           cursor: pointer;
         }
 
         .bundle-label {
-          font-size: 12px;
+          font-size: 10px;
           font-weight: 600;
           color: #666;
           text-transform: uppercase;
@@ -1051,10 +1024,13 @@ function FrequentlyBoughtPreview() {
         .bundle-item-card {
           border: 1px solid #000;
           border-radius: 6px;
-          padding: 12px;
+          padding: 8px;
           display: flex;
-          gap: 12px;
+          flex-direction: column;
+          gap: 8px;
           align-items: center;
+          text-align: center;
+          background: white;
         }
 
         .bundle-image-wrapper {
@@ -1073,59 +1049,63 @@ function FrequentlyBoughtPreview() {
         }
 
         .bundle-item-info {
-          flex: 1;
+          width: 100%;
         }
 
         .bundle-item-title {
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 6px 0;
+          margin: 0 0 4px 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
         }
 
         .bundle-item-price {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 700;
           color: #000;
         }
 
-        .bundle-plus,
-        .bundle-equals {
-          font-size: 24px;
+        .bundle-plus {
+          font-size: 20px;
           font-weight: 700;
           color: #000;
           flex-shrink: 0;
+          align-self: center;
+          margin-top: 20px;
+        }
+
+        .bundle-footer {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding-top: 12px;
+          border-top: 1px solid #eee;
         }
 
         .bundle-total {
-          flex: 0 0 160px;
-          text-align: center;
-          padding: 16px;
-          border: 2px solid #000;
-          border-radius: 8px;
-          background: white;
+          flex: 1;
+          font-size: 11px;
         }
 
         .bundle-total-label {
-          font-size: 11px;
           font-weight: 600;
           color: #666;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 4px;
         }
 
         .bundle-total-price {
-          font-size: 24px;
+          font-size: 16px;
           font-weight: 700;
           color: #000;
-          margin-bottom: 4px;
         }
 
         .bundle-total-savings {
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 600;
-          margin-bottom: 12px;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -1133,8 +1113,7 @@ function FrequentlyBoughtPreview() {
         }
 
         .bundle-button {
-          width: 100%;
-          padding: 10px 16px;
+          padding: 8px 16px;
           background: #000;
           color: white;
           border: none;
@@ -1143,6 +1122,7 @@ function FrequentlyBoughtPreview() {
           font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
+          white-space: nowrap;
         }
 
         .bundle-button:hover {
