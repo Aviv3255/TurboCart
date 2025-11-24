@@ -30,21 +30,30 @@ export async function GET(request: NextRequest) {
     // Verify environment variables are set
     const apiKey = process.env.SHOPIFY_API_KEY;
     const apiSecret = process.env.SHOPIFY_API_SECRET;
-    const appUrl = process.env.SHOPIFY_APP_URL;
+    let appUrl = process.env.SHOPIFY_APP_URL || process.env.NEXT_PUBLIC_APP_URL;
 
-    if (!apiKey || !apiSecret || !appUrl) {
-      console.error('[OAuth] Missing environment variables:', {
-        hasApiKey: !!apiKey,
-        hasApiSecret: !!apiSecret,
-        hasAppUrl: !!appUrl
-      });
+    console.log('[OAuth] Environment check:', {
+      hasApiKey: !!apiKey,
+      hasApiSecret: !!apiSecret,
+      hasAppUrl: !!appUrl,
+      appUrlValue: appUrl
+    });
+
+    // AGGRESSIVE FALLBACK: Use production URL if env var missing or invalid
+    if (!appUrl || appUrl.includes('localhost') || appUrl.includes('your-app-url')) {
+      console.warn('[OAuth] No valid SHOPIFY_APP_URL found, using hardcoded production URL');
+      appUrl = 'https://turbocart.onrender.com';
+    }
+
+    if (!apiKey || !apiSecret) {
+      console.error('[OAuth] Missing critical environment variables (API Key or Secret)');
       return NextResponse.json(
         { error: 'Server configuration error - missing credentials' },
         { status: 500 }
       );
     }
 
-    console.log('[OAuth] Environment variables OK');
+    console.log('[OAuth] Environment variables OK, using App URL:', appUrl);
 
     // Sanitize shop domain
     const shopDomain = shop.replace(/^https?:\/\//, '').replace(/\/$/, '');

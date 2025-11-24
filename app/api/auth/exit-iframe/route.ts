@@ -19,19 +19,22 @@ export async function GET(request: NextRequest) {
 
   console.log('[ExitIframe] Breaking out of iframe for shop:', shop);
   console.log('[ExitIframe] Host parameter:', host || 'not provided');
+  console.log('[ExitIframe] Environment check:', {
+    SHOPIFY_APP_URL: process.env.SHOPIFY_APP_URL ? 'SET' : 'MISSING',
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ? 'SET' : 'MISSING',
+    NODE_ENV: process.env.NODE_ENV
+  });
 
-  // Get the app URL from environment
-  const appUrl = process.env.SHOPIFY_APP_URL || process.env.NEXT_PUBLIC_APP_URL;
+  // Get the app URL from environment with aggressive fallbacks
+  let appUrl = process.env.SHOPIFY_APP_URL || process.env.NEXT_PUBLIC_APP_URL;
 
-  if (!appUrl) {
-    console.error('[ExitIframe] SHOPIFY_APP_URL not configured');
-    return NextResponse.json(
-      { error: 'Server configuration error - missing SHOPIFY_APP_URL' },
-      { status: 500 }
-    );
+  // AGGRESSIVE FALLBACK: If no environment variable is set, use production URL
+  if (!appUrl || appUrl.includes('localhost') || appUrl.includes('your-app-url')) {
+    console.warn('[ExitIframe] No valid SHOPIFY_APP_URL found, using hardcoded production URL');
+    appUrl = 'https://turbocart.onrender.com';
   }
 
-  console.log('[ExitIframe] App URL:', appUrl);
+  console.log('[ExitIframe] Final App URL:', appUrl);
 
   // Create the OAuth URL using the configured app URL
   const authUrl = new URL('/api/auth', appUrl);
