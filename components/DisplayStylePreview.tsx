@@ -158,7 +158,7 @@ function CarouselPreview() {
 
         .image {
           width: 100%;
-          height: 120px;
+          aspect-ratio: 1;
           object-fit: cover;
         }
 
