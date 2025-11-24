@@ -96,10 +96,13 @@ export default function DisplayStyleStep({
                   )}
                 </div>
 
-                <p className="style-description">{option.description}</p>
-
-                <div className="style-preview">
-                  <DisplayStylePreview style={option.value} />
+                <div className="style-content-wrapper">
+                  <div className="style-text-content">
+                    <p className="style-description">{option.description}</p>
+                  </div>
+                  <div className="style-preview">
+                    <DisplayStylePreview style={option.value} />
+                  </div>
                 </div>
               </div>
             ))}
@@ -164,43 +167,37 @@ export default function DisplayStyleStep({
           margin-bottom: 8px;
         }
 
+        .style-content-wrapper {
+          display: flex;
+          gap: 24px;
+          align-items: flex-start;
+          margin: 12px 0 0 32px;
+        }
+
+        .style-text-content {
+          flex: 1;
+        }
+
         .style-description {
           font-size: 14px;
           color: var(--text-secondary);
-          margin: 12px 0 12px 32px;
           line-height: 1.5;
+          margin: 0;
         }
 
         .style-preview {
-          margin: 16px 0 0 32px;
-          padding: 0;
+          flex: 0 0 300px;
           border-radius: 8px;
           overflow: hidden;
         }
 
         .badge-cosmic {
           background: #000;
+          color: white;
           padding: 4px 12px;
           border-radius: 12px;
           font-size: 12px;
           font-weight: 600;
-          background-image: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          position: relative;
-        }
-
-        .badge-cosmic::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: #000;
-          border-radius: 12px;
-          z-index: -1;
         }
       `}</style>
     </div>

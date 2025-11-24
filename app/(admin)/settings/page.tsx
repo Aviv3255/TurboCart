@@ -179,10 +179,13 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                <p className="style-description">{option.description}</p>
-
-                <div className="style-preview">
-                  <DisplayStylePreview style={option.value} />
+                <div className="style-content-wrapper">
+                  <div className="style-text-content">
+                    <p className="style-description">{option.description}</p>
+                  </div>
+                  <div className="style-preview">
+                    <DisplayStylePreview style={option.value} />
+                  </div>
                 </div>
               </div>
             ))}
@@ -272,16 +275,26 @@ export default function SettingsPage() {
           margin-bottom: 8px;
         }
 
+        .style-content-wrapper {
+          display: flex;
+          gap: 24px;
+          align-items: flex-start;
+          margin: 12px 0 0 32px;
+        }
+
+        .style-text-content {
+          flex: 1;
+        }
+
         .style-description {
           font-size: 14px;
           color: var(--text-secondary);
-          margin: 12px 0 12px 32px;
           line-height: 1.5;
+          margin: 0;
         }
 
         .style-preview {
-          margin: 16px 0 0 32px;
-          padding: 0;
+          flex: 0 0 300px;
           border-radius: 8px;
           overflow: hidden;
         }

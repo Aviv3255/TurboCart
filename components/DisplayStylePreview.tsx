@@ -64,38 +64,33 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
     <div className="mobile-product-page-wrapper">
       <div className="mobile-device-frame">
         <div className="mobile-header">
-          <span className="mobile-icon">📱</span>
-          <span className="mobile-title">Mobile Product Page</span>
+          <span className="mobile-icon">🛒</span>
+          <span className="mobile-title">Cart Drawer</span>
         </div>
 
         <div className="mobile-content">
-          {/* Product Details Section */}
-          <div className="product-main-section">
-            <div className="product-header">
-              <h2 className="product-name">Premium Product Name</h2>
-            </div>
+          {/* Cart Header */}
+          <div className="cart-header-section">
+            <h2 className="cart-title">Your Cart</h2>
+            <span className="cart-count">3 items</span>
+          </div>
 
-            <div className="product-image-main">
-              <img
-                src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop"
-                alt="Product"
-                className="main-product-img"
-              />
-            </div>
-
-            <div className="product-info-section">
-              <div className="price-section">
-                <span className="current-price">$49.99</span>
-                <span className="original-price">$62.49</span>
+          {/* Cart Items (without images) */}
+          <div className="cart-items-section">
+            <div className="cart-item">
+              <div className="cart-item-placeholder"></div>
+              <div className="cart-item-details">
+                <h4 className="cart-item-title">Product Name</h4>
+                <p className="cart-item-variant">Size: M</p>
+                <p className="cart-item-price">$49.99</p>
               </div>
-
-              <div className="size-selector-section">
-                <label className="selector-label">Size</label>
-                <div className="size-buttons">
-                  <button className="size-btn">S</button>
-                  <button className="size-btn selected">M</button>
-                  <button className="size-btn">L</button>
-                </div>
+            </div>
+            <div className="cart-item">
+              <div className="cart-item-placeholder"></div>
+              <div className="cart-item-details">
+                <h4 className="cart-item-title">Another Product</h4>
+                <p className="cart-item-variant">Color: Blue</p>
+                <p className="cart-item-price">$29.99</p>
               </div>
             </div>
           </div>
@@ -107,24 +102,19 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
             <div className="indicator-arrow">↓</div>
           </div>
 
-          {/* The actual preview component */}
+          {/* The actual preview component (with images) */}
           <div className="upsell-preview-section">
             {getPreviewComponent()}
           </div>
 
-          {/* Continue with cart section */}
-          <div className="cart-actions-section">
-            <div className="quantity-selector">
-              <label className="selector-label">Quantity</label>
-              <div className="quantity-controls">
-                <button className="qty-btn">−</button>
-                <span className="qty-value">1</span>
-                <button className="qty-btn">+</button>
-              </div>
+          {/* Cart Footer */}
+          <div className="cart-footer-section">
+            <div className="cart-subtotal">
+              <span className="subtotal-label">Subtotal</span>
+              <span className="subtotal-price">$79.98</span>
             </div>
-
-            <button className="add-to-cart-btn">
-              Add to Cart · $49.99
+            <button className="checkout-btn">
+              Checkout
             </button>
           </div>
         </div>
@@ -173,93 +163,70 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
           overflow-y: auto;
         }
 
-        .product-main-section {
+        .cart-header-section {
           padding: 16px;
+          border-bottom: 1px solid #eee;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
 
-        .product-header {
-          margin-bottom: 12px;
-        }
-
-        .product-name {
-          font-size: 16px;
+        .cart-title {
+          font-size: 18px;
           font-weight: 700;
           color: #000;
           margin: 0;
         }
 
-        .product-image-main {
-          width: 100%;
-          aspect-ratio: 1;
-          background: #f0f0f0;
-          border-radius: 8px;
-          overflow: hidden;
-          margin-bottom: 16px;
-          border: 1px solid #ddd;
+        .cart-count {
+          font-size: 14px;
+          color: #666;
         }
 
-        .main-product-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .product-info-section {
-          margin-bottom: 16px;
-        }
-
-        .price-section {
+        .cart-items-section {
+          padding: 16px;
           display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 16px;
+          flex-direction: column;
+          gap: 12px;
         }
 
-        .current-price {
-          font-size: 20px;
-          font-weight: 700;
-          color: #000;
-        }
-
-        .original-price {
-          font-size: 16px;
-          color: #999;
-          text-decoration: line-through;
-        }
-
-        .size-selector-section {
-          margin-bottom: 12px;
-        }
-
-        .selector-label {
-          display: block;
-          font-size: 13px;
-          font-weight: 600;
-          color: #000;
-          margin-bottom: 8px;
-        }
-
-        .size-buttons {
+        .cart-item {
           display: flex;
-          gap: 8px;
+          gap: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #eee;
         }
 
-        .size-btn {
+        .cart-item-placeholder {
+          width: 60px;
+          height: 60px;
+          background: #e0e0e0;
+          border-radius: 4px;
+          flex-shrink: 0;
+        }
+
+        .cart-item-details {
           flex: 1;
-          padding: 10px;
-          border: 2px solid #ddd;
-          background: white;
-          border-radius: 6px;
+        }
+
+        .cart-item-title {
           font-size: 14px;
           font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
+          color: #000;
+          margin: 0 0 4px 0;
         }
 
-        .size-btn.selected {
-          border-color: #000;
-          background: #000;
-          color: white;
+        .cart-item-variant {
+          font-size: 12px;
+          color: #666;
+          margin: 0 0 4px 0;
+        }
+
+        .cart-item-price {
+          font-size: 14px;
+          font-weight: 700;
+          color: #000;
+          margin: 0;
         }
 
         .upsell-position-indicator {
@@ -291,56 +258,32 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
           margin-bottom: 16px;
         }
 
-        .cart-actions-section {
+        .cart-footer-section {
           padding: 16px;
           border-top: 1px solid #eee;
           background: #fafafa;
         }
 
-        .quantity-selector {
+        .cart-subtotal {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
           margin-bottom: 16px;
         }
 
-        .quantity-controls {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          justify-content: center;
-          padding: 12px;
-          background: white;
-          border: 2px solid #ddd;
-          border-radius: 8px;
-        }
-
-        .qty-btn {
-          width: 32px;
-          height: 32px;
-          border: 2px solid #000;
-          background: white;
-          border-radius: 50%;
-          font-size: 18px;
-          font-weight: 700;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-        }
-
-        .qty-btn:hover {
-          background: #000;
-          color: white;
-        }
-
-        .qty-value {
-          font-size: 16px;
+        .subtotal-label {
+          font-size: 14px;
           font-weight: 600;
           color: #000;
-          min-width: 24px;
-          text-align: center;
         }
 
-        .add-to-cart-btn {
+        .subtotal-price {
+          font-size: 18px;
+          font-weight: 700;
+          color: #000;
+        }
+
+        .checkout-btn {
           width: 100%;
           padding: 16px;
           background: #000;
@@ -353,7 +296,7 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
           transition: all 0.2s;
         }
 
-        .add-to-cart-btn:hover {
+        .checkout-btn:hover {
           background: #333;
         }
 
