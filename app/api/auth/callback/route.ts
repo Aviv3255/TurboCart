@@ -76,15 +76,25 @@ export async function GET(request: NextRequest) {
     const shopRecord = await createShop(shop, access_token);
     console.log('[OAuth Callback] Shop saved successfully, ID:', shopRecord.id);
 
+    // Get the app URL from environment with aggressive fallback
+    let appUrl = process.env.SHOPIFY_APP_URL || process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl || appUrl.includes('localhost') || appUrl.includes('your-app-url')) {
+      console.warn('[OAuth Callback] No valid SHOPIFY_APP_URL found, using hardcoded production URL');
+      appUrl = 'https://turbocart.onrender.com';
+    }
+
+    console.log('[OAuth Callback] Using App URL:', appUrl);
+
     // Create dashboard URL with shop parameter
-    const dashboardUrl = new URL('/dashboard', request.url);
+    const dashboardUrl = new URL('/dashboard', appUrl);
     dashboardUrl.searchParams.set('shop', shop);
+    dashboardUrl.searchParams.set('embedded', '1'); // Mark as embedded
 
     // Encode host parameter for App Bridge
     const hostParam = Buffer.from(`${shop}/admin`).toString('base64');
     dashboardUrl.searchParams.set('host', hostParam);
 
-    console.log('[OAuth Callback] Redirecting to dashboard:', dashboardUrl.pathname);
+    console.log('[OAuth Callback] Redirecting to dashboard:', dashboardUrl.toString());
 
     // Create session
     const response = NextResponse.redirect(dashboardUrl);
