@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       const validSettings: Partial<ShopSettings> = {};
 
       if (settings.display_style) {
-        const validStyles = ['carousel', 'list', 'banner', 'cards', 'frequently-bought', 'inline'];
+        const validStyles = ['minimal-strip', 'list', 'banner', 'cards', 'frequently-bought', 'inline'];
         if (!validStyles.includes(settings.display_style)) {
           return NextResponse.json(
             { error: 'Invalid display_style' },
@@ -83,9 +83,11 @@ export async function POST(request: NextRequest) {
 
       if (settings.max_upsells !== undefined) {
         const maxUpsells = parseInt(settings.max_upsells);
-        if (isNaN(maxUpsells) || maxUpsells < 1 || maxUpsells > 10) {
+        // Allow up to 25 products for cards slider, up to 10 for other styles
+        const maxAllowed = settings.display_style === 'cards' ? 25 : 10;
+        if (isNaN(maxUpsells) || maxUpsells < 1 || maxUpsells > maxAllowed) {
           return NextResponse.json(
-            { error: 'max_upsells must be between 1 and 10' },
+            { error: `max_upsells must be between 1 and ${maxAllowed}` },
             { status: 400 }
           );
         }

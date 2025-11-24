@@ -7,7 +7,7 @@
 import { Card, RadioButton, BlockStack } from '@shopify/polaris';
 import DisplayStylePreview from '@/components/DisplayStylePreview';
 
-type DisplayStyle = 'carousel' | 'list' | 'banner' | 'cards' | 'frequently-bought';
+type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought';
 
 interface StyleOption {
   value: DisplayStyle;
@@ -19,10 +19,10 @@ interface StyleOption {
 
 const STYLE_OPTIONS: StyleOption[] = [
   {
-    value: 'carousel',
-    label: 'Clean Carousel',
-    description: 'Horizontal scrolling with 2-3 products visible. Perfect for product discovery.',
-    preview: '← [Product A] [Product B] [Product C] →',
+    value: 'minimal-strip',
+    label: 'Minimal Strip',
+    description: 'Clean horizontal row of products. Modern, subtle design with no navigation arrows.',
+    preview: '[Product A] [Product B] [Product C]',
     recommended: true,
   },
   {
@@ -39,8 +39,8 @@ const STYLE_OPTIONS: StyleOption[] = [
   },
   {
     value: 'cards',
-    label: 'Compact Cards',
-    description: 'Grid layout with image-first cards. Clean and space-efficient.',
+    label: 'Compact Cards (slider)',
+    description: 'Grid layout with image-first cards. Clean and space-efficient. עד 25 מוצרים',
     preview: '[Card 1] [Card 2] [Card 3]',
   },
   {
@@ -135,6 +135,17 @@ export default function DisplayStyleStep({
                 <option value="3">3 products</option>
                 <option value="4">4 products</option>
                 <option value="5">5 products</option>
+                {selectedStyle === 'cards' && (
+                  <>
+                    <option value="6">6 products</option>
+                    <option value="8">8 products</option>
+                    <option value="10">10 products</option>
+                    <option value="12">12 products</option>
+                    <option value="15">15 products</option>
+                    <option value="20">20 products</option>
+                    <option value="25">25 products</option>
+                  </>
+                )}
               </select>
             </div>
           </div>

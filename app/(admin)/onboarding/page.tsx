@@ -38,7 +38,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(1);
   const [data, setData] = useState<OnboardingData>({
     selectedProducts: [],
-    displayStyle: 'carousel',
+    displayStyle: 'minimal-strip',
     maxUpsells: 3,
     selectedPlan: null,
   });

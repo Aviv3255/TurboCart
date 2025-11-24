@@ -1,0 +1,55 @@
+{% comment %}
+  TurboCart - Minimal Strip Upsell Display
+  Clean horizontal row with no navigation arrows
+{% endcomment %}
+
+<div class="turbocart-minimal-strip" data-turbocart-block="minimal-strip">
+  <div class="turbocart-minimal-strip__header">
+    <h3 class="turbocart-minimal-strip__title">{{ block.settings.heading | default: "You might also like" }}</h3>
+  </div>
+
+  <div class="turbocart-minimal-strip__container">
+    <div class="turbocart-minimal-strip__items" data-turbocart-upsells>
+      <!-- Upsell products will be injected here via JavaScript -->
+      <div class="turbocart-minimal-strip__loading">
+        <div class="turbocart-spinner"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "TurboCart Minimal Strip",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "You might also like"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "label": "Products to show",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show prices",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "compact_mode",
+      "label": "Compact mode (smaller images)",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

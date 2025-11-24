@@ -36,7 +36,7 @@ const SAMPLE_PRODUCTS: ProductPreviewData[] = [
   },
 ];
 
-type DisplayStyle = 'carousel' | 'list' | 'banner' | 'cards' | 'frequently-bought';
+type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought';
 
 interface DisplayStylePreviewProps {
   style: DisplayStyle;
@@ -45,8 +45,8 @@ interface DisplayStylePreviewProps {
 export default function DisplayStylePreview({ style }: DisplayStylePreviewProps) {
   const getPreviewComponent = () => {
     switch (style) {
-      case 'carousel':
-        return <CarouselPreview />;
+      case 'minimal-strip':
+        return <MinimalStripPreview />;
       case 'list':
         return <ListPreview />;
       case 'banner':
@@ -77,146 +77,106 @@ export default function DisplayStylePreview({ style }: DisplayStylePreviewProps)
   );
 }
 
-function CarouselPreview() {
-  const displayProducts = SAMPLE_PRODUCTS.slice(0, 2);
+function MinimalStripPreview() {
+  const displayProducts = SAMPLE_PRODUCTS.slice(0, 3);
 
   return (
     <div className="preview-container">
       <h3 className="title">You might also like</h3>
 
-      <div className="carousel">
-        <button className="arrow">←</button>
-
-        <div className="track">
-          {displayProducts.map((product) => (
-            <div key={product.id} className="card">
-              <img src={product.image} alt={product.title} className="image" />
-              <div className="info">
-                <h4 className="name">{product.title}</h4>
-                <div className="price-row">
-                  {product.compareAtPrice && (
-                    <span className="old">${product.compareAtPrice.toFixed(2)}</span>
-                  )}
-                  <span className="price">${product.price.toFixed(2)}</span>
-                </div>
-                <button className="btn">Add</button>
+      <div className="strip">
+        {displayProducts.map((product) => (
+          <div key={product.id} className="card">
+            <img src={product.image} alt={product.title} className="image" />
+            <div className="info">
+              <h4 className="name">{product.title}</h4>
+              <div className="price-row">
+                {product.compareAtPrice && (
+                  <span className="old">${product.compareAtPrice.toFixed(2)}</span>
+                )}
+                <span className="price">${product.price.toFixed(2)}</span>
               </div>
+              <button className="btn">Add</button>
             </div>
-          ))}
-        </div>
-
-        <button className="arrow">→</button>
+          </div>
+        ))}
       </div>
 
       <style jsx>{`
         .preview-container {
           background: white;
-          padding: 16px;
+          padding: 14px;
         }
 
         .title {
           font-size: 13px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 14px 0;
+          margin: 0 0 12px 0;
         }
 
-        .carousel {
+        .strip {
           display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .arrow {
-          width: 28px;
-          height: 28px;
-          border: 1px solid #ddd;
-          background: white;
-          border-radius: 50%;
-          font-size: 12px;
-          cursor: pointer;
-          flex-shrink: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .track {
-          display: flex;
-          gap: 10px;
-          flex: 1;
-          overflow: hidden;
+          gap: 8px;
+          overflow-x: auto;
         }
 
         .card {
-          flex: 1;
-          border: 1px solid #e0e0e0;
+          flex: 0 0 105px;
           border-radius: 6px;
           overflow: hidden;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
+          background: #fafafa;
         }
 
         .image {
           width: 100%;
           aspect-ratio: 1;
           object-fit: cover;
-          flex-shrink: 0;
         }
 
         .info {
-          padding: 12px;
-          display: flex;
-          flex-direction: column;
-          flex-grow: 1;
+          padding: 8px;
         }
 
         .name {
-          font-size: 12px;
+          font-size: 10px;
           font-weight: 600;
           color: #000;
-          margin: 0 0 8px 0;
+          margin: 0 0 6px 0;
           overflow: hidden;
           text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          line-height: 1.4;
-          flex-grow: 1;
+          white-space: nowrap;
         }
 
         .price-row {
           display: flex;
-          gap: 6px;
-          margin-bottom: 10px;
+          gap: 4px;
+          margin-bottom: 8px;
           align-items: center;
-          flex-shrink: 0;
         }
 
         .old {
-          font-size: 11px;
+          font-size: 9px;
           color: #999;
           text-decoration: line-through;
         }
 
         .price {
-          font-size: 14px;
+          font-size: 11px;
           font-weight: 700;
           color: #000;
         }
 
         .btn {
           width: 100%;
-          padding: 8px;
+          padding: 5px;
           background: #000;
           color: white;
           border: none;
-          border-radius: 4px;
-          font-size: 12px;
+          border-radius: 3px;
+          font-size: 10px;
           font-weight: 600;
           cursor: pointer;
-          flex-shrink: 0;
         }
       `}</style>
     </div>

@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { Page, Card, RadioButton, Button, Banner, BlockStack } from '@shopify/polaris';
 import DisplayStylePreview from '@/components/DisplayStylePreview';
 
-type DisplayStyle = 'carousel' | 'list' | 'banner' | 'cards' | 'frequently-bought';
+type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought';
 
 interface StyleOption {
   value: DisplayStyle;
@@ -21,10 +21,10 @@ interface StyleOption {
 
 const STYLE_OPTIONS: StyleOption[] = [
   {
-    value: 'carousel',
-    label: 'Clean Carousel',
-    description: 'Horizontal scrolling carousel with 2-3 products visible at once. Perfect for product discovery.',
-    preview: '← [Product A] [Product B] [Product C] →',
+    value: 'minimal-strip',
+    label: 'Minimal Strip',
+    description: 'Clean horizontal row of products. Modern, subtle design with no navigation arrows.',
+    preview: '[Product A] [Product B] [Product C]',
     recommended: true,
   },
   {
@@ -41,8 +41,8 @@ const STYLE_OPTIONS: StyleOption[] = [
   },
   {
     value: 'cards',
-    label: 'Compact Cards',
-    description: 'Grid layout with image-first cards. Clean and space-efficient.',
+    label: 'Compact Cards (slider)',
+    description: 'Grid layout with image-first cards. Clean and space-efficient. עד 25 מוצרים',
     preview: '[Card 1] [Card 2] [Card 3]\n$29.99   $19.99   $24.99',
   },
   {
@@ -54,7 +54,7 @@ const STYLE_OPTIONS: StyleOption[] = [
 ];
 
 export default function SettingsPage() {
-  const [selectedStyle, setSelectedStyle] = useState<DisplayStyle>('carousel');
+  const [selectedStyle, setSelectedStyle] = useState<DisplayStyle>('minimal-strip');
   const [maxUpsells, setMaxUpsells] = useState<number>(3);
   const [cartPosition, setCartPosition] = useState<'top' | 'bottom'>('top');
   const [abTestingEnabled, setAbTestingEnabled] = useState(true);
@@ -77,7 +77,7 @@ export default function SettingsPage() {
 
       const data = await response.json();
       if (data.settings) {
-        setSelectedStyle(data.settings.display_style || 'carousel');
+        setSelectedStyle(data.settings.display_style || 'minimal-strip');
         setMaxUpsells(data.settings.max_upsells || 3);
         setCartPosition(data.settings.position || 'top');
         setAbTestingEnabled(data.settings.enable_ab_testing !== false);
@@ -215,6 +215,17 @@ export default function SettingsPage() {
               <option value="3">3 products</option>
               <option value="4">4 products</option>
               <option value="5">5 products</option>
+              {selectedStyle === 'cards' && (
+                <>
+                  <option value="6">6 products</option>
+                  <option value="8">8 products</option>
+                  <option value="10">10 products</option>
+                  <option value="12">12 products</option>
+                  <option value="15">15 products</option>
+                  <option value="20">20 products</option>
+                  <option value="25">25 products</option>
+                </>
+              )}
             </select>
           </div>
 
