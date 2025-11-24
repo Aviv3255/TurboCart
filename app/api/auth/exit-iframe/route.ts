@@ -20,9 +20,24 @@ export async function GET(request: NextRequest) {
   console.log('[ExitIframe] Breaking out of iframe for shop:', shop);
   console.log('[ExitIframe] Host parameter:', host || 'not provided');
 
-  // Create the OAuth URL
-  const authUrl = new URL('/api/auth', request.url);
+  // Get the app URL from environment
+  const appUrl = process.env.SHOPIFY_APP_URL || process.env.NEXT_PUBLIC_APP_URL;
+
+  if (!appUrl) {
+    console.error('[ExitIframe] SHOPIFY_APP_URL not configured');
+    return NextResponse.json(
+      { error: 'Server configuration error - missing SHOPIFY_APP_URL' },
+      { status: 500 }
+    );
+  }
+
+  console.log('[ExitIframe] App URL:', appUrl);
+
+  // Create the OAuth URL using the configured app URL
+  const authUrl = new URL('/api/auth', appUrl);
   authUrl.searchParams.set('shop', shop);
+
+  console.log('[ExitIframe] Auth URL:', authUrl.toString());
 
   // Return HTML page that breaks out of iframe
   const html = `
