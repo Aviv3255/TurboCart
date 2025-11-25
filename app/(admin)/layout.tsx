@@ -12,6 +12,58 @@ import { AppProvider } from '@shopify/polaris';
 import { Provider as AppBridgeProvider, NavigationMenu } from '@shopify/app-bridge-react';
 import '@shopify/polaris/build/esm/styles.css';
 
+// Navigation links for Shopify sidebar
+const NAVIGATION_LINKS = [
+  { label: 'Dashboard', destination: '/dashboard' },
+  { label: 'Products', destination: '/products' },
+  { label: 'Analytics', destination: '/analytics' },
+  { label: 'Settings', destination: '/settings' },
+];
+
+// Polaris i18n config
+const POLARIS_I18N = {
+  Polaris: {
+    Avatar: {
+      label: 'Avatar',
+      labelWithInitials: 'Avatar with initials {initials}',
+    },
+    ContextualSaveBar: {
+      save: 'Save',
+      discard: 'Discard',
+    },
+    TextField: {
+      characterCount: '{count} characters',
+    },
+    TopBar: {
+      toggleMenuLabel: 'Toggle menu',
+    },
+    Modal: {
+      iFrameTitle: 'body markup',
+    },
+    Frame: {
+      skipToContent: 'Skip to content',
+      navigationLabel: 'Navigation',
+    },
+  },
+};
+
+// Content wrapper with styles
+function AppContent({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <div className="shopify-app-content">
+        {children}
+      </div>
+      <style jsx>{`
+        .shopify-app-content {
+          min-height: 100vh;
+          background: #f6f6f7;
+        }
+      `}</style>
+    </>
+  );
+}
+
 function AdminLayoutContent({
   children,
 }: {
@@ -26,6 +78,9 @@ function AdminLayoutContent({
   // Get shop and host from URL for App Bridge
   const shop = searchParams.get('shop') || '';
   const host = searchParams.get('host') || '';
+
+  // Check if we have App Bridge context
+  const hasAppBridge = Boolean(shop && host && process.env.NEXT_PUBLIC_SHOPIFY_API_KEY);
 
   // Check if user needs onboarding
   useEffect(() => {
@@ -97,80 +152,25 @@ function AdminLayoutContent({
     );
   }
 
-  // Native Shopify embedded app style - just content, no custom header
-  const content = (
-    <AppProvider
-      i18n={{
-        Polaris: {
-          Avatar: {
-            label: 'Avatar',
-            labelWithInitials: 'Avatar with initials {initials}',
-          },
-          ContextualSaveBar: {
-            save: 'Save',
-            discard: 'Discard',
-          },
-          TextField: {
-            characterCount: '{count} characters',
-          },
-          TopBar: {
-            toggleMenuLabel: 'Toggle menu',
-          },
-          Modal: {
-            iFrameTitle: 'body markup',
-          },
-          Frame: {
-            skipToContent: 'Skip to content',
-            navigationLabel: 'Navigation',
-          },
-        },
-      }}
-    >
-      {/* Shopify App Bridge Navigation - appears in Shopify sidebar */}
-      <NavigationMenu
-        navigationLinks={[
-          {
-            label: 'Dashboard',
-            destination: '/dashboard',
-          },
-          {
-            label: 'Products',
-            destination: '/products',
-          },
-          {
-            label: 'Analytics',
-            destination: '/analytics',
-          },
-          {
-            label: 'Settings',
-            destination: '/settings',
-          },
-        ]}
-      />
-
-      <div className="shopify-app-content">
-        {children}
-      </div>
-      <style jsx>{`
-        .shopify-app-content {
-          min-height: 100vh;
-          background: #f6f6f7;
-        }
-      `}</style>
-    </AppProvider>
-  );
-
-  // If we have shop and host, wrap with App Bridge Provider
-  if (shop && host && appBridgeConfig.apiKey) {
+  // If we have App Bridge context, wrap with providers and navigation
+  if (hasAppBridge) {
     return (
-      <AppBridgeProvider config={appBridgeConfig}>
-        {content}
-      </AppBridgeProvider>
+      <AppProvider i18n={POLARIS_I18N}>
+        <AppBridgeProvider config={appBridgeConfig}>
+          {/* NavigationMenu MUST be inside AppBridgeProvider */}
+          <NavigationMenu navigationLinks={NAVIGATION_LINKS} />
+          <AppContent>{children}</AppContent>
+        </AppBridgeProvider>
+      </AppProvider>
     );
   }
 
-  // Otherwise just return the content
-  return content;
+  // Without App Bridge - just Polaris provider (for development/testing)
+  return (
+    <AppProvider i18n={POLARIS_I18N}>
+      <AppContent>{children}</AppContent>
+    </AppProvider>
+  );
 }
 
 export default function AdminLayout({
