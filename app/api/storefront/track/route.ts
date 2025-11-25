@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { trackEvent } from '@/lib/db/queries';
 import { rateLimit } from '@/lib/shopify/middleware';
+import { learnFromEvent } from '@/lib/ml/learning-engine';
 
 /**
- * Track upsell events (impressions, clicks, adds)
+ * Track upsell events (impressions, clicks, adds, purchases)
  * POST /api/storefront/track
+ *
+ * NOW FEEDS INTO ML LEARNING ENGINE!
+ * Every event updates Thompson Sampling parameters and learns patterns
  */
 export async function POST(request: NextRequest) {
   try {
@@ -33,14 +37,20 @@ export async function POST(request: NextRequest) {
     const {
       event_type,
       product_id,
+      product_ids,        // Can track multiple products at once
       session_id,
       customer_id,
       cart_token,
       revenue,
       quantity = 1,
+      display_style,      // NEW: Which display style was shown
+      cart_value,         // NEW: Cart value for context
+      cart_item_count,    // NEW: Cart item count for context
+      position,           // NEW: Product position
+      decision_id,        // NEW: Link to ML decision
     } = body;
 
-    if (!event_type || !product_id) {
+    if (!event_type || (!product_id && !product_ids)) {
       return NextResponse.json(
         { error: 'Missing required parameters' },
         { status: 400 }
@@ -72,33 +82,76 @@ export async function POST(request: NextRequest) {
 
     const shopId = shopResult.rows[0]!.id;
 
-    // Get upsell product ID
-    const productResult = await dbQuery(
-      'SELECT id FROM upsell_products WHERE shop_id = $1 AND shopify_product_id = $2',
-      [shopId, product_id]
-    );
+    // Handle single or multiple products
+    const productIdsArray = product_ids || [product_id];
 
-    const upsellProductId = productResult.rows[0]?.id || null;
+    // Track event in database
+    for (const pid of productIdsArray) {
+      const productResult = await dbQuery(
+        'SELECT id FROM upsell_products WHERE shop_id = $1 AND shopify_product_id = $2',
+        [shopId, pid]
+      );
 
-    // Track the event
-    await trackEvent(shopId, {
-      upsell_product_id: upsellProductId,
-      event_type: event_type as 'impression' | 'click' | 'add' | 'purchase' | 'remove',
-      session_id: session_id || 'unknown',
-      customer_id: customer_id || null,
-      cart_token: cart_token || null,
-      revenue: revenue || null,
-      quantity: quantity,
-      context: {
-        user_agent: request.headers.get('user-agent'),
-        referer: request.headers.get('referer'),
-        timestamp: new Date().toISOString(),
-      },
-    });
+      const upsellProductId = productResult.rows[0]?.id || null;
+
+      await trackEvent(shopId, {
+        upsell_product_id: upsellProductId,
+        event_type: event_type as 'impression' | 'click' | 'add' | 'purchase' | 'remove',
+        session_id: session_id || 'unknown',
+        customer_id: customer_id || null,
+        cart_token: cart_token || null,
+        revenue: revenue || null,
+        quantity: quantity,
+        context: {
+          display_style: display_style,
+          position: position,
+          decision_id: decision_id,
+          cart_value: cart_value,
+          cart_item_count: cart_item_count,
+          user_agent: request.headers.get('user-agent'),
+          referer: request.headers.get('referer'),
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+
+    // Feed event into ML learning engine (async, don't wait)
+    if (display_style && cart_value !== undefined) {
+      const hour = new Date().getHours();
+      let timeOfDay: string;
+      if (hour < 12) timeOfDay = 'morning';
+      else if (hour < 17) timeOfDay = 'afternoon';
+      else if (hour < 21) timeOfDay = 'evening';
+      else timeOfDay = 'night';
+
+      const productPositions: Record<number, number> = {};
+      productIdsArray.forEach((pid: number, index: number) => {
+        productPositions[pid] = position || index + 1;
+      });
+
+      learnFromEvent({
+        shopId,
+        sessionId: session_id || 'unknown',
+        eventType: event_type as 'impression' | 'click' | 'add' | 'purchase',
+        displayStyle: display_style,
+        productIds: productIdsArray,
+        productPositions,
+        revenue: revenue || undefined,
+        cartValue: cart_value,
+        cartItemCount: cart_item_count || 1,
+        timeOfDay,
+        dayOfWeek: new Date().getDay(),
+        decisionId: decision_id,
+      }).catch((err) => {
+        console.error('ML learning error:', err);
+        // Don't fail the request if ML learning fails
+      });
+    }
 
     return NextResponse.json({
       success: true,
       event_type,
+      ml_learning: display_style ? 'enabled' : 'disabled',
       tracked_at: new Date().toISOString(),
     });
 
