@@ -61,6 +61,36 @@
         case 'frequently-bought':
           initFrequentlyBought(block);
           break;
+        case 'masonry-grid':
+          initMasonryGrid(block);
+          break;
+        case 'carousel-arrows':
+          initCarouselArrows(block);
+          break;
+        case 'vertical-scroll':
+          initVerticalScroll(block);
+          break;
+        case 'spotlight':
+          initSpotlight(block);
+          break;
+        case 'sticky-tabs':
+          initStickyTabs(block);
+          break;
+        case 'countdown-bundle':
+          initCountdownBundle(block);
+          break;
+        case 'progressive-discount':
+          initProgressiveDiscount(block);
+          break;
+        case 'quiz-match':
+          initQuizMatch(block);
+          break;
+        case 'side-drawer':
+          initSideDrawer(block);
+          break;
+        case 'comparison-table':
+          initComparisonTable(block);
+          break;
       }
     });
   }
@@ -143,6 +173,36 @@
           break;
         case 'frequently-bought':
           renderFrequentlyBought(container);
+          break;
+        case 'masonry-grid':
+          renderMasonryGrid(container);
+          break;
+        case 'carousel-arrows':
+          renderCarouselArrows(container);
+          break;
+        case 'vertical-scroll':
+          renderVerticalScroll(container);
+          break;
+        case 'spotlight':
+          renderSpotlight(container);
+          break;
+        case 'sticky-tabs':
+          renderStickyTabs(container);
+          break;
+        case 'countdown-bundle':
+          renderCountdownBundle(container);
+          break;
+        case 'progressive-discount':
+          renderProgressiveDiscount(container);
+          break;
+        case 'quiz-match':
+          renderQuizMatch(container);
+          break;
+        case 'side-drawer':
+          renderSideDrawer(container);
+          break;
+        case 'comparison-table':
+          renderComparisonTable(container);
           break;
       }
     });
@@ -588,6 +648,737 @@
       }),
     }).catch(error => {
       log('Error tracking event:', error);
+    });
+  }
+
+  /* ============================================ */
+  /* MASONRY GRID IMPLEMENTATION */
+  /* ============================================ */
+
+  function initMasonryGrid(block) {
+    // Masonry-specific initialization if needed
+  }
+
+  function renderMasonryGrid(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No recommendations available</p>';
+      return;
+    }
+
+    const html = upsellProducts.map((product, index) => {
+      const isLarge = index % 3 === 0; // Every 3rd item is larger
+      return `
+        <div class="turbocart-masonry__item ${isLarge ? 'turbocart-masonry__item--large' : ''}" data-product-id="${product.id}">
+          <img
+            src="${product.image}"
+            alt="${escapeHtml(product.title)}"
+            class="turbocart-masonry__item-image"
+            loading="lazy"
+          />
+          <div class="turbocart-masonry__item-content">
+            <h4 class="turbocart-masonry__item-title">${escapeHtml(product.title)}</h4>
+            <div class="turbocart-masonry__item-price">${formatMoney(product.price)}</div>
+            <button
+              class="turbocart-btn turbocart-btn--primary"
+              data-turbocart-add="${product.variant_id}"
+              style="width: 100%; margin-top: 8px;"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = html;
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
+    });
+  }
+
+  /* ============================================ */
+  /* CAROUSEL ARROWS IMPLEMENTATION */
+  /* ============================================ */
+
+  function initCarouselArrows(block) {
+    const prevBtn = block.querySelector('.turbocart-carousel-arrows__nav--prev');
+    const nextBtn = block.querySelector('.turbocart-carousel-arrows__nav--next');
+
+    let currentIndex = 0;
+    const itemsPerView = 3;
+
+    prevBtn?.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCarouselArrows(block, currentIndex);
+        updateDots(block, currentIndex);
+      }
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      const maxIndex = Math.max(0, upsellProducts.length - itemsPerView);
+      if (currentIndex < maxIndex) {
+        currentIndex++;
+        updateCarouselArrows(block, currentIndex);
+        updateDots(block, currentIndex);
+      }
+    });
+  }
+
+  function renderCarouselArrows(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No recommendations available</p>';
+      return;
+    }
+
+    const html = upsellProducts.map(product => `
+      <div class="turbocart-carousel-arrows__item" data-product-id="${product.id}">
+        <img
+          src="${product.image}"
+          alt="${escapeHtml(product.title)}"
+          class="turbocart-carousel-arrows__item-image"
+          loading="lazy"
+        />
+        <h4 class="turbocart-carousel-arrows__item-title">${escapeHtml(product.title)}</h4>
+        <div class="turbocart-carousel-arrows__item-price">${formatMoney(product.price)}</div>
+        <button
+          class="turbocart-btn turbocart-btn--primary"
+          data-turbocart-add="${product.variant_id}"
+          style="margin-top: auto;"
+        >
+          Add
+        </button>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Render dots
+    const dotsContainer = container.closest('.turbocart-carousel-arrows').querySelector('.turbocart-carousel-arrows__dots');
+    if (dotsContainer) {
+      const numDots = Math.ceil(upsellProducts.length / 3);
+      dotsContainer.innerHTML = Array.from({length: numDots}, (_, i) =>
+        `<span class="turbocart-carousel-arrows__dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`
+      ).join('');
+    }
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
+    });
+  }
+
+  function updateCarouselArrows(block, index) {
+    const track = block.querySelector('.turbocart-carousel-arrows__items');
+    const itemWidth = track.querySelector('.turbocart-carousel-arrows__item')?.offsetWidth || 0;
+    const gap = 16;
+    const offset = -(index * (itemWidth + gap));
+    track.style.transform = `translateX(${offset}px)`;
+  }
+
+  function updateDots(block, index) {
+    const dots = block.querySelectorAll('.turbocart-carousel-arrows__dot');
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+  }
+
+  /* ============================================ */
+  /* VERTICAL SCROLL IMPLEMENTATION */
+  /* ============================================ */
+
+  function initVerticalScroll(block) {
+    // Vertical scroll specific initialization if needed
+  }
+
+  function renderVerticalScroll(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No recommendations available</p>';
+      return;
+    }
+
+    const html = upsellProducts.map(product => `
+      <div class="turbocart-vertical-scroll__item" data-product-id="${product.id}">
+        <img
+          src="${product.image}"
+          alt="${escapeHtml(product.title)}"
+          class="turbocart-vertical-scroll__item-image"
+          loading="lazy"
+        />
+        <div class="turbocart-vertical-scroll__item-overlay">
+          <h4 class="turbocart-vertical-scroll__item-title">${escapeHtml(product.title)}</h4>
+          <div class="turbocart-vertical-scroll__item-price">${formatMoney(product.price)}</div>
+          <button
+            class="turbocart-btn turbocart-btn--primary"
+            data-turbocart-add="${product.variant_id}"
+          >
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
+    });
+  }
+
+  /* ============================================ */
+  /* SPOTLIGHT IMPLEMENTATION */
+  /* ============================================ */
+
+  function initSpotlight(block) {
+    let currentIndex = 0;
+    let autoRotateInterval = null;
+
+    function showProduct(index) {
+      const items = block.querySelectorAll('.turbocart-spotlight__item');
+      items.forEach((item, i) => {
+        item.style.display = i === index ? 'block' : 'none';
+      });
+
+      // Update indicators
+      const indicators = block.querySelectorAll('.turbocart-spotlight__indicator');
+      indicators.forEach((ind, i) => {
+        ind.classList.toggle('active', i === index);
+      });
+    }
+
+    function nextProduct() {
+      if (!upsellProducts.length) return;
+      currentIndex = (currentIndex + 1) % upsellProducts.length;
+      showProduct(currentIndex);
+    }
+
+    // Auto-rotate every 5 seconds
+    autoRotateInterval = setInterval(nextProduct, 5000);
+
+    // Store cleanup function
+    block._cleanup = () => {
+      if (autoRotateInterval) {
+        clearInterval(autoRotateInterval);
+      }
+    };
+  }
+
+  function renderSpotlight(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No recommendations available</p>';
+      return;
+    }
+
+    const html = upsellProducts.map((product, index) => `
+      <div class="turbocart-spotlight__item" data-product-id="${product.id}" style="${index === 0 ? '' : 'display: none;'}">
+        <img
+          src="${product.image}"
+          alt="${escapeHtml(product.title)}"
+          class="turbocart-spotlight__item-image"
+          loading="lazy"
+        />
+        <div class="turbocart-spotlight__item-content">
+          <div class="turbocart-spotlight__badge">★ FEATURED ★</div>
+          <h4 class="turbocart-spotlight__item-title">${escapeHtml(product.title)}</h4>
+          <div class="turbocart-spotlight__item-price">${formatMoney(product.price)}</div>
+          <button
+            class="turbocart-btn turbocart-btn--cosmic"
+            data-turbocart-add="${product.variant_id}"
+          >
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Render indicators
+    const indicatorsContainer = container.closest('.turbocart-spotlight').querySelector('.turbocart-spotlight__indicators');
+    if (indicatorsContainer) {
+      indicatorsContainer.innerHTML = upsellProducts.map((_, i) =>
+        `<span class="turbocart-spotlight__indicator ${i === 0 ? 'active' : ''}"></span>`
+      ).join('');
+    }
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
+    });
+  }
+
+  /* ============================================ */
+  /* STICKY TABS IMPLEMENTATION */
+  /* ============================================ */
+
+  function initStickyTabs(block) {
+    // Tab switching will be handled in render function
+  }
+
+  function renderStickyTabs(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No recommendations available</p>';
+      return;
+    }
+
+    // Group products by collection or create default tabs
+    const tabs = {
+      'All': upsellProducts,
+      'Best Sellers': upsellProducts.slice(0, Math.ceil(upsellProducts.length / 2)),
+      'New': upsellProducts.slice(Math.ceil(upsellProducts.length / 2))
+    };
+
+    // Render tab navigation
+    const nav = container.closest('.turbocart-sticky-tabs').querySelector('.turbocart-sticky-tabs__nav');
+    nav.innerHTML = Object.keys(tabs).map((tabName, index) =>
+      `<button class="turbocart-sticky-tabs__tab ${index === 0 ? 'active' : ''}" data-tab="${tabName}">${tabName}</button>`
+    ).join('');
+
+    // Render first tab content
+    const firstTabProducts = tabs['All'];
+    const html = firstTabProducts.map(product => `
+      <div class="turbocart-sticky-tabs__item" data-product-id="${product.id}">
+        <img
+          src="${product.image}"
+          alt="${escapeHtml(product.title)}"
+          class="turbocart-sticky-tabs__item-image"
+          loading="lazy"
+        />
+        <h4 class="turbocart-sticky-tabs__item-title">${escapeHtml(product.title)}</h4>
+        <div class="turbocart-sticky-tabs__item-price">${formatMoney(product.price)}</div>
+        <button
+          class="turbocart-btn turbocart-btn--primary"
+          data-turbocart-add="${product.variant_id}"
+        >
+          Add
+        </button>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Attach tab click listeners
+    nav.querySelectorAll('.turbocart-sticky-tabs__tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        const products = tabs[tabName];
+
+        // Update active tab
+        nav.querySelectorAll('.turbocart-sticky-tabs__tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Render tab products
+        const tabHtml = products.map(product => `
+          <div class="turbocart-sticky-tabs__item" data-product-id="${product.id}">
+            <img src="${product.image}" alt="${escapeHtml(product.title)}" class="turbocart-sticky-tabs__item-image" loading="lazy" />
+            <h4 class="turbocart-sticky-tabs__item-title">${escapeHtml(product.title)}</h4>
+            <div class="turbocart-sticky-tabs__item-price">${formatMoney(product.price)}</div>
+            <button class="turbocart-btn turbocart-btn--primary" data-turbocart-add="${product.variant_id}">Add</button>
+          </div>
+        `).join('');
+
+        container.innerHTML = tabHtml;
+
+        // Re-attach listeners
+        container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const variantId = e.target.dataset.turbocartAdd;
+            const productId = e.target.closest('[data-product-id]').dataset.productId;
+            addToCart(variantId, productId);
+          });
+        });
+      });
+    });
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
+    });
+  }
+
+  /* ============================================ */
+  /* COUNTDOWN BUNDLE IMPLEMENTATION */
+  /* ============================================ */
+
+  function initCountdownBundle(block) {
+    const timerDisplay = block.querySelector('.turbocart-countdown-bundle__timer-values');
+    if (!timerDisplay) return;
+
+    // Set countdown to 15 minutes from now
+    const endTime = Date.now() + (15 * 60 * 1000);
+
+    function updateTimer() {
+      const now = Date.now();
+      const remaining = Math.max(0, endTime - now);
+
+      const hours = Math.floor(remaining / (1000 * 60 * 60));
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+      const hoursEl = timerDisplay.querySelector('[data-hours]');
+      const minutesEl = timerDisplay.querySelector('[data-minutes]');
+      const secondsEl = timerDisplay.querySelector('[data-seconds]');
+
+      if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+      if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+      if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+
+      if (remaining > 0) {
+        requestAnimationFrame(updateTimer);
+      }
+    }
+
+    updateTimer();
+  }
+
+  function renderCountdownBundle(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No bundle deals available</p>';
+      return;
+    }
+
+    // Show bundle of products
+    const bundleProducts = upsellProducts.slice(0, 2);
+    const totalPrice = bundleProducts.reduce((sum, p) => sum + p.price, 0);
+    const discountedPrice = Math.round(totalPrice * 0.8); // 20% off
+
+    const html = `
+      <div class="turbocart-countdown-bundle__products">
+        ${bundleProducts.map(product => `
+          <div class="turbocart-countdown-bundle__product" data-product-id="${product.id}">
+            <img src="${product.image}" alt="${escapeHtml(product.title)}" class="turbocart-countdown-bundle__product-image" loading="lazy" />
+            <h4 class="turbocart-countdown-bundle__product-title">${escapeHtml(product.title)}</h4>
+          </div>
+        `).join('<div class="turbocart-countdown-bundle__plus">+</div>')}
+      </div>
+      <div class="turbocart-countdown-bundle__pricing">
+        <div class="turbocart-countdown-bundle__total">
+          <span class="turbocart-countdown-bundle__original-price">${formatMoney(totalPrice)}</span>
+          <span class="turbocart-countdown-bundle__discounted-price">${formatMoney(discountedPrice)}</span>
+        </div>
+        <div class="turbocart-countdown-bundle__savings">Save ${formatMoney(totalPrice - discountedPrice)} (20% OFF)</div>
+      </div>
+      <button class="turbocart-btn turbocart-btn--cosmic" data-turbocart-add-bundle style="width: 100%; padding: 14px;">
+        Add Bundle to Cart
+      </button>
+    `;
+
+    container.innerHTML = html;
+
+    // Attach bundle add listener
+    container.querySelector('[data-turbocart-add-bundle]')?.addEventListener('click', () => {
+      bundleProducts.forEach(product => {
+        addToCart(product.variant_id, product.id);
+      });
+    });
+  }
+
+  /* ============================================ */
+  /* PROGRESSIVE DISCOUNT IMPLEMENTATION */
+  /* ============================================ */
+
+  function initProgressiveDiscount(block) {
+    // Progressive discount specific initialization if needed
+  }
+
+  function renderProgressiveDiscount(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No products available</p>';
+      return;
+    }
+
+    const html = upsellProducts.map(product => `
+      <div class="turbocart-progressive-discount__item" data-product-id="${product.id}">
+        <img
+          src="${product.image}"
+          alt="${escapeHtml(product.title)}"
+          class="turbocart-progressive-discount__item-image"
+          loading="lazy"
+        />
+        <div class="turbocart-progressive-discount__item-content">
+          <h4 class="turbocart-progressive-discount__item-title">${escapeHtml(product.title)}</h4>
+          <div class="turbocart-progressive-discount__item-price">${formatMoney(product.price)}</div>
+          <div class="turbocart-progressive-discount__item-quantity">
+            <button class="turbocart-progressive-discount__qty-btn" data-action="decrease">-</button>
+            <input type="number" class="turbocart-progressive-discount__qty-input" value="1" min="1" />
+            <button class="turbocart-progressive-discount__qty-btn" data-action="increase">+</button>
+          </div>
+          <button
+            class="turbocart-btn turbocart-btn--primary"
+            data-turbocart-add="${product.variant_id}"
+            style="width: 100%;"
+          >
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Attach quantity button listeners
+    container.querySelectorAll('.turbocart-progressive-discount__qty-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const action = e.target.dataset.action;
+        const input = e.target.closest('.turbocart-progressive-discount__item-quantity').querySelector('input');
+        let value = parseInt(input.value) || 1;
+
+        if (action === 'increase') {
+          value++;
+        } else if (action === 'decrease' && value > 1) {
+          value--;
+        }
+
+        input.value = value;
+      });
+    });
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        const quantity = parseInt(e.target.closest('.turbocart-progressive-discount__item-content').querySelector('input').value) || 1;
+
+        // Add multiple quantities
+        for (let i = 0; i < quantity; i++) {
+          addToCart(variantId, productId);
+        }
+      });
+    });
+  }
+
+  /* ============================================ */
+  /* QUIZ MATCH IMPLEMENTATION */
+  /* ============================================ */
+
+  function initQuizMatch(block) {
+    const options = block.querySelectorAll('.turbocart-quiz-match__option');
+    const resultsContainer = block.querySelector('.turbocart-quiz-match__results');
+
+    options.forEach(option => {
+      option.addEventListener('click', (e) => {
+        const preference = e.target.dataset.preference;
+
+        // Hide quiz, show results
+        block.querySelector('.turbocart-quiz-match__quiz').style.display = 'none';
+        resultsContainer.style.display = 'block';
+
+        // Filter products based on preference (simple implementation)
+        renderQuizResults(resultsContainer.querySelector('[data-turbocart-upsells]'), preference);
+      });
+    });
+  }
+
+  function renderQuizMatch(container) {
+    // Initially show loading state
+    container.innerHTML = `
+      <div class="turbocart-quiz-match__loading">
+        <div class="turbocart-spinner"></div>
+      </div>
+    `;
+  }
+
+  function renderQuizResults(container, preference) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No matching products found</p>';
+      return;
+    }
+
+    // Show matched products (simple filtering for demo)
+    const matchedProducts = upsellProducts.slice(0, 3);
+
+    const html = `
+      <div class="turbocart-quiz-match__match-badge">✨ Perfect Matches for You</div>
+      ${matchedProducts.map(product => `
+        <div class="turbocart-quiz-match__item" data-product-id="${product.id}">
+          <img
+            src="${product.image}"
+            alt="${escapeHtml(product.title)}"
+            class="turbocart-quiz-match__item-image"
+            loading="lazy"
+          />
+          <div class="turbocart-quiz-match__item-content">
+            <h4 class="turbocart-quiz-match__item-title">${escapeHtml(product.title)}</h4>
+            <div class="turbocart-quiz-match__item-price">${formatMoney(product.price)}</div>
+            <button
+              class="turbocart-btn turbocart-btn--primary"
+              data-turbocart-add="${product.variant_id}"
+            >
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    `;
+
+    container.innerHTML = html;
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
+    });
+  }
+
+  /* ============================================ */
+  /* SIDE DRAWER IMPLEMENTATION */
+  /* ============================================ */
+
+  function initSideDrawer(block) {
+    const toggle = block.querySelector('.turbocart-side-drawer__toggle');
+    const panel = block.querySelector('.turbocart-side-drawer__panel');
+    const overlay = block.querySelector('.turbocart-side-drawer__overlay');
+    const closeBtn = block.querySelector('.turbocart-side-drawer__close');
+
+    function openDrawer() {
+      panel.classList.add('open');
+      overlay.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      panel.classList.remove('open');
+      overlay.classList.remove('visible');
+      document.body.style.overflow = '';
+    }
+
+    toggle?.addEventListener('click', openDrawer);
+    closeBtn?.addEventListener('click', closeDrawer);
+    overlay?.addEventListener('click', closeDrawer);
+  }
+
+  function renderSideDrawer(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No add-ons available</p>';
+      return;
+    }
+
+    const html = upsellProducts.map(product => `
+      <div class="turbocart-side-drawer__item" data-product-id="${product.id}">
+        <img
+          src="${product.image}"
+          alt="${escapeHtml(product.title)}"
+          class="turbocart-side-drawer__item-image"
+          loading="lazy"
+        />
+        <div class="turbocart-side-drawer__item-content">
+          <h4 class="turbocart-side-drawer__item-title">${escapeHtml(product.title)}</h4>
+          <div class="turbocart-side-drawer__item-price">${formatMoney(product.price)}</div>
+        </div>
+        <button
+          class="turbocart-btn turbocart-btn--primary"
+          data-turbocart-add="${product.variant_id}"
+        >
+          +
+        </button>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
+    });
+  }
+
+  /* ============================================ */
+  /* COMPARISON TABLE IMPLEMENTATION */
+  /* ============================================ */
+
+  function initComparisonTable(block) {
+    // Comparison table specific initialization if needed
+  }
+
+  function renderComparisonTable(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280;">No products to compare</p>';
+      return;
+    }
+
+    const productsToCompare = upsellProducts.slice(0, 3);
+
+    const html = `
+      <table class="turbocart-comparison-table__table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            ${productsToCompare.map(product => `
+              <th>
+                <img src="${product.image}" alt="${escapeHtml(product.title)}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" />
+                <div style="margin-top: 8px; font-size: 14px;">${escapeHtml(product.title)}</div>
+              </th>
+            `).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Price</strong></td>
+            ${productsToCompare.map(product => `<td>${formatMoney(product.price)}</td>`).join('')}
+          </tr>
+          <tr>
+            <td><strong>Rating</strong></td>
+            ${productsToCompare.map(() => `<td>★★★★☆ 4.5</td>`).join('')}
+          </tr>
+          <tr>
+            <td></td>
+            ${productsToCompare.map(product => `
+              <td>
+                <button
+                  class="turbocart-btn turbocart-btn--primary"
+                  data-turbocart-add="${product.variant_id}"
+                  data-product-id="${product.id}"
+                  style="width: 100%;"
+                >
+                  Select
+                </button>
+              </td>
+            `).join('')}
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    container.innerHTML = html;
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.dataset.productId;
+        addToCart(variantId, productId);
+      });
     });
   }
 

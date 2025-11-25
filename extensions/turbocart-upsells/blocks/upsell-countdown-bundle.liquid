@@ -1,0 +1,61 @@
+{% comment %}
+  TurboCart - Countdown Bundle Deal Upsell Display
+  Limited-time bundle offer with countdown timer
+{% endcomment %}
+
+<div class="turbocart-countdown-bundle" data-turbocart-block="countdown-bundle">
+  <div class="turbocart-countdown-bundle__header">
+    <h3 class="turbocart-countdown-bundle__title">{{ block.settings.heading | default: "Limited Time Bundle Deal" }}</h3>
+  </div>
+
+  <div class="turbocart-countdown-bundle__timer">
+    <div class="turbocart-countdown-bundle__timer-display">
+      <span class="turbocart-countdown-bundle__timer-label">⏰ OFFER ENDS IN:</span>
+      <div class="turbocart-countdown-bundle__timer-values">
+        <span class="turbocart-countdown-bundle__timer-value" data-hours>00</span>:
+        <span class="turbocart-countdown-bundle__timer-value" data-minutes>00</span>:
+        <span class="turbocart-countdown-bundle__timer-value" data-seconds>00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="turbocart-countdown-bundle__content" data-turbocart-upsells>
+    <!-- Bundle products will be injected here via JavaScript -->
+    <div class="turbocart-countdown-bundle__loading">
+      <div class="turbocart-spinner"></div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "TurboCart Countdown Bundle (Cart Only)",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Limited Time Bundle Deal"
+    },
+    {
+      "type": "range",
+      "id": "countdown_minutes",
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "label": "Countdown duration (minutes)",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "discount_percentage",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "label": "Bundle discount (%)",
+      "default": 20
+    }
+  ]
+}
+{% endschema %}

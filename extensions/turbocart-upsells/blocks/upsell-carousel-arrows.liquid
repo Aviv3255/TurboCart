@@ -1,0 +1,65 @@
+{% comment %}
+  TurboCart - Classic Carousel with Arrows Upsell Display
+  Traditional carousel with navigation arrows and dots
+{% endcomment %}
+
+<div class="turbocart-carousel-arrows" data-turbocart-block="carousel-arrows">
+  <div class="turbocart-carousel-arrows__header">
+    <h3 class="turbocart-carousel-arrows__title">{{ block.settings.heading | default: "You might also like" }}</h3>
+  </div>
+
+  <div class="turbocart-carousel-arrows__container">
+    <button class="turbocart-carousel-arrows__nav turbocart-carousel-arrows__nav--prev" aria-label="Previous">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <div class="turbocart-carousel-arrows__track">
+      <div class="turbocart-carousel-arrows__items" data-turbocart-upsells>
+        <!-- Upsell products will be injected here via JavaScript -->
+        <div class="turbocart-carousel-arrows__loading">
+          <div class="turbocart-spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="turbocart-carousel-arrows__nav turbocart-carousel-arrows__nav--next" aria-label="Next">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+        <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="turbocart-carousel-arrows__dots"></div>
+</div>
+
+{% schema %}
+{
+  "name": "TurboCart Classic Carousel (Cart Only)",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "You might also like"
+    },
+    {
+      "type": "range",
+      "id": "products_per_view",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "label": "Products per view",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show navigation dots",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
