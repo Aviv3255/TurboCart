@@ -1,7 +1,7 @@
 /**
  * Admin Dashboard Layout
- * Native Shopify embedded app style - no custom header/nav
- * Content displays directly like other Shopify apps
+ * Native Shopify embedded app style with App Bridge navigation
+ * Navigation appears in Shopify's sidebar under app name
  */
 
 'use client';
@@ -9,7 +9,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { AppProvider } from '@shopify/polaris';
-import { Provider as AppBridgeProvider } from '@shopify/app-bridge-react';
+import { Provider as AppBridgeProvider, NavigationMenu } from '@shopify/app-bridge-react';
 import '@shopify/polaris/build/esm/styles.css';
 
 function AdminLayoutContent({
@@ -126,6 +126,28 @@ function AdminLayoutContent({
         },
       }}
     >
+      {/* Shopify App Bridge Navigation - appears in Shopify sidebar */}
+      <NavigationMenu
+        navigationLinks={[
+          {
+            label: 'Dashboard',
+            destination: '/dashboard',
+          },
+          {
+            label: 'Products',
+            destination: '/products',
+          },
+          {
+            label: 'Analytics',
+            destination: '/analytics',
+          },
+          {
+            label: 'Settings',
+            destination: '/settings',
+          },
+        ]}
+      />
+
       <div className="shopify-app-content">
         {children}
       </div>
