@@ -652,15 +652,14 @@ export default function AdvancedAnalyticsPage() {
       <style jsx>{`
         .analytics-container {
           min-height: 100vh;
-          background: #fff;
+          background: #f6f6f7;
         }
         .analytics-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 32px 32px 24px;
-          background: #fff;
-          border-bottom: 1px solid #e5e5e5;
+          padding: 20px 20px 16px;
+          background: #f6f6f7;
         }
         .header-left h1 {
           font-size: 28px;
@@ -714,9 +713,8 @@ export default function AdvancedAnalyticsPage() {
           cursor: not-allowed;
         }
         .tabs-container {
-          background: #fff;
-          padding: 0 32px;
-          border-bottom: 1px solid #e5e5e5;
+          background: #f6f6f7;
+          padding: 0 20px;
         }
         .tabs {
           display: flex;
@@ -751,10 +749,9 @@ export default function AdvancedAnalyticsPage() {
           border-radius: 2px 2px 0 0;
         }
         .tab-content {
-          padding: 32px;
+          padding: 20px;
           max-width: 1400px;
           margin: 0 auto;
-          background: #fafafa;
         }
       `}</style>
     </div>
@@ -1567,7 +1564,7 @@ function CartTypesTab({
           border-radius: 8px;
         }
         .heatmap-header-text {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;

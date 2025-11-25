@@ -1,25 +1,16 @@
 /**
  * Admin Dashboard Layout
- * Clean native-style layout for Shopify embedded app
- * No sidebar - uses header navigation for cleaner integration
+ * Native Shopify embedded app style - no custom header/nav
+ * Content displays directly like other Shopify apps
  */
 
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { AppProvider } from '@shopify/polaris';
 import { Provider as AppBridgeProvider } from '@shopify/app-bridge-react';
 import '@shopify/polaris/build/esm/styles.css';
-
-// Navigation items - clean header nav instead of sidebar
-const NAV_ITEMS = [
-  { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Products', href: '/products' },
-  { label: 'Analytics', href: '/analytics' },
-  { label: 'Settings', href: '/settings' },
-];
 
 function AdminLayoutContent({
   children,
@@ -75,21 +66,21 @@ function AdminLayoutContent({
     return (
       <div className="admin-loading">
         <div className="loading-spinner" />
-        <p>Loading TurboCart...</p>
+        <p>Loading...</p>
         <style jsx>{`
           .admin-loading {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            background: #fff;
+            min-height: 400px;
+            background: #f6f6f7;
           }
           .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f0f0f0;
-            border-top-color: #1d1d1f;
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e4e5e7;
+            border-top-color: #5c6ac4;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
           }
@@ -97,8 +88,8 @@ function AdminLayoutContent({
             to { transform: rotate(360deg); }
           }
           p {
-            margin-top: 16px;
-            color: #1d1d1f;
+            margin-top: 12px;
+            color: #6d7175;
             font-size: 14px;
           }
         `}</style>
@@ -106,10 +97,7 @@ function AdminLayoutContent({
     );
   }
 
-  // Hide header nav on onboarding page
-  const showNav = pathname !== '/onboarding';
-
-  // Wrap with App Bridge Provider if we have shop and host
+  // Native Shopify embedded app style - just content, no custom header
   const content = (
     <AppProvider
       i18n={{
@@ -138,107 +126,13 @@ function AdminLayoutContent({
         },
       }}
     >
-      <div className="admin-layout">
-        {showNav && (
-          <header className="admin-header">
-            <div className="header-brand">
-              <span className="brand-icon">TC</span>
-              <span className="brand-name">TurboCart</span>
-            </div>
-            <nav className="header-nav">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`nav-link ${pathname?.startsWith(item.href) ? 'active' : ''}`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <div className="header-actions">
-              <span className="trial-badge">14 days trial</span>
-            </div>
-          </header>
-        )}
-        <main className="admin-content">
-          {children}
-        </main>
+      <div className="shopify-app-content">
+        {children}
       </div>
       <style jsx>{`
-        .admin-layout {
+        .shopify-app-content {
           min-height: 100vh;
-          background: #fff;
-        }
-        .admin-header {
-          height: 56px;
-          background: #fff;
-          border-bottom: 1px solid #e5e5e5;
-          display: flex;
-          align-items: center;
-          padding: 0 24px;
-          gap: 32px;
-        }
-        .header-brand {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .brand-icon {
-          width: 32px;
-          height: 32px;
-          background: #1d1d1f;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #fff;
-          font-weight: 700;
-          font-size: 12px;
-        }
-        .brand-name {
-          font-size: 16px;
-          font-weight: 600;
-          color: #1d1d1f;
-        }
-        .header-nav {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          flex: 1;
-        }
-        .nav-link {
-          padding: 8px 16px;
-          font-size: 14px;
-          font-weight: 500;
-          color: #6b7280;
-          text-decoration: none;
-          border-radius: 8px;
-          transition: all 0.15s ease;
-        }
-        .nav-link:hover {
-          color: #1d1d1f;
-          background: #f5f5f5;
-        }
-        .nav-link.active {
-          color: #1d1d1f;
-          background: #f5f5f5;
-        }
-        .header-actions {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .trial-badge {
-          padding: 6px 12px;
-          background: #1d1d1f;
-          color: #fff;
-          font-size: 12px;
-          font-weight: 600;
-          border-radius: 6px;
-        }
-        .admin-content {
-          padding: 0;
+          background: #f6f6f7;
         }
       `}</style>
     </AppProvider>
