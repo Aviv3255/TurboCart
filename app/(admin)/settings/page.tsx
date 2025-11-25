@@ -1,14 +1,15 @@
 /**
  * Settings Page - Display Style Selector
- * Choose from 5 beautiful upsell display styles
+ * Choose from 15 beautiful upsell display styles
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Page, Card, RadioButton, Button, Banner, BlockStack } from '@shopify/polaris';
+import DisplayStylePreview from '@/components/DisplayStylePreview';
 
-type DisplayStyle = 'carousel' | 'list' | 'banner' | 'cards' | 'frequently-bought';
+type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'masonry-grid' | 'vertical-scroll' | 'sticky-tabs' | 'comparison-table';
 
 interface StyleOption {
   value: DisplayStyle;
@@ -20,10 +21,10 @@ interface StyleOption {
 
 const STYLE_OPTIONS: StyleOption[] = [
   {
-    value: 'carousel',
-    label: 'Clean Carousel',
-    description: 'Horizontal scrolling carousel with 2-3 products visible at once. Perfect for product discovery.',
-    preview: '← [Product A] [Product B] [Product C] →',
+    value: 'minimal-strip',
+    label: 'Minimal Strip',
+    description: 'Clean horizontal row of products. Modern, subtle design with no navigation arrows. up to 25 products.',
+    preview: '[Product A] [Product B] [Product C]',
     recommended: true,
   },
   {
@@ -34,14 +35,14 @@ const STYLE_OPTIONS: StyleOption[] = [
   },
   {
     value: 'banner',
-    label: 'Discount Banner',
-    description: 'Single prominent upsell with savings message. High visibility, focused attention.',
-    preview: '[Image] Add Product - Save $6.00! [Add to Cart]',
+    label: 'Selling Fast',
+    description: 'Single prominent upsell with urgency indicator. High visibility, focused attention.',
+    preview: '[Image] Add Product - SELLING FAST! [Add to Cart]',
   },
   {
     value: 'cards',
-    label: 'Compact Cards',
-    description: 'Grid layout with image-first cards. Clean and space-efficient.',
+    label: 'Compact Cards (slider)',
+    description: 'Grid layout with image-first cards. Clean and space-efficient. עד 25 מוצרים',
     preview: '[Card 1] [Card 2] [Card 3]\n$29.99   $19.99   $24.99',
   },
   {
@@ -50,10 +51,34 @@ const STYLE_OPTIONS: StyleOption[] = [
     description: 'Bundle-style display showing cart item + upsell. Contextual pairing.',
     preview: '[Cart Item] + [Upsell] = Bundle Price',
   },
+  {
+    value: 'masonry-grid',
+    label: 'Masonry Grid',
+    description: 'Pinterest-style masonry layout with varying card heights. Dynamic, visually engaging multi-row display.',
+    preview: '[Card 1 Tall]\n[Card 2] [Card 3]\n[Card 4]',
+  },
+  {
+    value: 'vertical-scroll',
+    label: 'Vertical Scroll Gallery',
+    description: 'Tall vertical gallery with large product images. Immersive scrollable experience, great for visual products.',
+    preview: '[Large Image A]\n[Large Image B]\n[Large Image C]',
+  },
+  {
+    value: 'sticky-tabs',
+    label: 'Category Tabs',
+    description: 'Tabbed interface with product categories. Organized navigation for browsing by type or collection.',
+    preview: '[Tab: Best Sellers] [Tab: New] [Tab: Sale]\n[Product A] [Product B] [Product C]',
+  },
+  {
+    value: 'comparison-table',
+    label: 'Product Comparison Table',
+    description: 'Side-by-side comparison of product features and prices. Helps customers make informed decisions between options.',
+    preview: '[Product A vs B vs C] | Features | Prices | [Select]',
+  },
 ];
 
 export default function SettingsPage() {
-  const [selectedStyle, setSelectedStyle] = useState<DisplayStyle>('carousel');
+  const [selectedStyle, setSelectedStyle] = useState<DisplayStyle>('minimal-strip');
   const [maxUpsells, setMaxUpsells] = useState<number>(3);
   const [cartPosition, setCartPosition] = useState<'top' | 'bottom'>('top');
   const [abTestingEnabled, setAbTestingEnabled] = useState(true);
@@ -76,7 +101,7 @@ export default function SettingsPage() {
 
       const data = await response.json();
       if (data.settings) {
-        setSelectedStyle(data.settings.display_style || 'carousel');
+        setSelectedStyle(data.settings.display_style || 'minimal-strip');
         setMaxUpsells(data.settings.max_upsells || 3);
         setCartPosition(data.settings.position || 'top');
         setAbTestingEnabled(data.settings.enable_ab_testing !== false);
@@ -178,10 +203,13 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                <p className="style-description">{option.description}</p>
-
-                <div className="style-preview">
-                  <code>{option.preview}</code>
+                <div className="style-content-wrapper">
+                  <div className="style-text-content">
+                    <p className="style-description">{option.description}</p>
+                  </div>
+                  <div className="style-preview">
+                    <DisplayStylePreview style={option.value} />
+                  </div>
                 </div>
               </div>
             ))}
@@ -211,6 +239,17 @@ export default function SettingsPage() {
               <option value="3">3 products</option>
               <option value="4">4 products</option>
               <option value="5">5 products</option>
+              {selectedStyle === 'cards' && (
+                <>
+                  <option value="6">6 products</option>
+                  <option value="8">8 products</option>
+                  <option value="10">10 products</option>
+                  <option value="12">12 products</option>
+                  <option value="15">15 products</option>
+                  <option value="20">20 products</option>
+                  <option value="25">25 products</option>
+                </>
+              )}
             </select>
           </div>
 
@@ -271,26 +310,28 @@ export default function SettingsPage() {
           margin-bottom: 8px;
         }
 
+        .style-content-wrapper {
+          display: flex;
+          gap: 24px;
+          align-items: flex-start;
+          margin: 12px 0 0 32px;
+        }
+
+        .style-text-content {
+          flex: 1;
+        }
+
         .style-description {
           font-size: 14px;
           color: var(--text-secondary);
-          margin: 12px 0 12px 32px;
           line-height: 1.5;
+          margin: 0;
         }
 
         .style-preview {
-          margin: 12px 0 0 32px;
-          padding: 16px;
-          background: var(--bg-secondary);
+          flex: 0 0 300px;
           border-radius: 8px;
-          border-left: 4px solid var(--cosmic-from);
-        }
-
-        .style-preview code {
-          font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Courier New', monospace;
-          font-size: 12px;
-          color: var(--text-secondary);
-          white-space: pre-wrap;
+          overflow: hidden;
         }
 
         .setting-item {

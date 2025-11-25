@@ -1,0 +1,58 @@
+{% comment %}
+  TurboCart - Interactive Quiz Match Upsell Display
+  Interactive quiz-style product recommendations
+{% endcomment %}
+
+<div class="turbocart-quiz-match" data-turbocart-block="quiz-match">
+  <div class="turbocart-quiz-match__header">
+    <h3 class="turbocart-quiz-match__title">{{ block.settings.heading | default: "Find Your Perfect Match" }}</h3>
+  </div>
+
+  <div class="turbocart-quiz-match__quiz">
+    <div class="turbocart-quiz-match__question">
+      <p class="turbocart-quiz-match__question-text">{{ block.settings.question | default: "What matters most to you?" }}</p>
+      <div class="turbocart-quiz-match__options">
+        <button class="turbocart-quiz-match__option" data-preference="quality">Quality</button>
+        <button class="turbocart-quiz-match__option" data-preference="price">Best Price</button>
+        <button class="turbocart-quiz-match__option" data-preference="popular">Most Popular</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="turbocart-quiz-match__results" data-turbocart-upsells style="display: none;">
+    <!-- Quiz-matched products will be injected here via JavaScript -->
+    <div class="turbocart-quiz-match__loading">
+      <div class="turbocart-spinner"></div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "TurboCart Quiz Match (Cart Only)",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Find Your Perfect Match"
+    },
+    {
+      "type": "text",
+      "id": "question",
+      "label": "Quiz question",
+      "default": "What matters most to you?"
+    },
+    {
+      "type": "range",
+      "id": "max_results",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Maximum results to show",
+      "default": 3
+    }
+  ]
+}
+{% endschema %}

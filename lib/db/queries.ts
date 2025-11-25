@@ -22,7 +22,7 @@ export interface Shop {
 }
 
 export interface ShopSettings {
-  display_style: 'carousel' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'inline';
+  display_style: 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'inline';
   cart_type: 'drawer' | 'page' | 'both';
   max_upsells: number;
   position: 'top' | 'bottom';

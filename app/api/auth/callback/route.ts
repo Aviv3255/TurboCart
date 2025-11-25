@@ -67,25 +67,48 @@ export async function GET(request: NextRequest) {
     }
 
     // Exchange code for access token
+    console.log('[OAuth Callback] Exchanging code for access token');
     const { access_token, scope } = await exchangeCodeForToken(shop, code);
+    console.log('[OAuth Callback] Access token received, scope:', scope);
 
     // Save shop to database
+    console.log('[OAuth Callback] ========================================');
+    console.log('[OAuth Callback] Saving shop to database:', shop);
     const shopRecord = await createShop(shop, access_token);
+    console.log('[OAuth Callback] ✅ Shop saved successfully!');
+    console.log('[OAuth Callback] Shop details:', {
+      id: shopRecord.id,
+      shop_domain: shopRecord.shop_domain,
+      installed_at: shopRecord.installed_at,
+      uninstalled_at: shopRecord.uninstalled_at,
+      hasAccessToken: !!shopRecord.access_token
+    });
+    console.log('[OAuth Callback] ========================================');
 
-    // Create session
-    const response = NextResponse.redirect(
-      new URL('/dashboard', request.url)
-    );
+    // Get API key for redirect
+    const apiKey = process.env.SHOPIFY_API_KEY;
+    if (!apiKey) {
+      throw new Error('SHOPIFY_API_KEY not configured');
+    }
 
-    // Set session cookie
+    // Create Shopify admin app URL (this will embed the app in Shopify admin)
+    const shopifyAdminUrl = `https://${shop}/admin/apps/${apiKey}`;
+    console.log('[OAuth Callback] Redirecting to Shopify Admin:', shopifyAdminUrl);
+
+    // Create response with redirect to Shopify admin (embedded)
+    const response = NextResponse.redirect(shopifyAdminUrl);
+
+    // Set session cookie with correct attributes for embedded apps
+    // SameSite=None is required for cross-origin iframe (Shopify embedded app)
+    // Secure=true is required when using SameSite=None
     response.cookies.set('shopify_session', JSON.stringify({
       shop: shop,
       shopId: shopRecord.id,
       accessToken: access_token,
     }), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true, // Always true for SameSite=None
+      sameSite: 'none', // Required for embedded apps in iframe
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
     });
@@ -94,12 +117,28 @@ export async function GET(request: NextRequest) {
     response.cookies.delete('shopify_oauth_state');
     response.cookies.delete('shopify_shop');
 
+    console.log('[OAuth Callback] OAuth flow completed successfully');
     return response;
   } catch (error) {
-    console.error('OAuth callback error:', error);
-    return NextResponse.json(
-      { error: 'Authentication callback failed' },
-      { status: 500 }
-    );
+    console.error('[OAuth Callback] Fatal error:', error);
+    console.error('[OAuth Callback] Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
+
+    // Create error page URL
+    const errorUrl = new URL('/', request.url);
+    errorUrl.searchParams.set('error', 'auth_failed');
+    errorUrl.searchParams.set('message', error instanceof Error ? error.message : 'Unknown error');
+
+    // Redirect to error page
+    const response = NextResponse.redirect(errorUrl);
+
+    // Clear any OAuth cookies
+    response.cookies.delete('shopify_oauth_state');
+    response.cookies.delete('shopify_shop');
+
+    return response;
   }
 }

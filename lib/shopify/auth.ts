@@ -13,10 +13,16 @@ export function getAuthConfig(): ShopifyAuthConfig {
   const apiKey = process.env.SHOPIFY_API_KEY;
   const apiSecret = process.env.SHOPIFY_API_SECRET;
   const scopes = process.env.SHOPIFY_SCOPES;
-  const appUrl = process.env.SHOPIFY_APP_URL;
+  let appUrl = process.env.SHOPIFY_APP_URL || process.env.NEXT_PUBLIC_APP_URL;
 
-  if (!apiKey || !apiSecret || !scopes || !appUrl) {
-    throw new Error('Missing required Shopify configuration');
+  // AGGRESSIVE FALLBACK: Use production URL if env var missing or invalid
+  if (!appUrl || appUrl.includes('localhost') || appUrl.includes('your-app-url')) {
+    console.warn('[Auth Config] No valid SHOPIFY_APP_URL found, using hardcoded production URL');
+    appUrl = 'https://turbocart.onrender.com';
+  }
+
+  if (!apiKey || !apiSecret || !scopes) {
+    throw new Error('Missing required Shopify configuration (API Key, Secret, or Scopes)');
   }
 
   return {

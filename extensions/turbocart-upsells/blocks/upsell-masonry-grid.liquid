@@ -1,16 +1,16 @@
 {% comment %}
-  TurboCart - Compact Cards Upsell Display
-  Grid layout with image-first cards
+  TurboCart - Masonry Grid Upsell Display
+  Pinterest-style masonry layout with varying card heights
 {% endcomment %}
 
-<div class="turbocart-cards" data-turbocart-block="cards">
-  <div class="turbocart-cards__header">
-    <h3 class="turbocart-cards__title">{{ block.settings.heading | default: "Complete your purchase" }}</h3>
+<div class="turbocart-masonry" data-turbocart-block="masonry-grid">
+  <div class="turbocart-masonry__header">
+    <h3 class="turbocart-masonry__title">{{ block.settings.heading | default: "Complete your purchase" }}</h3>
   </div>
 
-  <div class="turbocart-cards__grid" data-turbocart-upsells>
-    <!-- Upsell product cards will be injected here via JavaScript -->
-    <div class="turbocart-cards__loading">
+  <div class="turbocart-masonry__grid" data-turbocart-upsells>
+    <!-- Upsell products will be injected here via JavaScript -->
+    <div class="turbocart-masonry__loading">
       <div class="turbocart-spinner"></div>
     </div>
   </div>
@@ -18,7 +18,7 @@
 
 {% schema %}
 {
-  "name": "TurboCart Cards",
+  "name": "TurboCart Masonry Grid (Cart Only)",
   "target": "section",
   "settings": [
     {
@@ -40,7 +40,7 @@
       "type": "range",
       "id": "max_items",
       "min": 2,
-      "max": 25,
+      "max": 12,
       "step": 1,
       "label": "Maximum items to show",
       "default": 6

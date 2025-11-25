@@ -73,7 +73,7 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
               <div>
                 <h3 className="feature-title">5 Display Styles</h3>
                 <p className="feature-description">
-                  Choose from carousel, list, banner, cards, or frequently-bought layouts
+                  Choose from minimal strip, list, banner, cards, or frequently-bought layouts
                 </p>
               </div>
             </div>

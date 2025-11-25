@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Page,
   Card,
@@ -22,6 +23,10 @@ import {
   Banner,
   Spinner,
   EmptyState,
+  Frame,
+  Toast,
+  Modal,
+  TextContainer,
 } from '@shopify/polaris';
 import { SearchIcon, ProductIcon } from '@shopify/polaris-icons';
 
@@ -41,6 +46,7 @@ interface Product {
 }
 
 export default function ProductsPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +54,15 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [productType, setProductType] = useState<string | null>(null);
   const [stockFilter, setStockFilter] = useState<string[]>([]);
+
+  // Toast notifications
+  const [toastActive, setToastActive] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastError, setToastError] = useState(false);
+
+  // Success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [savedCount, setSavedCount] = useState(0);
 
   // Fetch products and previously selected on mount
   useEffect(() => {
@@ -108,10 +123,17 @@ export default function ProductsPage() {
       }
 
       const data = await response.json();
-      alert(`Successfully saved ${data.count} products!`);
+
+      // Show success modal with navigation options
+      setSavedCount(data.count);
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Error saving:', error);
-      alert('Failed to save products. Please try again.');
+
+      // Show error toast
+      setToastMessage('Failed to save products. Please try again.');
+      setToastError(true);
+      setToastActive(true);
     } finally {
       setSaving(false);
     }
@@ -141,16 +163,18 @@ export default function ProductsPage() {
   const isValidSelection = selectionCount >= 10 && selectionCount <= 50;
 
   return (
-    <Page
-      title="Product Selection"
-      subtitle="Choose 10-50 products to upsell"
-      primaryAction={{
-        content: 'Save Selection',
-        onAction: handleSaveSelection,
-        loading: saving,
-        disabled: !isValidSelection,
-      }}
-    >
+    <Frame>
+      <Page
+        title="Product Selection"
+        subtitle="Choose 10-50 products to upsell"
+        backAction={{ content: 'Dashboard', onAction: () => router.push('/dashboard') }}
+        primaryAction={{
+          content: 'Save Selection',
+          onAction: handleSaveSelection,
+          loading: saving,
+          disabled: !isValidSelection,
+        }}
+      >
       {/* Selection Status Banner */}
       {selectionCount > 0 && (
         <div style={{ marginBottom: '20px' }}>
@@ -302,5 +326,39 @@ export default function ProductsPage() {
         </Card>
       </div>
     </Page>
+
+    {/* Success Modal */}
+    <Modal
+      open={showSuccessModal}
+      onClose={() => setShowSuccessModal(false)}
+      title="Products Saved Successfully!"
+      primaryAction={{
+        content: 'Go to Dashboard',
+        onAction: () => router.push('/dashboard'),
+      }}
+      secondaryActions={[
+        {
+          content: 'Configure Display Settings',
+          onAction: () => router.push('/settings'),
+        },
+      ]}
+    >
+      <Modal.Section>
+        <TextContainer>
+          <p>Successfully saved {savedCount} products for upselling!</p>
+          <p>What would you like to do next?</p>
+        </TextContainer>
+      </Modal.Section>
+    </Modal>
+
+    {/* Toast Notification */}
+    {toastActive && (
+      <Toast
+        content={toastMessage}
+        error={toastError}
+        onDismiss={() => setToastActive(false)}
+      />
+    )}
+  </Frame>
   );
 }
