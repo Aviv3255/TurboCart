@@ -938,7 +938,9 @@ export class MLOptimizationEngine {
       [this.shopId, displayStyle]
     );
 
-    return result.rows[0] || { totalImpressions: 0, totalAdds: 0 };
+    return result.rows[0]
+      ? { totalImpressions: result.rows[0].total_impressions, totalAdds: result.rows[0].total_adds }
+      : { totalImpressions: 0, totalAdds: 0 };
   }
 
   /**
@@ -1062,7 +1064,7 @@ export class MLOptimizationEngine {
    */
   private async makeTopPerformersDecision(context: CartContext): Promise<MLDecision> {
     // Get historically top-performing products
-    const result = await query<{ shopify_product_id: string; revenue: number }>(
+    const result = await query<{ shopify_product_id: number; revenue: number }>(
       `SELECT
         UNNEST(product_ids) as shopify_product_id,
         SUM(revenue) as revenue
@@ -1118,17 +1120,22 @@ export class MLOptimizationEngine {
    */
   private makeEmergencyFallbackDecision(context: CartContext): MLDecision {
     // Absolute last resort - return something, anything
-    const dummyProduct = {
+    const dummyProduct: UpsellProduct = {
       id: 'emergency_fallback',
       shop_id: this.shopId,
-      shopify_product_id: 'fallback',
+      shopify_product_id: 0,
+      shopify_variant_id: null,
       title: 'Emergency Fallback Product',
-      price: '0',
-      image_url: null,
-      is_active: true,
-      priority: 0,
+      handle: 'emergency-fallback',
+      product_type: null,
+      vendor: null,
       collection_ids: [],
-      trigger_collections: [],
+      price: 0,
+      compare_at_price: null,
+      image_url: null,
+      priority: 0,
+      is_active: true,
+      metadata: {},
       created_at: new Date(),
       updated_at: new Date(),
     };

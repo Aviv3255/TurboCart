@@ -309,7 +309,7 @@ export default function MLAnalyticsPage() {
                           {item.type === 'exploit' ? '⚡ Exploitation' : '🔬 Exploration'}
                         </h3>
                         <Badge tone={item.type === 'exploit' ? 'success' : 'info'}>
-                          {item.type === 'exploit' ? '80%' : '20%'} of traffic
+                          {`${item.type === 'exploit' ? '80%' : '20%'} of traffic`}
                         </Badge>
                       </div>
                       <div className="exploit-metrics">
@@ -481,7 +481,7 @@ export default function MLAnalyticsPage() {
                               </span>
                             </td>
                             <td>
-                              <Badge tone="info">Position {bestPosition}</Badge>
+                              <Badge tone="info">{`Position ${bestPosition}`}</Badge>
                             </td>
                             <td>
                               <div className="confidence-bar">

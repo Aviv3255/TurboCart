@@ -176,7 +176,7 @@ export default function MLConfigPage() {
               </p>
             </div>
             <Badge tone="info">
-              {enabledCount} of {displayStyles.length} enabled
+              {`${enabledCount} of ${displayStyles.length} enabled`}
             </Badge>
           </div>
 

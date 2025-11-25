@@ -219,19 +219,25 @@ export class MLLearningEngine {
         positionPerformance = current.rows[0]!.position_performance;
       }
 
+      // Ensure position exists in performance tracking
+      const posKey = position.toString();
+      if (!positionPerformance[posKey]) {
+        positionPerformance[posKey] = { impressions: 0, adds: 0, revenue: 0 };
+      }
+
       // Update based on event type
       if (outcome.eventType === 'impression') {
         totalImpressions++;
-        positionPerformance[position.toString()].impressions++;
+        positionPerformance[posKey].impressions++;
       } else if (outcome.eventType === 'add') {
         totalAdds++;
         alpha += 1;
-        positionPerformance[position.toString()].adds++;
+        positionPerformance[posKey].adds++;
       } else if (outcome.eventType === 'purchase') {
         const revenue = outcome.revenue || 0;
         alpha += Math.min(revenue / 100, 1);
         totalRevenue += revenue;
-        positionPerformance[position.toString()].revenue += revenue;
+        positionPerformance[posKey].revenue += revenue;
       } else {
         beta += 0.5;
       }
