@@ -7,7 +7,7 @@
 import { Card, RadioButton, BlockStack } from '@shopify/polaris';
 import DisplayStylePreview from '@/components/DisplayStylePreview';
 
-type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'masonry-grid' | 'carousel-arrows' | 'vertical-scroll' | 'spotlight' | 'sticky-tabs' | 'countdown-bundle' | 'progressive-discount' | 'quiz-match' | 'side-drawer' | 'comparison-table';
+type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'masonry-grid' | 'vertical-scroll' | 'sticky-tabs' | 'comparison-table';
 
 interface StyleOption {
   value: DisplayStyle;
@@ -56,52 +56,16 @@ const STYLE_OPTIONS: StyleOption[] = [
     preview: '[Card 1 Tall]\n[Card 2] [Card 3]\n[Card 4]',
   },
   {
-    value: 'carousel-arrows',
-    label: 'Classic Carousel',
-    description: 'Traditional carousel with navigation arrows and dots. Interactive browsing experience with manual control.',
-    preview: '← [Product A] [Product B] [Product C] →\n● ○ ○',
-  },
-  {
     value: 'vertical-scroll',
     label: 'Vertical Scroll Gallery',
     description: 'Tall vertical gallery with large product images. Immersive scrollable experience, great for visual products.',
     preview: '[Large Image A]\n[Large Image B]\n[Large Image C]',
   },
   {
-    value: 'spotlight',
-    label: 'Featured Spotlight',
-    description: 'Rotating featured product with auto-transition. Single large showcase that changes every few seconds.',
-    preview: '★ [Featured Product - Auto-rotating] ★',
-  },
-  {
     value: 'sticky-tabs',
     label: 'Category Tabs',
     description: 'Tabbed interface with product categories. Organized navigation for browsing by type or collection.',
     preview: '[Tab: Best Sellers] [Tab: New] [Tab: Sale]\n[Product A] [Product B] [Product C]',
-  },
-  {
-    value: 'countdown-bundle',
-    label: 'Countdown Bundle Deal',
-    description: 'Limited-time bundle offer with countdown timer. Creates urgency and scarcity for special promotions.',
-    preview: '⏰ 2:45:30 LEFT | [Bundle] Save 30% | [Add Bundle]',
-  },
-  {
-    value: 'progressive-discount',
-    label: 'Progressive Discount Tiers',
-    description: 'Tiered pricing display showing volume discounts. "Buy more, save more" approach to increase order value.',
-    preview: 'Buy 2: 10% OFF | Buy 3: 20% OFF | Buy 4+: 30% OFF',
-  },
-  {
-    value: 'quiz-match',
-    label: 'Interactive Quiz Match',
-    description: 'Interactive quiz-style product recommendations. Personalized suggestions based on customer preferences.',
-    preview: '❓ Which feature matters most? [Speed] [Design] [Price]',
-  },
-  {
-    value: 'side-drawer',
-    label: 'Side Panel Drawer',
-    description: 'Non-intrusive sliding panel from the side. Compact, elegant way to show add-ons without blocking content.',
-    preview: '[Slide-in Panel] → Suggested Add-ons Inside',
   },
   {
     value: 'comparison-table',
