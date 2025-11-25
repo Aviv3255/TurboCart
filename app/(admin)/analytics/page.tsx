@@ -146,13 +146,12 @@ const DATE_RANGES = [
   { label: 'Last 365 days', days: 365 },
 ];
 
-// Tab configuration
+// Tab configuration - No A/B Tests (app does automatic optimization)
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'display-styles', label: 'Display Styles' },
   { id: 'products', label: 'Products' },
   { id: 'cart-types', label: 'Cart Analysis' },
-  { id: 'ab-tests', label: 'A/B Tests' },
   { id: 'attribution', label: 'Attribution' },
 ];
 
@@ -645,9 +644,6 @@ export default function AdvancedAnalyticsPage() {
         {activeTab === 'cart-types' && (
           <CartTypesTab data={data} formatCurrency={formatCurrency} formatPercent={formatPercent} />
         )}
-        {activeTab === 'ab-tests' && (
-          <ABTestsTab data={data} formatCurrency={formatCurrency} formatPercent={formatPercent} />
-        )}
         {activeTab === 'attribution' && (
           <AttributionTab data={data} formatCurrency={formatCurrency} formatPercent={formatPercent} />
         )}
@@ -656,7 +652,7 @@ export default function AdvancedAnalyticsPage() {
       <style jsx>{`
         .analytics-container {
           min-height: 100vh;
-          background: linear-gradient(180deg, #fafafa 0%, #f5f5f7 100%);
+          background: #fff;
         }
         .analytics-header {
           display: flex;
@@ -664,7 +660,7 @@ export default function AdvancedAnalyticsPage() {
           align-items: center;
           padding: 32px 32px 24px;
           background: #fff;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+          border-bottom: 1px solid #e5e5e5;
         }
         .header-left h1 {
           font-size: 28px;
@@ -674,7 +670,7 @@ export default function AdvancedAnalyticsPage() {
         }
         .header-left p {
           font-size: 15px;
-          color: #86868b;
+          color: #6b7280;
           margin: 0;
         }
         .header-right {
@@ -684,12 +680,13 @@ export default function AdvancedAnalyticsPage() {
         }
         .date-select {
           padding: 10px 16px;
-          border: 1px solid #e5e5ea;
-          border-radius: 10px;
+          border: 1px solid #e5e5e5;
+          border-radius: 8px;
           font-size: 14px;
           background: #fff;
           cursor: pointer;
           outline: none;
+          color: #1d1d1f;
         }
         .export-buttons {
           display: flex;
@@ -700,17 +697,17 @@ export default function AdvancedAnalyticsPage() {
           align-items: center;
           gap: 6px;
           padding: 10px 16px;
-          background: #f5f5f7;
+          background: #1d1d1f;
           border: none;
-          border-radius: 10px;
+          border-radius: 8px;
           font-size: 14px;
           font-weight: 500;
           cursor: pointer;
           transition: all 0.2s ease;
-          color: #1d1d1f;
+          color: #fff;
         }
         .export-btn:hover {
-          background: #e5e5ea;
+          background: #374151;
         }
         .export-btn:disabled {
           opacity: 0.5;
@@ -719,7 +716,7 @@ export default function AdvancedAnalyticsPage() {
         .tabs-container {
           background: #fff;
           padding: 0 32px;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+          border-bottom: 1px solid #e5e5e5;
         }
         .tabs {
           display: flex;
@@ -731,7 +728,7 @@ export default function AdvancedAnalyticsPage() {
           border: none;
           font-size: 14px;
           font-weight: 500;
-          color: #86868b;
+          color: #6b7280;
           cursor: pointer;
           position: relative;
           transition: all 0.2s ease;
@@ -740,7 +737,8 @@ export default function AdvancedAnalyticsPage() {
           color: #1d1d1f;
         }
         .tab.active {
-          color: #667eea;
+          color: #1d1d1f;
+          font-weight: 600;
         }
         .tab.active::after {
           content: '';
@@ -749,13 +747,14 @@ export default function AdvancedAnalyticsPage() {
           left: 0;
           right: 0;
           height: 2px;
-          background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+          background: #1d1d1f;
           border-radius: 2px 2px 0 0;
         }
         .tab-content {
           padding: 32px;
           max-width: 1400px;
           margin: 0 auto;
+          background: #fafafa;
         }
       `}</style>
     </div>
@@ -944,12 +943,12 @@ function OverviewTab({
         }
         .kpi-card {
           background: #fff;
-          border-radius: 16px;
+          border-radius: 12px;
           padding: 24px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e5e5;
         }
         .kpi-card.primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #1d1d1f;
           color: #fff;
           border: none;
         }
@@ -962,7 +961,10 @@ function OverviewTab({
         .kpi-label {
           font-size: 13px;
           font-weight: 500;
-          opacity: 0.8;
+          color: #6b7280;
+        }
+        .kpi-card.primary .kpi-label {
+          color: rgba(255, 255, 255, 0.7);
         }
         .kpi-change {
           font-size: 12px;
@@ -979,26 +981,36 @@ function OverviewTab({
           color: #ff3b30;
         }
         .kpi-card.primary .kpi-change {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
           color: #fff;
         }
         .kpi-value {
           font-size: 32px;
           font-weight: 700;
           margin-bottom: 4px;
+          color: #1d1d1f;
+        }
+        .kpi-card.primary .kpi-value {
+          color: #fff;
         }
         .kpi-value.aov-impact {
-          color: #34c759;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
         .kpi-subtext {
           font-size: 13px;
-          opacity: 0.7;
+          color: #6b7280;
+        }
+        .kpi-card.primary .kpi-subtext {
+          color: rgba(255, 255, 255, 0.7);
         }
         .chart-card {
           background: #fff;
-          border-radius: 16px;
+          border-radius: 12px;
           padding: 24px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e5e5;
           margin-bottom: 24px;
         }
         .chart-header {
@@ -1025,22 +1037,22 @@ function OverviewTab({
           background: #fff;
           padding: 20px;
           border-radius: 12px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e5e5;
         }
         .stat-icon {
           width: 44px;
           height: 44px;
-          background: rgba(102, 126, 234, 0.1);
-          border-radius: 12px;
+          background: #1d1d1f;
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #667eea;
+          color: #fff;
           flex-shrink: 0;
         }
         .stat-label {
           font-size: 13px;
-          color: #86868b;
+          color: #6b7280;
           margin-bottom: 2px;
         }
         .stat-value {
@@ -1049,7 +1061,10 @@ function OverviewTab({
           color: #1d1d1f;
         }
         .stat-value.conversion-impact {
-          color: #34c759;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
       `}</style>
     </div>
@@ -1157,9 +1172,9 @@ function DisplayStylesTab({
         .display-styles-tab {}
         .chart-card, .table-card {
           background: #fff;
-          border-radius: 16px;
+          border-radius: 12px;
           padding: 24px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e5e5;
           margin-bottom: 24px;
         }
         .chart-card h3, .table-card h3 {
@@ -1174,21 +1189,21 @@ function DisplayStylesTab({
           text-align: left;
           font-size: 12px;
           font-weight: 600;
-          color: #86868b;
+          color: #6b7280;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           padding: 12px 16px;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+          border-bottom: 1px solid #e5e5e5;
         }
         .data-table th.right { text-align: right; }
         .data-table td {
           padding: 16px;
           font-size: 14px;
           color: #1d1d1f;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+          border-bottom: 1px solid #f0f0f0;
         }
         .data-table td.right { text-align: right; }
-        .data-table tr:hover { background: rgba(102, 126, 234, 0.02); }
+        .data-table tr:hover { background: #fafafa; }
         .style-name {
           display: flex;
           align-items: center;
@@ -1196,25 +1211,31 @@ function DisplayStylesTab({
           font-weight: 600;
         }
         .winner-badge {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #1d1d1f;
           color: #fff;
           font-size: 10px;
           font-weight: 700;
           padding: 4px 8px;
           border-radius: 6px;
         }
-        .revenue { font-weight: 600; color: #667eea; }
+        .revenue {
+          font-weight: 600;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
         .highlight { font-weight: 700; }
         .confidence-bar {
           width: 80px;
           height: 6px;
-          background: #e5e5ea;
+          background: #e5e5e5;
           border-radius: 3px;
           overflow: hidden;
         }
         .confidence-fill {
           height: 100%;
-          background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+          background: #1d1d1f;
           border-radius: 3px;
         }
         .status-badge {
@@ -1224,9 +1245,9 @@ function DisplayStylesTab({
           font-size: 12px;
           font-weight: 600;
         }
-        .status-badge.success { background: rgba(52, 199, 89, 0.15); color: #34c759; }
+        .status-badge.success { background: #1d1d1f; color: #fff; }
         .status-badge.warning { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
-        .status-badge.neutral { background: #f5f5f7; color: #86868b; }
+        .status-badge.neutral { background: #f5f5f5; color: #6b7280; }
       `}</style>
     </div>
   );
@@ -1328,10 +1349,10 @@ function ProductsTab({
           align-items: center;
           gap: 10px;
           background: #fff;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          border-radius: 10px;
+          border: 1px solid #e5e5e5;
+          border-radius: 8px;
           padding: 10px 16px;
-          color: #86868b;
+          color: #6b7280;
         }
         .search-box input {
           border: none;
@@ -1339,21 +1360,23 @@ function ProductsTab({
           outline: none;
           font-size: 14px;
           width: 200px;
+          color: #1d1d1f;
         }
         .sort-control {
           display: flex;
           align-items: center;
           gap: 10px;
           font-size: 14px;
-          color: #86868b;
+          color: #6b7280;
         }
         .sort-control select {
           padding: 10px 16px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          border-radius: 10px;
+          border: 1px solid #e5e5e5;
+          border-radius: 8px;
           font-size: 14px;
           background: #fff;
           cursor: pointer;
+          color: #1d1d1f;
         }
         .products-grid {
           display: grid;
@@ -1362,8 +1385,8 @@ function ProductsTab({
         }
         .product-card {
           background: #fff;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          border-radius: 16px;
+          border: 1px solid #e5e5e5;
+          border-radius: 12px;
           overflow: hidden;
           position: relative;
         }
@@ -1371,7 +1394,7 @@ function ProductsTab({
           position: absolute;
           top: 12px;
           left: 12px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #1d1d1f;
           color: #fff;
           font-size: 12px;
           font-weight: 700;
@@ -1474,7 +1497,9 @@ function CartTypesTab({
         <div className="heatmap-grid">
           <div className="heatmap-corner" />
           {['$0-50', '$50-100', '$100-200', '$200+'].map((bucket) => (
-            <div key={bucket} className="heatmap-header">{bucket}</div>
+            <div key={bucket} className="heatmap-header">
+              <span className="heatmap-header-text">{bucket}</span>
+            </div>
           ))}
           {['1', '2-3', '4-5', '6+'].map((itemCount) => (
             <>
@@ -1485,14 +1510,16 @@ function CartTypesTab({
                 );
                 const maxRPI = Math.max(...data.contextHeatmap.map(c => c.revenuePerImpression));
                 const intensity = cell ? (cell.revenuePerImpression / maxRPI) : 0;
+                // Use grayscale: higher intensity = darker
+                const bgLightness = 97 - (intensity * 20); // 97% (light gray) to 77% (darker gray)
 
                 return (
                   <div
                     key={`${valueBucket}-${itemCount}`}
                     className="heatmap-cell"
                     style={{
-                      background: `rgba(102, 126, 234, ${intensity * 0.8 + 0.1})`,
-                      color: intensity > 0.5 ? '#fff' : '#1d1d1f',
+                      background: intensity > 0.7 ? '#1d1d1f' : `hsl(0, 0%, ${bgLightness}%)`,
+                      color: intensity > 0.7 ? '#fff' : '#1d1d1f',
                     }}
                     title={cell ? `${formatCurrency(cell.revenuePerImpression)}/impression` : 'No data'}
                   >
@@ -1509,9 +1536,9 @@ function CartTypesTab({
         .cart-types-tab {}
         .chart-card, .heatmap-card {
           background: #fff;
-          border-radius: 16px;
+          border-radius: 12px;
           padding: 24px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e5e5;
           margin-bottom: 24px;
         }
         .chart-card h3, .heatmap-card h3 {
@@ -1522,7 +1549,7 @@ function CartTypesTab({
         }
         .heatmap-card p {
           font-size: 13px;
-          color: #86868b;
+          color: #6b7280;
           margin: 0 0 24px 0;
         }
         .heatmap-grid {
@@ -1532,13 +1559,18 @@ function CartTypesTab({
         }
         .heatmap-corner { background: transparent; }
         .heatmap-header {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: #fff;
+          background: #1d1d1f;
           padding: 12px;
           text-align: center;
           font-size: 12px;
           font-weight: 600;
           border-radius: 8px;
+        }
+        .heatmap-header-text {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
         .heatmap-label {
           display: flex;
@@ -1547,7 +1579,7 @@ function CartTypesTab({
           padding-right: 12px;
           font-size: 13px;
           font-weight: 500;
-          color: #86868b;
+          color: #6b7280;
         }
         .heatmap-cell {
           padding: 16px 8px;
@@ -1557,6 +1589,8 @@ function CartTypesTab({
           border-radius: 8px;
           transition: transform 0.2s ease;
           cursor: help;
+          background: #f5f5f5;
+          color: #1d1d1f;
         }
         .heatmap-cell:hover {
           transform: scale(1.05);
@@ -1858,7 +1892,7 @@ function AttributionTab({
         }
         .attribution-header p {
           font-size: 15px;
-          color: #86868b;
+          color: #6b7280;
           margin: 0;
         }
         .attribution-comparison {
@@ -1871,25 +1905,25 @@ function AttributionTab({
         }
         .attribution-card {
           background: #fff;
-          border-radius: 16px;
+          border-radius: 12px;
           padding: 32px;
           width: 280px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e5e5;
         }
         .attribution-card.before { opacity: 0.7; }
         .attribution-card.after {
-          border: 2px solid #667eea;
-          box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+          border: 2px solid #1d1d1f;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
         .attribution-label {
           font-size: 14px;
           font-weight: 600;
-          color: #86868b;
+          color: #6b7280;
           margin-bottom: 4px;
         }
         .attribution-period {
           font-size: 12px;
-          color: #86868b;
+          color: #6b7280;
           margin-bottom: 20px;
         }
         .attribution-metrics .metric {
@@ -1897,12 +1931,12 @@ function AttributionTab({
           justify-content: space-between;
           align-items: center;
           padding: 12px 0;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+          border-bottom: 1px solid #f0f0f0;
         }
         .attribution-metrics .metric:last-child { border-bottom: none; }
-        .attribution-metrics .metric span { font-size: 13px; color: #86868b; }
+        .attribution-metrics .metric span { font-size: 13px; color: #6b7280; }
         .attribution-metrics .metric strong { font-size: 18px; font-weight: 700; color: #1d1d1f; }
-        .attribution-arrow { color: #667eea; }
+        .attribution-arrow { color: #1d1d1f; }
         .improvement-summary {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -1910,27 +1944,34 @@ function AttributionTab({
         }
         .improvement-card {
           background: #fff;
-          border-radius: 16px;
+          border-radius: 12px;
           padding: 32px;
           display: flex;
           align-items: center;
           gap: 24px;
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e5e5;
         }
         .improvement-icon {
           width: 64px;
           height: 64px;
-          border-radius: 16px;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
         }
-        .improvement-icon.success { background: rgba(52, 199, 89, 0.15); color: #34c759; }
-        .improvement-icon.primary { background: rgba(102, 126, 234, 0.15); color: #667eea; }
-        .improvement-label { font-size: 13px; color: #86868b; margin-bottom: 4px; }
+        .improvement-icon.success { background: #1d1d1f; color: #fff; }
+        .improvement-icon.primary { background: #1d1d1f; color: #fff; }
+        .improvement-label { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
         .improvement-value { font-size: 32px; font-weight: 700; color: #1d1d1f; margin-bottom: 4px; }
-        .improvement-percent { font-size: 14px; color: #34c759; font-weight: 600; }
+        .improvement-percent {
+          font-size: 14px;
+          font-weight: 600;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
       `}</style>
     </div>
   );

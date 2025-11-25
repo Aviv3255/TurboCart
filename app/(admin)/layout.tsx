@@ -1,25 +1,31 @@
 /**
  * Admin Dashboard Layout
- * Uses Shopify Polaris for consistent UI and App Bridge for embedded app functionality
- * Includes sidebar navigation and onboarding redirect
+ * Clean native-style layout for Shopify embedded app
+ * No sidebar - uses header navigation for cleaner integration
  */
 
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { AppProvider } from '@shopify/polaris';
 import { Provider as AppBridgeProvider } from '@shopify/app-bridge-react';
 import '@shopify/polaris/build/esm/styles.css';
-import AdminSidebar from '@/components/admin/Sidebar';
-import AdminHeader from '@/components/admin/Header';
+
+// Navigation items - clean header nav instead of sidebar
+const NAV_ITEMS = [
+  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Products', href: '/products' },
+  { label: 'Analytics', href: '/analytics' },
+  { label: 'Settings', href: '/settings' },
+];
 
 function AdminLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
   const searchParams = useSearchParams();
@@ -57,25 +63,6 @@ function AdminLayoutContent({
     checkOnboarding();
   }, [pathname, router]);
 
-  // Handle responsive sidebar
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   // App Bridge configuration
   const appBridgeConfig = {
     apiKey: process.env.NEXT_PUBLIC_SHOPIFY_API_KEY || '',
@@ -96,22 +83,22 @@ function AdminLayoutContent({
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: #fafafa;
+            background: #fff;
           }
           .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid #e5e5e5;
-            border-top-color: #667eea;
+            border: 3px solid #f0f0f0;
+            border-top-color: #1d1d1f;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
           }
           @keyframes spin {
             to { transform: rotate(360deg); }
           }
           p {
             margin-top: 16px;
-            color: #666;
+            color: #1d1d1f;
             font-size: 14px;
           }
         `}</style>
@@ -119,8 +106,8 @@ function AdminLayoutContent({
     );
   }
 
-  // Hide sidebar on onboarding page
-  const showSidebar = pathname !== '/onboarding';
+  // Hide header nav on onboarding page
+  const showNav = pathname !== '/onboarding';
 
   // Wrap with App Bridge Provider if we have shop and host
   const content = (
@@ -152,45 +139,106 @@ function AdminLayoutContent({
       }}
     >
       <div className="admin-layout">
-        {showSidebar && (
-          <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+        {showNav && (
+          <header className="admin-header">
+            <div className="header-brand">
+              <span className="brand-icon">TC</span>
+              <span className="brand-name">TurboCart</span>
+            </div>
+            <nav className="header-nav">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-link ${pathname?.startsWith(item.href) ? 'active' : ''}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="header-actions">
+              <span className="trial-badge">14 days trial</span>
+            </div>
+          </header>
         )}
-        <div className={`admin-main ${showSidebar ? (sidebarOpen ? 'with-sidebar' : 'with-sidebar-collapsed') : ''}`}>
-          {showSidebar && (
-            <AdminHeader onMenuToggle={toggleSidebar} sidebarOpen={sidebarOpen} />
-          )}
-          <main className="admin-content">
-            {children}
-          </main>
-        </div>
+        <main className="admin-content">
+          {children}
+        </main>
       </div>
       <style jsx>{`
         .admin-layout {
-          display: flex;
           min-height: 100vh;
-          background: var(--bg-secondary, #fafafa);
+          background: #fff;
         }
-        .admin-main {
-          flex: 1;
+        .admin-header {
+          height: 56px;
+          background: #fff;
+          border-bottom: 1px solid #e5e5e5;
           display: flex;
-          flex-direction: column;
-          transition: margin-left 0.3s ease;
+          align-items: center;
+          padding: 0 24px;
+          gap: 32px;
         }
-        .admin-main.with-sidebar {
-          margin-left: 280px;
+        .header-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
         }
-        .admin-main.with-sidebar-collapsed {
-          margin-left: 80px;
+        .brand-icon {
+          width: 32px;
+          height: 32px;
+          background: #1d1d1f;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          font-weight: 700;
+          font-size: 12px;
+        }
+        .brand-name {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1d1d1f;
+        }
+        .header-nav {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          flex: 1;
+        }
+        .nav-link {
+          padding: 8px 16px;
+          font-size: 14px;
+          font-weight: 500;
+          color: #6b7280;
+          text-decoration: none;
+          border-radius: 8px;
+          transition: all 0.15s ease;
+        }
+        .nav-link:hover {
+          color: #1d1d1f;
+          background: #f5f5f5;
+        }
+        .nav-link.active {
+          color: #1d1d1f;
+          background: #f5f5f5;
+        }
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .trial-badge {
+          padding: 6px 12px;
+          background: #1d1d1f;
+          color: #fff;
+          font-size: 12px;
+          font-weight: 600;
+          border-radius: 6px;
         }
         .admin-content {
-          flex: 1;
-          padding: 24px;
-        }
-        @media (max-width: 768px) {
-          .admin-main.with-sidebar,
-          .admin-main.with-sidebar-collapsed {
-            margin-left: 0;
-          }
+          padding: 0;
         }
       `}</style>
     </AppProvider>
