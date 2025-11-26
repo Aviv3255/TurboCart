@@ -1,6 +1,6 @@
 /**
  * Admin Dashboard Layout
- * Native Shopify embedded app style with App Bridge navigation
+ * Native Shopify embedded app style with App Bridge v4 navigation
  * Navigation appears in Shopify's sidebar under app name
  */
 
@@ -8,17 +8,10 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import Script from 'next/script';
 import { AppProvider } from '@shopify/polaris';
-import { Provider as AppBridgeProvider, NavigationMenu } from '@shopify/app-bridge-react';
+import { NavMenu } from '@shopify/app-bridge-react';
 import '@shopify/polaris/build/esm/styles.css';
-
-// Navigation links for Shopify sidebar
-const NAVIGATION_LINKS = [
-  { label: 'Dashboard', destination: '/dashboard' },
-  { label: 'Products', destination: '/products' },
-  { label: 'Analytics', destination: '/analytics' },
-  { label: 'Settings', destination: '/settings' },
-];
 
 // Polaris i18n config
 const POLARIS_I18N = {
@@ -79,7 +72,7 @@ function AdminLayoutContent({
   const shop = searchParams.get('shop') || '';
   const host = searchParams.get('host') || '';
 
-  // Check if we have App Bridge context
+  // Check if we have App Bridge context (running inside Shopify admin)
   const hasAppBridge = Boolean(shop && host && process.env.NEXT_PUBLIC_SHOPIFY_API_KEY);
 
   // Check if user needs onboarding
@@ -108,13 +101,6 @@ function AdminLayoutContent({
 
     checkOnboarding();
   }, [pathname, router]);
-
-  // App Bridge configuration
-  const appBridgeConfig = {
-    apiKey: process.env.NEXT_PUBLIC_SHOPIFY_API_KEY || '',
-    host: host,
-    forceRedirect: true,
-  };
 
   // Don't render until onboarding check is complete
   if (!onboardingChecked || isNewUser) {
@@ -152,16 +138,30 @@ function AdminLayoutContent({
     );
   }
 
-  // If we have App Bridge context, wrap with providers and navigation
+  // If we have App Bridge context (running inside Shopify admin)
   if (hasAppBridge) {
     return (
-      <AppProvider i18n={POLARIS_I18N}>
-        <AppBridgeProvider config={appBridgeConfig}>
-          {/* NavigationMenu MUST be inside AppBridgeProvider */}
-          <NavigationMenu navigationLinks={NAVIGATION_LINKS} />
+      <>
+        {/* App Bridge v4 requires script tag with API key meta tag */}
+        <Script
+          id="shopify-app-bridge"
+          src="https://cdn.shopify.com/shopifycloud/app-bridge.js"
+          strategy="beforeInteractive"
+        />
+        <meta name="shopify-api-key" content={process.env.NEXT_PUBLIC_SHOPIFY_API_KEY || ''} />
+
+        <AppProvider i18n={POLARIS_I18N}>
+          {/* NavMenu registers links in Shopify's native sidebar */}
+          {/* First link with rel="home" is the app home, not shown in menu */}
+          <NavMenu>
+            <a href="/dashboard" rel="home">Dashboard</a>
+            <a href="/products">Products</a>
+            <a href="/analytics">Analytics</a>
+            <a href="/settings">Settings</a>
+          </NavMenu>
           <AppContent>{children}</AppContent>
-        </AppBridgeProvider>
-      </AppProvider>
+        </AppProvider>
+      </>
     );
   }
 
