@@ -1,16 +1,14 @@
 /**
  * Admin Dashboard Layout
- * Native Shopify embedded app style with App Bridge v4 navigation
- * Navigation appears in Shopify's sidebar under app name
+ * Provides Polaris UI framework and handles onboarding redirect
+ * Navigation is handled by root layout via App Bridge NavMenu
  */
 
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import Script from 'next/script';
+import { useRouter, usePathname } from 'next/navigation';
 import { AppProvider } from '@shopify/polaris';
-import { NavMenu } from '@shopify/app-bridge-react';
 import '@shopify/polaris/build/esm/styles.css';
 
 // Polaris i18n config
@@ -64,16 +62,8 @@ function AdminLayoutContent({
 }) {
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
-  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-
-  // Get shop and host from URL for App Bridge
-  const shop = searchParams.get('shop') || '';
-  const host = searchParams.get('host') || '';
-
-  // Check if we have App Bridge context (running inside Shopify admin)
-  const hasAppBridge = Boolean(shop && host && process.env.NEXT_PUBLIC_SHOPIFY_API_KEY);
 
   // Check if user needs onboarding
   useEffect(() => {
@@ -138,34 +128,7 @@ function AdminLayoutContent({
     );
   }
 
-  // If we have App Bridge context (running inside Shopify admin)
-  if (hasAppBridge) {
-    return (
-      <>
-        {/* App Bridge v4 requires script tag with API key meta tag */}
-        <Script
-          id="shopify-app-bridge"
-          src="https://cdn.shopify.com/shopifycloud/app-bridge.js"
-          strategy="beforeInteractive"
-        />
-        <meta name="shopify-api-key" content={process.env.NEXT_PUBLIC_SHOPIFY_API_KEY || ''} />
-
-        <AppProvider i18n={POLARIS_I18N}>
-          {/* NavMenu registers links in Shopify's native sidebar */}
-          {/* First link with rel="home" is the app home, not shown in menu */}
-          <NavMenu>
-            <a href="/dashboard" rel="home">Dashboard</a>
-            <a href="/products">Products</a>
-            <a href="/analytics">Analytics</a>
-            <a href="/settings">Settings</a>
-          </NavMenu>
-          <AppContent>{children}</AppContent>
-        </AppProvider>
-      </>
-    );
-  }
-
-  // Without App Bridge - just Polaris provider (for development/testing)
+  // Render with Polaris provider
   return (
     <AppProvider i18n={POLARIS_I18N}>
       <AppContent>{children}</AppContent>
