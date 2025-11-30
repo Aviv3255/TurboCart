@@ -53,18 +53,39 @@ export async function createShop(
   domain: string,
   accessToken: string
 ): Promise<Shop> {
+  // Default settings for new/reinstalled shops
+  const defaultSettings = {
+    display_style: 'minimal-strip',
+    cart_type: 'drawer',
+    max_upsells: 3,
+    position: 'top',
+    enable_ab_testing: true,
+  };
+
   const result = await query<Shop>(
-    `INSERT INTO shops (shop_domain, access_token)
-     VALUES ($1, $2)
+    `INSERT INTO shops (shop_domain, access_token, settings)
+     VALUES ($1, $2, $3::jsonb)
      ON CONFLICT (shop_domain)
      DO UPDATE SET
        access_token = $2,
        uninstalled_at = NULL,
-       last_active_at = NOW()
+       last_active_at = NOW(),
+       settings = $3::jsonb,
+       plan = 'free',
+       plan_status = 'trial',
+       billing_id = NULL,
+       trial_ends_at = NULL,
+       updated_at = NOW()
      RETURNING *`,
-    [domain, accessToken]
+    [domain, accessToken, JSON.stringify(defaultSettings)]
   );
-  return result.rows[0]!;
+
+  const shop = result.rows[0]!;
+
+  // Clear any existing upsell products (for reinstalls)
+  await query('DELETE FROM upsell_products WHERE shop_id = $1', [shop.id]);
+
+  return shop;
 }
 
 export async function updateShopSettings(
