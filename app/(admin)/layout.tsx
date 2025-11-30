@@ -166,6 +166,22 @@ function AdminLayoutContent({
         const response = await authenticatedFetch('/api/admin/shop/onboarding-status');
         if (response.ok) {
           const data = await response.json();
+
+          // If app was reinstalled, clear all localStorage data to start fresh
+          if (data.wasReinstalled) {
+            console.log('[TurboCart] App reinstalled - clearing localStorage for fresh start');
+            localStorage.removeItem('turbocart_onboarding_data');
+            localStorage.removeItem('turbocart_onboarding_complete');
+            localStorage.removeItem('turbocart_selected_products');
+            localStorage.removeItem('turbocart_display_settings');
+            // Clear any other TurboCart-related localStorage items
+            Object.keys(localStorage).forEach(key => {
+              if (key.startsWith('turbocart_')) {
+                localStorage.removeItem(key);
+              }
+            });
+          }
+
           if (!data.onboardingComplete) {
             setIsNewUser(true);
             router.push('/onboarding');

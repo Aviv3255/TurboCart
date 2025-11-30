@@ -25,35 +25,54 @@ export async function GET(request: NextRequest) {
       // 1) Has at least one upsell product selected
       // 2) Has settings configured (enabled_display_styles)
       // 3) Has theme enabled
+      // Also check if shop was previously uninstalled (reinstall scenario)
       const result = await query<{
         has_products: boolean;
         settings: { enabled_display_styles?: string[]; theme_enabled?: boolean } | null;
+        uninstalled_at: string | null;
+        onboarding_completed_at: string | null;
       }>(
         `SELECT
           EXISTS(SELECT 1 FROM upsell_products WHERE shop_id = $1 AND is_active = true) as has_products,
-          settings
+          settings,
+          uninstalled_at,
+          onboarding_completed_at
         FROM shops
         WHERE id = $1`,
         [req.shop.id]
       );
 
       const data = result.rows[0];
+
+      // Check if this is a reinstall (uninstalled_at is set)
+      const wasReinstalled = data?.uninstalled_at !== null;
+
+      // If this is a reinstall, clear the uninstalled_at flag
+      if (wasReinstalled) {
+        await query(
+          `UPDATE shops SET uninstalled_at = NULL WHERE id = $1`,
+          [req.shop.id]
+        );
+        console.log('[Onboarding Status] Detected reinstall, cleared uninstalled_at for shop:', req.shop.id);
+      }
+
       const hasProducts = data?.has_products || false;
       const hasSettings = data?.settings?.enabled_display_styles &&
                           data.settings.enabled_display_styles.length > 0;
       const themeEnabled = data?.settings?.theme_enabled === true;
 
       // Onboarding is complete if they have products selected
-      // (settings have defaults so they're always valid)
-      const onboardingComplete = hasProducts;
+      // BUT if this is a reinstall, onboarding should start fresh
+      const onboardingComplete = wasReinstalled ? false : hasProducts;
 
       return NextResponse.json({
         onboardingComplete,
         themeEnabled,
+        wasReinstalled, // Frontend should clear localStorage if true
         status: {
-          hasProducts,
-          hasSettings: !!hasSettings,
-          themeEnabled,
+          hasProducts: wasReinstalled ? false : hasProducts,
+          hasSettings: wasReinstalled ? false : !!hasSettings,
+          themeEnabled: wasReinstalled ? false : themeEnabled,
         },
       });
     } catch (error) {

@@ -100,9 +100,11 @@ export async function POST(request: NextRequest) {
     console.log('[Uninstall Webhook] Deleted product affinities');
 
     // Reset shop settings and mark as uninstalled
+    // Also reset onboarding_completed_at so reinstall starts fresh
     await query(
       `UPDATE shops
        SET uninstalled_at = NOW(),
+           onboarding_completed_at = NULL,
            settings = '{"display_style": "minimal-strip", "cart_type": "drawer", "max_upsells": 3, "position": "top", "enable_ab_testing": true}'::jsonb,
            plan = 'free',
            plan_status = 'trial',

@@ -115,14 +115,45 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Load saved data on mount
+  // Load saved data on mount, but first check if this is a reinstall
   useEffect(() => {
-    const saved = loadFromStorage();
-    if (saved) {
-      setData(saved.data);
-      setCurrentStep(saved.step);
-    }
-    setLoading(false);
+    const checkAndLoad = async () => {
+      try {
+        // Check if this is a reinstall - if so, clear localStorage
+        const response = await authenticatedFetch('/api/admin/shop/onboarding-status');
+        if (response.ok) {
+          const statusData = await response.json();
+          if (statusData.wasReinstalled) {
+            console.log('[TurboCart Onboarding] App reinstalled - clearing localStorage for fresh start');
+            clearStorage();
+            localStorage.removeItem('turbocart_onboarding_complete');
+            localStorage.removeItem('turbocart_selected_products');
+            localStorage.removeItem('turbocart_display_settings');
+            // Clear any other TurboCart-related localStorage items
+            Object.keys(localStorage).forEach(key => {
+              if (key.startsWith('turbocart_')) {
+                localStorage.removeItem(key);
+              }
+            });
+            // Start fresh - don't load from localStorage
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error checking reinstall status:', error);
+      }
+
+      // Not a reinstall - load saved data normally
+      const saved = loadFromStorage();
+      if (saved) {
+        setData(saved.data);
+        setCurrentStep(saved.step);
+      }
+      setLoading(false);
+    };
+
+    checkAndLoad();
   }, []);
 
   // Save data whenever it changes
