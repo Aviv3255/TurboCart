@@ -27,9 +27,21 @@ interface DisplayStyleConfig {
   priority: number;
 }
 
+interface SelectedProduct {
+  id: string;
+  title: string;
+  handle?: string;
+  productType?: string;
+  vendor?: string;
+  price: number;
+  image: string | null;
+  variantId?: string;
+  collections?: Array<{ id: string; title?: string }>;
+}
+
 interface OnboardingData {
   displayStyles: DisplayStyleConfig[];
-  selectedProducts: string[];
+  selectedProducts: SelectedProduct[];
   settings: {
     position: 'above_cart' | 'below_cart' | 'popup';
     maxProducts: number;
@@ -95,44 +107,60 @@ export default function OnboardingPage() {
     try {
       setSaving(true);
 
-      // Save all settings
-      const responses = await Promise.all([
-        fetch('/api/admin/settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            settings: {
-              enabled_display_styles: data.displayStyles
-                .filter(s => s.enabled)
-                .sort((a, b) => a.priority - b.priority)
-                .map(s => s.id),
-              position: data.settings.position,
-              max_products: data.settings.maxProducts,
-              show_prices: data.settings.showPrices,
-              show_compare_at: data.settings.showCompareAt,
-              ml_enabled: data.settings.mlEnabled,
-              auto_optimize: data.settings.autoOptimize,
-              onboarding_complete: true,
-            },
-          }),
-        }),
-        fetch('/api/admin/products/selected', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            products: data.selectedProducts,
-          }),
-        }),
-      ]);
+      // Map position values to API format
+      const positionMap: Record<string, 'top' | 'bottom'> = {
+        'above_cart': 'top',
+        'below_cart': 'bottom',
+        'popup': 'top',
+      };
 
-      // Check for errors
-      for (const response of responses) {
-        if (!response.ok) {
-          throw new Error('Failed to save settings');
-        }
+      // Save settings using authenticated fetch
+      const settingsResponse = await authenticatedFetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            enabled_display_styles: data.displayStyles
+              .filter(s => s.enabled)
+              .sort((a, b) => a.priority - b.priority)
+              .map(s => s.id),
+            display_style: data.displayStyles.find(s => s.enabled)?.id || 'minimal-strip',
+            position: positionMap[data.settings.position] || 'top',
+            max_upsells: data.settings.maxProducts,
+            enable_ab_testing: data.settings.mlEnabled,
+          },
+        }),
+      });
+
+      if (!settingsResponse.ok) {
+        const errorData = await settingsResponse.json().catch(() => ({}));
+        console.error('Settings save error:', errorData);
+        throw new Error(errorData.error || 'Failed to save settings');
       }
 
-      // Mark onboarding complete
+      // Save selected products using authenticated fetch
+      const productsResponse = await authenticatedFetch('/api/admin/products/selected', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          products: data.selectedProducts,
+        }),
+      });
+
+      if (!productsResponse.ok) {
+        const errorData = await productsResponse.json().catch(() => ({}));
+        console.error('Products save error:', errorData);
+        throw new Error(errorData.error || 'Failed to save products');
+      }
+
+      // Mark onboarding complete via API
+      await authenticatedFetch('/api/admin/shop/onboarding-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+
+      // Mark onboarding complete locally
       localStorage.setItem('turbocart_onboarding_complete', 'true');
 
       // Redirect to dashboard
@@ -141,7 +169,7 @@ export default function OnboardingPage() {
       }, 2000);
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      alert('Failed to save settings. Please try again.');
+      alert(`Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
       setSaving(false);
     }
   };
@@ -695,7 +723,7 @@ const DISPLAY_STYLES = [
     id: 'frequently-bought',
     name: 'Frequently Bought',
     description: 'Bundle-style "Add both" display',
-    recommended: false,
+    recommended: true,
     preview: '/previews/frequently-bought.png',
   },
   {
@@ -711,6 +739,34 @@ const DISPLAY_STYLES = [
     description: 'Compact checklist with quick add',
     recommended: false,
     preview: '/previews/list.png',
+  },
+  {
+    id: 'masonry-grid',
+    name: 'Masonry Grid',
+    description: 'Pinterest-style dynamic layout with varying heights',
+    recommended: false,
+    preview: '/previews/masonry-grid.png',
+  },
+  {
+    id: 'vertical-scroll',
+    name: 'Vertical Scroll',
+    description: 'Tall gallery with large product images',
+    recommended: false,
+    preview: '/previews/vertical-scroll.png',
+  },
+  {
+    id: 'sticky-tabs',
+    name: 'Category Tabs',
+    description: 'Tabbed interface for browsing by type',
+    recommended: false,
+    preview: '/previews/sticky-tabs.png',
+  },
+  {
+    id: 'comparison-table',
+    name: 'Comparison Table',
+    description: 'Side-by-side product comparison',
+    recommended: false,
+    preview: '/previews/comparison-table.png',
   },
 ];
 
@@ -971,17 +1027,22 @@ function ProductSelectionStep({
   onNext,
   onBack,
 }: {
-  selectedProducts: string[];
-  onUpdate: (products: string[]) => void;
+  selectedProducts: SelectedProduct[];
+  onUpdate: (products: SelectedProduct[]) => void;
   onNext: () => void;
   onBack: () => void;
 }) {
   const [products, setProducts] = useState<Array<{
     id: string;
     title: string;
+    handle: string;
+    productType: string;
+    vendor: string;
     price: number;
     image: string | null;
     inventory: number;
+    variantId: string;
+    collections: Array<{ id: string; title: string }>;
   }>>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -1004,11 +1065,23 @@ function ProductSelectionStep({
     }
   };
 
-  const toggleProduct = (id: string) => {
-    if (selectedProducts.includes(id)) {
-      onUpdate(selectedProducts.filter(p => p !== id));
+  const isSelected = (id: string) => selectedProducts.some(p => p.id === id);
+
+  const toggleProduct = (product: typeof products[0]) => {
+    if (isSelected(product.id)) {
+      onUpdate(selectedProducts.filter(p => p.id !== product.id));
     } else if (selectedProducts.length < 25) {
-      onUpdate([...selectedProducts, id]);
+      onUpdate([...selectedProducts, {
+        id: product.id,
+        title: product.title,
+        handle: product.handle,
+        productType: product.productType,
+        vendor: product.vendor,
+        price: product.price,
+        image: product.image,
+        variantId: product.variantId,
+        collections: product.collections,
+      }]);
     }
   };
 
@@ -1056,8 +1129,8 @@ function ProductSelectionStep({
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className={`product-card ${selectedProducts.includes(product.id) ? 'selected' : ''}`}
-              onClick={() => toggleProduct(product.id)}
+              className={`product-card ${isSelected(product.id) ? 'selected' : ''}`}
+              onClick={() => toggleProduct(product)}
             >
               <div className="product-image">
                 {product.image ? (
@@ -1068,10 +1141,10 @@ function ProductSelectionStep({
               </div>
               <div className="product-info">
                 <h4>{product.title}</h4>
-                <p>${(product.price / 100).toFixed(2)}</p>
+                <p>${product.price.toFixed(2)}</p>
               </div>
               <div className="checkbox">
-                {selectedProducts.includes(product.id) && (
+                {isSelected(product.id) && (
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                     <path d="M10 3L4.5 8.5L2 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -1616,6 +1689,36 @@ function ThemeEnableStep({
 }) {
   const [enabled, setEnabled] = useState(false);
 
+  // Get shop domain for theme editor link
+  const getThemeEditorUrl = () => {
+    // Try to get shop from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const shop = urlParams.get('shop');
+
+    if (shop) {
+      return `https://${shop}/admin/themes/current/editor?template=cart`;
+    }
+
+    // Try from App Bridge config
+    if (typeof window !== 'undefined' && (window as { shopify?: { config?: { shop?: string } } }).shopify?.config?.shop) {
+      const shopDomain = (window as { shopify?: { config?: { shop?: string } } }).shopify!.config!.shop;
+      return `https://${shopDomain}/admin/themes/current/editor?template=cart`;
+    }
+
+    // Fallback - open in parent window context
+    return 'https://admin.shopify.com/store/themes/current/editor?template=cart';
+  };
+
+  const handleOpenThemeEditor = () => {
+    const url = getThemeEditorUrl();
+    // For embedded apps, open in parent window
+    if (window.top !== window.self) {
+      window.open(url, '_top');
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <div className="theme-enable-step">
       <div className="step-intro">
@@ -1657,9 +1760,8 @@ function ThemeEnableStep({
       </div>
 
       <div className="quick-actions">
-        <a
-          href="/admin/themes/current/editor?template=cart"
-          target="_blank"
+        <button
+          onClick={handleOpenThemeEditor}
           className="action-button primary"
         >
           Open Theme Editor
@@ -1668,7 +1770,7 @@ function ThemeEnableStep({
             <path d="M9 3H13V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M13 3L7 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
-        </a>
+        </button>
       </div>
 
       <div className="verification-box">
