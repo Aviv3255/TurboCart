@@ -137,11 +137,11 @@ export default function SettingsPage() {
       if (selectedStyles.length < MAX_STYLES) {
         setSelectedStyles([...selectedStyles, style]);
       } else if (event) {
-        // Show tooltip near click position
+        // Show tooltip BELOW the clicked element so user can see it
         const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
         setTooltipPosition({
           x: rect.left + rect.width / 2,
-          y: rect.top
+          y: rect.bottom + 10 // Position below the element with 10px gap
         });
         setShowTooltip(true);
         setTimeout(() => setShowTooltip(false), 3000);
@@ -206,7 +206,7 @@ export default function SettingsPage() {
         disabled: !isValidSelection,
       }}
     >
-      {/* Tooltip for max styles */}
+      {/* Tooltip for max styles - appears BELOW clicked element */}
       {showTooltip && tooltipPosition && (
         <div
           className="max-styles-tooltip"
@@ -214,14 +214,14 @@ export default function SettingsPage() {
             position: 'fixed',
             left: tooltipPosition.x,
             top: tooltipPosition.y,
-            transform: 'translate(-50%, -100%)',
+            transform: 'translateX(-50%)',
             zIndex: 9999,
           }}
         >
+          <div className="tooltip-arrow-up" />
           <div className="tooltip-content">
             You can select up to 3 styles. Please deselect one to choose this option.
           </div>
-          <div className="tooltip-arrow" />
         </div>
       )}
 
@@ -669,6 +669,15 @@ export default function SettingsPage() {
           border-left: 8px solid transparent;
           border-right: 8px solid transparent;
           border-top: 8px solid #1d1d1f;
+          margin: 0 auto;
+        }
+
+        .tooltip-arrow-up {
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-bottom: 8px solid #1d1d1f;
           margin: 0 auto;
         }
 

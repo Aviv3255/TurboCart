@@ -1,16 +1,13 @@
 {% comment %}
   TurboCart App Embed Block
-  This app embed loads globally on the store and enables TurboCart upsells.
-  Merchants can activate this from Theme Settings > App embeds in the theme editor.
+  Appears in Theme Editor > App embeds
 {% endcomment %}
 
 <script>
   window.TurboCartConfig = {
     shopDomain: '{{ shop.permanent_domain }}',
-    enabled: {{ block.settings.enabled }},
-    displayPosition: '{{ block.settings.display_position }}',
-    maxProducts: {{ block.settings.max_products }},
-    appUrl: '{{ shop.metafields.turbocart.app_url | default: "" }}'
+    enabled: {{ block.settings.enabled | default: true }},
+    maxProducts: {{ block.settings.max_products | default: 3 }}
   };
 </script>
 
@@ -22,37 +19,14 @@
 
 {% schema %}
 {
-  "name": "TurboCart AI Upsells",
+  "name": "TurboCart Upsells",
   "target": "body",
-  "stylesheet": "turbocart.css",
-  "javascript": "turbocart.js",
   "settings": [
     {
       "type": "checkbox",
       "id": "enabled",
-      "label": "Enable TurboCart Upsells",
-      "default": true,
-      "info": "Toggle to enable or disable upsell recommendations"
-    },
-    {
-      "type": "select",
-      "id": "display_position",
-      "label": "Display Position",
-      "default": "before_checkout",
-      "options": [
-        {
-          "value": "before_checkout",
-          "label": "Before checkout button"
-        },
-        {
-          "value": "after_items",
-          "label": "After cart items"
-        },
-        {
-          "value": "bottom",
-          "label": "Bottom of cart"
-        }
-      ]
+      "label": "Enable TurboCart",
+      "default": true
     },
     {
       "type": "range",
@@ -60,9 +34,8 @@
       "min": 1,
       "max": 20,
       "step": 1,
-      "label": "Maximum products to show",
-      "default": 3,
-      "info": "Choose how many upsell products to display (1-20)"
+      "label": "Max products to show",
+      "default": 3
     }
   ]
 }
