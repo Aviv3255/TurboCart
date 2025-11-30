@@ -170,6 +170,7 @@ export default function OnboardingPage() {
             cart_type: data.settings.cartType,
             max_upsells: data.settings.maxProducts,
             enable_ab_testing: data.settings.mlEnabled,
+            theme_enabled: data.themeEnabled,
           },
         }),
       });
@@ -325,6 +326,8 @@ export default function OnboardingPage() {
 
         {currentStep === 5 && (
           <ThemeEnableStep
+            themeEnabled={data.themeEnabled}
+            onThemeEnabledChange={(enabled) => updateData({ themeEnabled: enabled })}
             onNext={handleNext}
             onBack={handleBack}
             onSkip={handleNext}
@@ -876,10 +879,11 @@ function DisplayStylesStep({
       </div>
 
       <div className="selection-counter">
-        <span className={selectedCount >= 1 ? 'valid' : ''}>
-          {selectedCount} of 3 selected
+        <span className={`counter-badge ${selectedCount >= 3 ? 'max' : selectedCount >= 1 ? 'valid' : ''}`}>
+          {selectedCount}/3 Selected
         </span>
         {selectedCount < 1 && <span className="hint">Select at least 1</span>}
+        {selectedCount >= 3 && <span className="max-hint">Maximum reached</span>}
       </div>
 
       <div className="styles-grid">
@@ -946,19 +950,34 @@ function DisplayStylesStep({
           margin-bottom: 24px;
         }
 
-        .selection-counter span {
+        .counter-badge {
           font-size: 14px;
+          font-weight: 600;
+          padding: 6px 16px;
+          border-radius: 20px;
+          background: #f5f5f7;
           color: #86868b;
         }
 
-        .selection-counter span.valid {
+        .counter-badge.valid {
+          background: rgba(102, 126, 234, 0.1);
           color: #667eea;
-          font-weight: 600;
+        }
+
+        .counter-badge.max {
+          background: #000;
+          color: #fff;
         }
 
         .selection-counter .hint {
           color: #ff6b6b;
           font-size: 13px;
+        }
+
+        .selection-counter .max-hint {
+          color: #86868b;
+          font-size: 13px;
+          font-style: italic;
         }
 
         .styles-grid {
@@ -1788,15 +1807,18 @@ function SettingsStep({
  * Step 5: Enable in Theme
  */
 function ThemeEnableStep({
+  themeEnabled,
+  onThemeEnabledChange,
   onNext,
   onBack,
   onSkip,
 }: {
+  themeEnabled: boolean;
+  onThemeEnabledChange: (enabled: boolean) => void;
   onNext: () => void;
   onBack: () => void;
   onSkip: () => void;
 }) {
-  const [enabled, setEnabled] = useState(false);
 
   // Get shop domain for theme editor link - opens directly to App Embeds
   const getThemeEditorUrl = () => {
@@ -1883,11 +1905,11 @@ function ThemeEnableStep({
         <label className="checkbox-label">
           <input
             type="checkbox"
-            checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
+            checked={themeEnabled}
+            onChange={(e) => onThemeEnabledChange(e.target.checked)}
           />
           <span className="checkmark" />
-          <span>I've added TurboCart to my theme</span>
+          <span>I&apos;ve added TurboCart to my theme</span>
         </label>
       </div>
 

@@ -56,6 +56,74 @@ function AppContent({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Theme warning banner component
+function ThemeWarningBanner({ onOpenThemeEditor }: { onOpenThemeEditor: () => void }) {
+  return (
+    <div className="theme-warning-banner">
+      <div className="warning-content">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L2 18H18L10 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M10 8V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="10" cy="14" r="1" fill="currentColor"/>
+        </svg>
+        <span>TurboCart is not enabled in your theme. Upsells won&apos;t appear until you enable the app block.</span>
+        <button onClick={onOpenThemeEditor} className="enable-btn">
+          Enable Now
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M5 3H3V11H11V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            <path d="M7 3H11V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M11 3L6 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <style jsx>{`
+        .theme-warning-banner {
+          background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+          color: #fff;
+          padding: 12px 20px;
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+        }
+        .warning-content {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        .warning-content svg {
+          flex-shrink: 0;
+        }
+        .warning-content span {
+          flex: 1;
+        }
+        .enable-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: #fff;
+          color: #dc2626;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+        .enable-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function AdminLayoutContent({
   children,
 }: {
@@ -63,10 +131,29 @@ function AdminLayoutContent({
 }) {
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [themeEnabled, setThemeEnabled] = useState(true); // Assume enabled until checked
   const router = useRouter();
   const pathname = usePathname();
 
-  // Check if user needs onboarding
+  // Get theme editor URL
+  const getThemeEditorUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shop = urlParams.get('shop');
+    if (shop) {
+      return `https://${shop}/admin/themes/current/editor?context=apps`;
+    }
+    if (typeof window !== 'undefined' && (window as { shopify?: { config?: { shop?: string } } }).shopify?.config?.shop) {
+      const shopDomain = (window as { shopify?: { config?: { shop?: string } } }).shopify!.config!.shop;
+      return `https://${shopDomain}/admin/themes/current/editor?context=apps`;
+    }
+    return 'https://admin.shopify.com/store/themes/current/editor?context=apps';
+  };
+
+  const handleOpenThemeEditor = () => {
+    window.open(getThemeEditorUrl(), '_blank', 'noopener,noreferrer');
+  };
+
+  // Check if user needs onboarding and theme status
   useEffect(() => {
     const checkOnboarding = async () => {
       // Skip check if already on onboarding page
@@ -83,6 +170,8 @@ function AdminLayoutContent({
             setIsNewUser(true);
             router.push('/onboarding');
           }
+          // Check theme enabled status
+          setThemeEnabled(data.themeEnabled !== false);
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -132,6 +221,9 @@ function AdminLayoutContent({
   // Render with Polaris provider
   return (
     <AppProvider i18n={POLARIS_I18N}>
+      {!themeEnabled && pathname !== '/onboarding' && (
+        <ThemeWarningBanner onOpenThemeEditor={handleOpenThemeEditor} />
+      )}
       <AppContent>{children}</AppContent>
     </AppProvider>
   );

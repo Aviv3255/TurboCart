@@ -986,6 +986,8 @@ function OverviewTab({
           font-weight: 700;
           margin-bottom: 4px;
           color: #1d1d1f;
+          line-height: 1.2;
+          overflow: visible;
         }
         .kpi-card.primary .kpi-value {
           color: #fff;
@@ -995,6 +997,8 @@ function OverviewTab({
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          padding-bottom: 4px;
+          display: inline-block;
         }
         .kpi-subtext {
           font-size: 13px;

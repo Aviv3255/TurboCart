@@ -24,9 +24,10 @@ export async function GET(request: NextRequest) {
       // Check if shop has completed onboarding by checking:
       // 1) Has at least one upsell product selected
       // 2) Has settings configured (enabled_display_styles)
+      // 3) Has theme enabled
       const result = await query<{
         has_products: boolean;
-        settings: { enabled_display_styles?: string[] } | null;
+        settings: { enabled_display_styles?: string[]; theme_enabled?: boolean } | null;
       }>(
         `SELECT
           EXISTS(SELECT 1 FROM upsell_products WHERE shop_id = $1 AND is_active = true) as has_products,
@@ -40,6 +41,7 @@ export async function GET(request: NextRequest) {
       const hasProducts = data?.has_products || false;
       const hasSettings = data?.settings?.enabled_display_styles &&
                           data.settings.enabled_display_styles.length > 0;
+      const themeEnabled = data?.settings?.theme_enabled === true;
 
       // Onboarding is complete if they have products selected
       // (settings have defaults so they're always valid)
@@ -47,9 +49,11 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         onboardingComplete,
+        themeEnabled,
         status: {
           hasProducts,
           hasSettings: !!hasSettings,
+          themeEnabled,
         },
       });
     } catch (error) {
