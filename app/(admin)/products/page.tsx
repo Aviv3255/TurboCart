@@ -1,6 +1,6 @@
 /**
  * Product Selection Page
- * Let merchants choose 10-50 products for upselling
+ * Let merchants choose 1-25 products for upselling
  */
 
 'use client';
@@ -160,13 +160,13 @@ export default function ProductsPage() {
 
   // Selection info
   const selectionCount = selectedProducts.length;
-  const isValidSelection = selectionCount >= 10 && selectionCount <= 50;
+  const isValidSelection = selectionCount >= 1 && selectionCount <= 25;
 
   return (
     <Frame>
       <Page
         title="Product Selection"
-        subtitle="Choose 10-50 products to upsell"
+        subtitle="Choose 1-25 products to upsell"
         backAction={{ content: 'Dashboard', onAction: () => router.push('/dashboard') }}
         primaryAction={{
           content: 'Save Selection',
@@ -182,8 +182,8 @@ export default function ProductsPage() {
             title={`${selectionCount} products selected`}
             tone={isValidSelection ? 'success' : 'warning'}
           >
-            {selectionCount < 10 && <p>Select at least {10 - selectionCount} more products</p>}
-            {selectionCount > 50 && <p>You can select maximum 50 products (remove {selectionCount - 50})</p>}
+            {selectionCount < 1 && <p>Select at least 1 product</p>}
+            {selectionCount > 25 && <p>You can select maximum 25 products (remove {selectionCount - 25})</p>}
             {isValidSelection && <p>Perfect! Click "Save Selection" to continue.</p>}
           </Banner>
         </div>

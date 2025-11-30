@@ -3,8 +3,8 @@
  *
  * 6-Step Professional Setup Wizard:
  * 1. Welcome - Introduction to TurboCart
- * 2. Select Display Styles - Choose 1-5 display styles
- * 3. Select Products - Choose up to 30 upsell products
+ * 2. Select Display Styles - Choose 1-3 display styles for A/B testing
+ * 3. Select Products - Choose 1-25 upsell products
  * 4. Configure Settings - Fine-tune behavior
  * 5. Enable in Theme - Theme app block installation
  * 6. Live! - Success confirmation & redirect
@@ -152,7 +152,7 @@ export default function OnboardingPage() {
       case 2:
         return data.displayStyles.filter(s => s.enabled).length >= 1;
       case 3:
-        return data.selectedProducts.length >= 5 && data.selectedProducts.length <= 30;
+        return data.selectedProducts.length >= 1 && data.selectedProducts.length <= 25;
       case 4:
         return true;
       case 5:
@@ -730,7 +730,7 @@ function DisplayStylesStep({
       onUpdate(displayStyles.filter(s => s.id !== id));
     } else {
       const enabledCount = displayStyles.filter(s => s.enabled).length;
-      if (enabledCount < 5) {
+      if (enabledCount < 3) {
         onUpdate([
           ...displayStyles,
           { id, enabled: true, priority: enabledCount + 1 },
@@ -745,12 +745,12 @@ function DisplayStylesStep({
   return (
     <div className="display-styles-step">
       <div className="step-intro">
-        <p>Select 1-5 display styles. The ML engine will automatically A/B test them to find what converts best for your store.</p>
+        <p>Select 1-3 display styles. The ML engine will automatically A/B test them to find what converts best for your store.</p>
       </div>
 
       <div className="selection-counter">
         <span className={selectedCount >= 1 ? 'valid' : ''}>
-          {selectedCount} of 5 selected
+          {selectedCount} of 3 selected
         </span>
         {selectedCount < 1 && <span className="hint">Select at least 1</span>}
       </div>
@@ -1006,7 +1006,7 @@ function ProductSelectionStep({
   const toggleProduct = (id: string) => {
     if (selectedProducts.includes(id)) {
       onUpdate(selectedProducts.filter(p => p !== id));
-    } else if (selectedProducts.length < 30) {
+    } else if (selectedProducts.length < 25) {
       onUpdate([...selectedProducts, id]);
     }
   };
@@ -1020,15 +1020,15 @@ function ProductSelectionStep({
   return (
     <div className="product-selection-step">
       <div className="step-intro">
-        <p>Select 5-30 products to use as upsells. Choose your best sellers and complementary items.</p>
+        <p>Select 1-25 products to use as upsells. Choose your best sellers and complementary items.</p>
       </div>
 
       <div className="selection-header">
         <div className="selection-counter">
-          <span className={selectedCount >= 5 && selectedCount <= 30 ? 'valid' : ''}>
-            {selectedCount} of 30 selected
+          <span className={selectedCount >= 1 && selectedCount <= 25 ? 'valid' : ''}>
+            {selectedCount} of 25 selected
           </span>
-          {selectedCount < 5 && <span className="hint">Select at least 5</span>}
+          {selectedCount < 1 && <span className="hint">Select at least 1</span>}
         </div>
 
         <div className="search-box">
