@@ -26,6 +26,7 @@ CREATE TABLE shops (
     }'::jsonb,
     installed_at TIMESTAMP DEFAULT NOW(),
     uninstalled_at TIMESTAMP,
+    onboarding_completed_at TIMESTAMP,
     last_active_at TIMESTAMP DEFAULT NOW(),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
