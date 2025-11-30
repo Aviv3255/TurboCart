@@ -67,7 +67,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Shop not found' });
     }
 
-    const shopId = shopResult.rows[0].id;
+    const shopRecord = shopResult.rows[0];
+    if (!shopRecord) {
+      console.log('[Uninstall Webhook] Shop record is undefined');
+      return NextResponse.json({ success: true, message: 'Shop not found' });
+    }
+
+    const shopId = shopRecord.id;
     console.log('[Uninstall Webhook] Found shop ID:', shopId);
 
     // Clean up all shop data
