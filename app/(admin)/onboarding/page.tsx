@@ -372,7 +372,7 @@ export default function OnboardingPage() {
         .progress-header {
           background: #fff;
           border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-          padding: 32px 24px;
+          padding: 16px 24px;
           position: sticky;
           top: 0;
           z-index: 100;
@@ -381,39 +381,40 @@ export default function OnboardingPage() {
         .progress-content {
           max-width: 800px;
           margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 24px;
         }
 
         .progress-info {
-          text-align: center;
-          margin-bottom: 24px;
+          text-align: left;
         }
 
         .step-indicator {
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 1px;
-          color: #667eea;
-          margin-bottom: 8px;
+          letter-spacing: 0.5px;
+          color: #86868b;
+          margin-bottom: 2px;
         }
 
         .step-title {
-          font-size: 28px;
+          font-size: 18px;
           font-weight: 700;
           color: #1d1d1f;
-          margin: 0 0 4px 0;
-          letter-spacing: -0.5px;
+          margin: 0;
+          letter-spacing: -0.3px;
         }
 
         .step-subtitle {
-          font-size: 17px;
-          color: #86868b;
-          margin: 0;
+          display: none;
         }
 
         .progress-bar-container {
-          max-width: 400px;
-          margin: 0 auto;
+          flex: 1;
+          max-width: 300px;
         }
 
         .progress-bar {
@@ -421,7 +422,7 @@ export default function OnboardingPage() {
           background: #e5e5ea;
           border-radius: 2px;
           overflow: hidden;
-          margin-bottom: 12px;
+          margin-bottom: 8px;
         }
 
         .progress-fill {
@@ -970,10 +971,10 @@ function DisplayStylesStep({
           background: #fff;
           border: 2px solid rgba(0, 0, 0, 0.06);
           border-radius: 16px;
-          padding: 20px;
+          padding: 16px;
           display: grid;
-          grid-template-columns: 120px 1fr 40px;
-          gap: 20px;
+          grid-template-columns: 220px 1fr 32px;
+          gap: 16px;
           align-items: center;
           cursor: pointer;
           transition: all 0.2s ease;
@@ -991,22 +992,26 @@ function DisplayStylesStep({
         }
 
         .style-preview {
-          width: 160px;
-          height: 140px;
-          border-radius: 8px;
+          width: 220px;
+          height: 160px;
+          border-radius: 10px;
           overflow: hidden;
-          background: #f5f5f7;
+          background: #fafafa;
+          border: 1px solid #e5e5ea;
           flex-shrink: 0;
+          position: relative;
         }
 
         .style-preview :global(.preview-wrapper) {
-          transform: scale(0.42);
+          transform: scale(0.55);
           transform-origin: top left;
-          width: 380px;
+          width: 400px;
+          height: 290px;
         }
 
         .style-info {
           flex: 1;
+          min-width: 0;
         }
 
         .style-header {
@@ -1793,34 +1798,31 @@ function ThemeEnableStep({
 }) {
   const [enabled, setEnabled] = useState(false);
 
-  // Get shop domain for theme editor link
+  // Get shop domain for theme editor link - opens directly to App Embeds
   const getThemeEditorUrl = () => {
     // Try to get shop from URL params
     const urlParams = new URLSearchParams(window.location.search);
     const shop = urlParams.get('shop');
 
     if (shop) {
-      return `https://${shop}/admin/themes/current/editor?template=cart`;
+      // Open directly to App Embeds section
+      return `https://${shop}/admin/themes/current/editor?context=apps`;
     }
 
     // Try from App Bridge config
     if (typeof window !== 'undefined' && (window as { shopify?: { config?: { shop?: string } } }).shopify?.config?.shop) {
       const shopDomain = (window as { shopify?: { config?: { shop?: string } } }).shopify!.config!.shop;
-      return `https://${shopDomain}/admin/themes/current/editor?template=cart`;
+      return `https://${shopDomain}/admin/themes/current/editor?context=apps`;
     }
 
-    // Fallback - open in parent window context
-    return 'https://admin.shopify.com/store/themes/current/editor?template=cart';
+    // Fallback
+    return 'https://admin.shopify.com/store/themes/current/editor?context=apps';
   };
 
   const handleOpenThemeEditor = () => {
     const url = getThemeEditorUrl();
-    // For embedded apps, open in parent window
-    if (window.top !== window.self) {
-      window.open(url, '_top');
-    } else {
-      window.open(url, '_blank');
-    }
+    // Always open in a new tab
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
