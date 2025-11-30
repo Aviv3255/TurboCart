@@ -2,16 +2,6 @@
 # Learn more: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions
 
 api_version = "2024-01"
-
-[[extensions]]
 type = "theme"
 name = "TurboCart Upsells"
 handle = "turbocart-upsells"
-
-[extensions.capabilities]
-# Enable app embed block for global activation
-app_embed = true
-
-[[extensions.targeting]]
-module = "./blocks/turbocart-app-embed.liquid"
-target = "body"

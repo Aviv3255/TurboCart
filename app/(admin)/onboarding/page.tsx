@@ -572,7 +572,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
               <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <h3>ML Optimization</h3>
+          <h3>Machine Learning Optimization</h3>
           <p>Thompson Sampling algorithm learns what converts best for each cart type</p>
         </div>
 
@@ -875,7 +875,7 @@ function DisplayStylesStep({
   return (
     <div className="display-styles-step">
       <div className="step-intro">
-        <p>Select 1-3 display styles. The ML engine will automatically A/B test them to find what converts best for your store.</p>
+        <p>Select 1-3 display styles. The Machine Learning engine will automatically A/B test them to find what converts best for your store.</p>
       </div>
 
       <div className="selection-counter">
@@ -923,7 +923,7 @@ function DisplayStylesStep({
           </svg>
         </div>
         <div>
-          <strong>Pro tip:</strong> Select 2-3 styles to let the ML engine find the optimal combination for different cart types.
+          <strong>Pro tip:</strong> Select 2-3 styles to let the Machine Learning engine find the optimal combination for different cart types.
         </div>
       </div>
 
@@ -1534,11 +1534,11 @@ function SettingsStep({
           </div>
         </div>
 
-        {/* ML Settings */}
+        {/* Machine Learning Settings */}
         <div className="setting-card highlight">
           <div className="setting-header">
             <div className="header-with-badge">
-              <h3>ML Optimization</h3>
+              <h3>Machine Learning Optimization</h3>
               <span className="pro-badge">Recommended</span>
             </div>
             <p>Let AI automatically optimize your upsells</p>
@@ -1547,7 +1547,7 @@ function SettingsStep({
           <div className="toggle-row">
             <div>
               <h4>Auto-Optimize Products</h4>
-              <p>ML selects best products for each cart</p>
+              <p>Machine Learning selects best products for each cart</p>
             </div>
             <label className="toggle">
               <input
@@ -2105,7 +2105,7 @@ function LiveStep({
           </div>
           <div className="summary-item">
             <span className="summary-value">{data.settings.mlEnabled ? 'ON' : 'OFF'}</span>
-            <span className="summary-label">ML Optimization</span>
+            <span className="summary-label">Machine Learning</span>
           </div>
         </div>
       </div>
@@ -2115,7 +2115,7 @@ function LiveStep({
         <ul>
           <li>
             <span className="bullet">1</span>
-            ML engine starts learning from customer behavior immediately
+            Machine Learning engine starts learning from customer behavior immediately
           </li>
           <li>
             <span className="bullet">2</span>

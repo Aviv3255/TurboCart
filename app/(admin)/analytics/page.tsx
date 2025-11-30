@@ -1810,7 +1810,7 @@ function AttributionTab({
     <div className="attribution-tab">
       <div className="attribution-header">
         <h2>Revenue Attribution</h2>
-        <p>Before vs after ML optimization</p>
+        <p>Before vs after Machine Learning optimization</p>
       </div>
 
       <div className="attribution-comparison">
@@ -1874,7 +1874,7 @@ function AttributionTab({
           <div className="improvement-content">
             <div className="improvement-label">Additional Revenue Generated</div>
             <div className="improvement-value">{formatCurrency(attribution.improvement.additionalRevenue)}</div>
-            <div className="improvement-percent">from ML optimization</div>
+            <div className="improvement-percent">from Machine Learning optimization</div>
           </div>
         </div>
       </div>

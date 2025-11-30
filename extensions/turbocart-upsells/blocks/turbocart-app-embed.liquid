@@ -1,22 +1,21 @@
 {% comment %}
-  TurboCart App Embed
-  This embed loads globally on the store and injects the upsell functionality
-  on cart pages and cart drawers.
+  TurboCart App Embed Block
+  This app embed loads globally on the store and enables TurboCart upsells.
+  Merchants can activate this from Theme Settings > App embeds in the theme editor.
 {% endcomment %}
 
-{% if request.page_type == 'cart' or request.design_mode %}
-  <script>
-    window.TurboCartConfig = {
-      shopDomain: '{{ shop.permanent_domain }}',
-      enabled: true,
-      appUrl: '{{ shop.metafields.turbocart.app_url | default: "" }}'
-    };
-  </script>
+<script>
+  window.TurboCartConfig = {
+    shopDomain: '{{ shop.permanent_domain }}',
+    enabled: {{ block.settings.enabled }},
+    displayPosition: '{{ block.settings.display_position }}',
+    maxProducts: {{ block.settings.max_products }},
+    appUrl: '{{ shop.metafields.turbocart.app_url | default: "" }}'
+  };
+</script>
 
-  <div id="turbocart-container" data-turbocart-embed style="display: none;">
-    <!-- TurboCart upsells will be rendered here -->
-  </div>
-
+{% if block.settings.enabled %}
+  <div id="turbocart-app-embed" data-turbocart-embed></div>
   {{ 'turbocart.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'turbocart.js' | asset_url }}" defer></script>
 {% endif %}
@@ -25,14 +24,15 @@
 {
   "name": "TurboCart AI Upsells",
   "target": "body",
-  "javascript": "turbocart.js",
   "stylesheet": "turbocart.css",
+  "javascript": "turbocart.js",
   "settings": [
     {
       "type": "checkbox",
       "id": "enabled",
       "label": "Enable TurboCart Upsells",
-      "default": true
+      "default": true,
+      "info": "Toggle to enable or disable upsell recommendations"
     },
     {
       "type": "select",
@@ -58,10 +58,11 @@
       "type": "range",
       "id": "max_products",
       "min": 1,
-      "max": 5,
+      "max": 20,
       "step": 1,
       "label": "Maximum products to show",
-      "default": 3
+      "default": 3,
+      "info": "Choose how many upsell products to display (1-20)"
     }
   ]
 }
