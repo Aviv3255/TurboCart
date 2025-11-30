@@ -35,7 +35,7 @@ uri = "/api/webhooks/gdpr/shop-redact"
 # App lifecycle webhooks
 [[webhooks.subscriptions]]
 topics = ["app/uninstalled"]
-uri = "/api/webhooks/app-uninstalled"
+uri = "/api/webhooks/app/uninstalled"
 
 # Product webhooks
 [[webhooks.subscriptions]]
