@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+// Use system font stack for reliable builds (avoids Google Fonts network dependency)
+const fontClass = 'font-sans';
 
 export const metadata: Metadata = {
   title: 'TurboCart - AI Cart Upsells',
@@ -24,7 +24,7 @@ export default function RootLayout({
         {/* App Bridge v4: Synchronous script load - no async/defer */}
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
       </head>
-      <body className={inter.className}>
+      <body className={fontClass}>
         {/*
           ui-nav-menu Web Component - Shopify's native sidebar navigation
           - First link with rel="home" defines app home (not displayed as link)
