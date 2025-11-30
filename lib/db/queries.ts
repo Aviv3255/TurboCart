@@ -21,7 +21,16 @@ export interface Shop {
   updated_at: Date;
 }
 
-export type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'inline';
+export type DisplayStyle =
+  | 'minimal-strip'
+  | 'list'
+  | 'banner'
+  | 'cards'
+  | 'frequently-bought'
+  | 'masonry-grid'
+  | 'vertical-scroll'
+  | 'sticky-tabs'
+  | 'comparison-table';
 
 export interface ShopSettings {
   display_style: DisplayStyle;

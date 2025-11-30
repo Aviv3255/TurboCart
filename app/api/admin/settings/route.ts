@@ -60,7 +60,10 @@ export async function POST(request: NextRequest) {
       const validSettings: Partial<ShopSettings> = {};
 
       if (settings.display_style) {
-        const validStyles = ['minimal-strip', 'list', 'banner', 'cards', 'frequently-bought', 'inline'];
+        const validStyles = [
+          'minimal-strip', 'list', 'banner', 'cards', 'frequently-bought',
+          'masonry-grid', 'vertical-scroll', 'sticky-tabs', 'comparison-table'
+        ];
         if (!validStyles.includes(settings.display_style)) {
           return NextResponse.json(
             { error: 'Invalid display_style' },
@@ -118,7 +121,10 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const validDisplayStyles = ['minimal-strip', 'list', 'banner', 'cards', 'frequently-bought', 'inline'];
+        const validDisplayStyles = [
+          'minimal-strip', 'list', 'banner', 'cards', 'frequently-bought',
+          'masonry-grid', 'vertical-scroll', 'sticky-tabs', 'comparison-table'
+        ];
         const invalidStyles = settings.enabled_display_styles.filter(
           (style: string) => !validDisplayStyles.includes(style)
         );
