@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exchangeCodeForToken, verifyHmac } from '@/lib/shopify/auth';
 import { createShop } from '@/lib/db/queries';
+import { registerWebhooks } from '@/lib/shopify/webhooks';
 
 // Force dynamic rendering for OAuth routes
 export const dynamic = 'force-dynamic';
@@ -84,6 +85,15 @@ export async function GET(request: NextRequest) {
       hasAccessToken: !!shopRecord.access_token
     });
     console.log('[OAuth Callback] ========================================');
+
+    // Register webhooks
+    console.log('[OAuth Callback] Registering webhooks...');
+    const webhookResult = await registerWebhooks(shop, access_token);
+    if (!webhookResult.success) {
+      console.warn('[OAuth Callback] Some webhooks failed to register:', webhookResult.errors);
+    } else {
+      console.log('[OAuth Callback] ✅ All webhooks registered successfully');
+    }
 
     // Get API key for redirect
     const apiKey = process.env.SHOPIFY_API_KEY;

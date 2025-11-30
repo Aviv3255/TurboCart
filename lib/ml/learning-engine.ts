@@ -21,14 +21,18 @@ export interface EventOutcome {
   sessionId: string;
   eventType: 'impression' | 'click' | 'add' | 'purchase';
   displayStyle: string;
-  productIds: number[];
+  productIds: number[];  // Products being shown as upsells
   productPositions: Record<number, number>;
   revenue?: number;
   cartValue: number;
   cartItemCount: number;
+  cartProductIds?: number[];  // Products currently in the cart (for context learning)
+  cartProductTypes?: string[];  // Product types in cart
   timeOfDay: string;
   dayOfWeek: number;
   decisionId?: string;
+  deviceType?: 'mobile' | 'tablet' | 'desktop';
+  customerSegment?: 'new' | 'returning' | 'vip' | 'at_risk';
 }
 
 /**
@@ -56,12 +60,18 @@ export class MLLearningEngine {
       // 3. Update combination performance
       await this.updateCombinationPerformance(outcome);
 
-      // 4. Update decision log with outcome
+      // 4. Update cart context matrix (granular cart optimization)
+      await this.updateCartContextMatrix(outcome);
+
+      // 5. Update product-in-cart context (what works when X is in cart)
+      await this.updateCartProductContext(outcome);
+
+      // 6. Update decision log with outcome
       if (outcome.decisionId) {
         await this.updateDecisionOutcome(outcome);
       }
 
-      // 5. Detect and learn patterns (async, don't wait)
+      // 7. Detect and learn patterns (async, don't wait)
       this.learnContextPatterns(outcome).catch((err) =>
         console.error('Error learning context patterns:', err)
       );
@@ -418,6 +428,200 @@ export class MLLearningEngine {
        LIMIT 1`,
       [outcome.eventType, outcome.revenue || null, this.shopId, outcome.sessionId]
     );
+  }
+
+  /**
+   * Update cart context matrix
+   * Tracks performance by cart value × item count × display style
+   * This enables granular optimization: "Small carts (1 item, <$50) work best with Cards style"
+   */
+  private async updateCartContextMatrix(outcome: EventOutcome): Promise<void> {
+    const cartValueBucket = this.getCartValueBucket(outcome.cartValue);
+    const cartItemCountBucket = this.getCartItemCountBucket(outcome.cartItemCount);
+    const isSuccess = outcome.eventType === 'add' || outcome.eventType === 'purchase';
+    const revenue = outcome.revenue || 0;
+
+    // Use database function to update (handles all the logic)
+    try {
+      await query(
+        `SELECT update_cart_context_outcome($1, $2, $3, $4, $5, $6)`,
+        [
+          this.shopId,
+          outcome.cartValue,
+          outcome.cartItemCount,
+          outcome.displayStyle,
+          isSuccess,
+          revenue,
+        ]
+      );
+    } catch (err) {
+      // Function may not exist yet (migration not run), fall back to manual update
+      await this.updateCartContextMatrixManual(outcome, cartValueBucket, cartItemCountBucket, isSuccess, revenue);
+    }
+  }
+
+  /**
+   * Manual cart context matrix update (fallback if function doesn't exist)
+   */
+  private async updateCartContextMatrixManual(
+    outcome: EventOutcome,
+    cartValueBucket: string,
+    cartItemCountBucket: string,
+    isSuccess: boolean,
+    revenue: number
+  ): Promise<void> {
+    const result = await query<{
+      impressions: number;
+      adds: number;
+      revenue: number;
+      alpha: number;
+      beta: number;
+    }>(
+      `SELECT impressions, adds, revenue, alpha, beta
+       FROM ml_cart_context_matrix
+       WHERE shop_id = $1
+         AND cart_value_bucket = $2
+         AND cart_item_count_bucket = $3
+         AND display_style = $4`,
+      [this.shopId, cartValueBucket, cartItemCountBucket, outcome.displayStyle]
+    );
+
+    let impressions = 1;
+    let adds = isSuccess ? 1 : 0;
+    let totalRevenue = revenue;
+    let alpha = isSuccess ? 2 : 1;
+    let beta = isSuccess ? 1 : 2;
+
+    if (result.rows.length > 0) {
+      impressions = result.rows[0]!.impressions + 1;
+      adds = result.rows[0]!.adds + (isSuccess ? 1 : 0);
+      totalRevenue = Number(result.rows[0]!.revenue) + revenue;
+      alpha = Number(result.rows[0]!.alpha) + (isSuccess ? 1 : 0);
+      beta = Number(result.rows[0]!.beta) + (isSuccess ? 0 : 1);
+    }
+
+    const acceptanceRate = impressions > 0 ? adds / impressions : 0;
+    const revenuePerImpression = impressions > 0 ? totalRevenue / impressions : 0;
+    const confidenceScore = Math.min(0.99, 1 - 1.0 / Math.sqrt(alpha + beta));
+
+    await query(
+      `INSERT INTO ml_cart_context_matrix (
+        shop_id, cart_value_bucket, cart_item_count_bucket, display_style,
+        impressions, adds, revenue, acceptance_rate, revenue_per_impression,
+        alpha, beta, sample_size, confidence_score
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $5, $12)
+      ON CONFLICT (shop_id, cart_value_bucket, cart_item_count_bucket, display_style)
+      DO UPDATE SET
+        impressions = $5,
+        adds = $6,
+        revenue = $7,
+        acceptance_rate = $8,
+        revenue_per_impression = $9,
+        alpha = $10,
+        beta = $11,
+        sample_size = $5,
+        confidence_score = $12,
+        updated_at = NOW()`,
+      [
+        this.shopId,
+        cartValueBucket,
+        cartItemCountBucket,
+        outcome.displayStyle,
+        impressions,
+        adds,
+        totalRevenue,
+        acceptanceRate,
+        revenuePerImpression,
+        alpha,
+        beta,
+        confidenceScore,
+      ]
+    );
+  }
+
+  /**
+   * Update product-in-cart context
+   * Tracks what upsells work best when specific products are in the cart
+   * This enables: "When Product X is in cart, upsell Product Y works 40% better"
+   */
+  private async updateCartProductContext(outcome: EventOutcome): Promise<void> {
+    // Skip if no cart product IDs in outcome (we need to know what's in cart)
+    if (!outcome.cartProductIds || outcome.cartProductIds.length === 0) {
+      return;
+    }
+
+    const isSuccess = outcome.eventType === 'add' || outcome.eventType === 'purchase';
+    const revenue = outcome.revenue || 0;
+
+    // For each product currently in cart, track performance of the upsell
+    for (const triggerProductId of outcome.cartProductIds) {
+      const result = await query<{
+        impressions: number;
+        adds: number;
+        revenue: number;
+        alpha: number;
+        beta: number;
+      }>(
+        `SELECT impressions, adds, revenue, alpha, beta
+         FROM ml_cart_product_context
+         WHERE shop_id = $1
+           AND trigger_product_id = $2
+           AND display_style = $3`,
+        [this.shopId, triggerProductId, outcome.displayStyle]
+      );
+
+      let impressions = 1;
+      let adds = isSuccess ? 1 : 0;
+      let totalRevenue = revenue;
+      let alpha = isSuccess ? 2 : 1;
+      let beta = isSuccess ? 1 : 2;
+
+      if (result.rows.length > 0) {
+        impressions = result.rows[0]!.impressions + 1;
+        adds = result.rows[0]!.adds + (isSuccess ? 1 : 0);
+        totalRevenue = Number(result.rows[0]!.revenue) + revenue;
+        alpha = Number(result.rows[0]!.alpha) + (isSuccess ? 1 : 0);
+        beta = Number(result.rows[0]!.beta) + (isSuccess ? 0 : 1);
+      }
+
+      const acceptanceRate = impressions > 0 ? adds / impressions : 0;
+      const revenuePerImpression = impressions > 0 ? totalRevenue / impressions : 0;
+      const confidenceScore = Math.min(0.99, 1 - 1.0 / Math.sqrt(alpha + beta));
+
+      await query(
+        `INSERT INTO ml_cart_product_context (
+          shop_id, trigger_product_id, display_style, recommended_product_ids,
+          impressions, adds, revenue, acceptance_rate, revenue_per_impression,
+          alpha, beta, confidence_score
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        ON CONFLICT (shop_id, trigger_product_id, display_style)
+        DO UPDATE SET
+          recommended_product_ids = $4,
+          impressions = $5,
+          adds = $6,
+          revenue = $7,
+          acceptance_rate = $8,
+          revenue_per_impression = $9,
+          alpha = $10,
+          beta = $11,
+          confidence_score = $12,
+          updated_at = NOW()`,
+        [
+          this.shopId,
+          triggerProductId,
+          outcome.displayStyle,
+          outcome.productIds,
+          impressions,
+          adds,
+          totalRevenue,
+          acceptanceRate,
+          revenuePerImpression,
+          alpha,
+          beta,
+          confidenceScore,
+        ]
+      );
+    }
   }
 
   /**

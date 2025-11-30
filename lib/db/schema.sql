@@ -17,7 +17,8 @@ CREATE TABLE shops (
     billing_id BIGINT,
     trial_ends_at TIMESTAMP,
     settings JSONB DEFAULT '{
-        "display_style": "minimal-strip",
+        "display_style": "cards",
+        "enabled_display_styles": ["cards"],
         "cart_type": "drawer",
         "max_upsells": 3,
         "position": "top",

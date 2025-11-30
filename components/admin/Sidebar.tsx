@@ -38,9 +38,14 @@ const NAV_ITEMS: NavItem[] = [
     icon: ProductIcon,
   },
   {
-    label: 'Analytics',
+    label: 'ML Analytics',
     href: '/analytics',
     icon: ChartVerticalIcon,
+  },
+  {
+    label: 'ML Config',
+    href: '/ml-config',
+    icon: SettingsIcon,
   },
   {
     label: 'Billing',

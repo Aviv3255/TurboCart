@@ -139,6 +139,25 @@ export async function GET(request: NextRequest) {
       });
     } catch (error) {
       console.error('Error fetching products:', error);
+
+      // Check if this is an authentication error from Shopify
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (
+        errorMessage.includes('Invalid API key') ||
+        errorMessage.includes('access token') ||
+        errorMessage.includes('Unauthorized') ||
+        errorMessage.includes('401')
+      ) {
+        return NextResponse.json(
+          {
+            error: 'Authentication expired',
+            code: 'REAUTH_REQUIRED',
+            message: 'Your Shopify session has expired. Please reinstall the app from your Shopify admin.',
+          },
+          { status: 401 }
+        );
+      }
+
       return NextResponse.json(
         { error: 'Failed to fetch products' },
         { status: 500 }

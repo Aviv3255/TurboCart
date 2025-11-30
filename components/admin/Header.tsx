@@ -10,9 +10,10 @@ import { MenuIcon } from '@shopify/polaris-icons';
 
 interface HeaderProps {
   onMenuToggle: () => void;
+  sidebarOpen?: boolean;
 }
 
-export default function AdminHeader({ onMenuToggle }: HeaderProps) {
+export default function AdminHeader({ onMenuToggle, sidebarOpen }: HeaderProps) {
   const [shopName] = useState('Demo Store'); // Will be dynamic
 
   return (

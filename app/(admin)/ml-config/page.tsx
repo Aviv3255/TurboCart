@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { Page, Card, Checkbox, Button, Banner, Badge, Text } from '@shopify/polaris';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
 interface DisplayStyleOption {
   value: string;
@@ -65,7 +66,7 @@ export default function MLConfigPage() {
   const fetchConfig = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/settings');
+      const response = await authenticatedFetch('/api/admin/settings');
 
       if (!response.ok) throw new Error('Failed to fetch');
 
@@ -110,7 +111,7 @@ export default function MLConfigPage() {
 
       const enabledStyles = displayStyles.filter((s) => s.enabled).map((s) => s.value);
 
-      const response = await fetch('/api/admin/settings', {
+      const response = await authenticatedFetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

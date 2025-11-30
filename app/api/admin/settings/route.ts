@@ -60,7 +60,10 @@ export async function POST(request: NextRequest) {
       const validSettings: Partial<ShopSettings> = {};
 
       if (settings.display_style) {
-        const validStyles = ['minimal-strip', 'list', 'banner', 'cards', 'frequently-bought', 'inline'];
+        const validStyles = [
+          'minimal-strip', 'list', 'banner', 'cards', 'frequently-bought',
+          'masonry-grid', 'vertical-scroll', 'sticky-tabs', 'comparison-table'
+        ];
         if (!validStyles.includes(settings.display_style)) {
           return NextResponse.json(
             { error: 'Invalid display_style' },
@@ -107,6 +110,40 @@ export async function POST(request: NextRequest) {
 
       if (settings.enable_ab_testing !== undefined) {
         validSettings.enable_ab_testing = Boolean(settings.enable_ab_testing);
+      }
+
+      // Validate enabled_display_styles array (for ML A/B testing)
+      if (settings.enabled_display_styles !== undefined) {
+        if (!Array.isArray(settings.enabled_display_styles)) {
+          return NextResponse.json(
+            { error: 'enabled_display_styles must be an array' },
+            { status: 400 }
+          );
+        }
+
+        const validDisplayStyles = [
+          'minimal-strip', 'list', 'banner', 'cards', 'frequently-bought',
+          'masonry-grid', 'vertical-scroll', 'sticky-tabs', 'comparison-table'
+        ];
+        const invalidStyles = settings.enabled_display_styles.filter(
+          (style: string) => !validDisplayStyles.includes(style)
+        );
+
+        if (invalidStyles.length > 0) {
+          return NextResponse.json(
+            { error: `Invalid display styles: ${invalidStyles.join(', ')}` },
+            { status: 400 }
+          );
+        }
+
+        if (settings.enabled_display_styles.length < 1 || settings.enabled_display_styles.length > 3) {
+          return NextResponse.json(
+            { error: 'Must select 1-3 display styles for ML optimization' },
+            { status: 400 }
+          );
+        }
+
+        validSettings.enabled_display_styles = settings.enabled_display_styles;
       }
 
       // Update settings in database

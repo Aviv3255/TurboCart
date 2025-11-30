@@ -1,6 +1,6 @@
 /**
  * Product Selection Page
- * Let merchants choose 10-50 products for upselling
+ * Let merchants choose 1-25 products for upselling
  */
 
 'use client';
@@ -29,6 +29,7 @@ import {
   TextContainer,
 } from '@shopify/polaris';
 import { SearchIcon, ProductIcon } from '@shopify/polaris-icons';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
 interface Product {
   id: string;
@@ -72,7 +73,7 @@ export default function ProductsPage() {
 
   const fetchSelectedProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products/selected');
+      const response = await authenticatedFetch('/api/admin/products/selected');
       if (!response.ok) return;
 
       const data = await response.json();
@@ -91,13 +92,29 @@ export default function ProductsPage() {
       if (query) params.append('query', query);
       if (productType) params.append('productType', productType);
 
-      const response = await fetch(`/api/admin/products?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch products');
+      const response = await authenticatedFetch(`/api/admin/products?${params}`);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+
+        // Handle re-authentication required
+        if (errorData.code === 'REAUTH_REQUIRED' || response.status === 401) {
+          setToastMessage('Session expired. Please reinstall the app from your Shopify admin.');
+          setToastError(true);
+          setToastActive(true);
+          return;
+        }
+
+        throw new Error('Failed to fetch products');
+      }
 
       const data = await response.json();
       setProducts(data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setToastMessage('Failed to load products. Please try again.');
+      setToastError(true);
+      setToastActive(true);
     } finally {
       setLoading(false);
     }
@@ -112,7 +129,7 @@ export default function ProductsPage() {
         selectedProducts.includes(p.id)
       );
 
-      const response = await fetch('/api/admin/products/selected', {
+      const response = await authenticatedFetch('/api/admin/products/selected', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ products: selectedProductsData }),
@@ -160,13 +177,13 @@ export default function ProductsPage() {
 
   // Selection info
   const selectionCount = selectedProducts.length;
-  const isValidSelection = selectionCount >= 10 && selectionCount <= 50;
+  const isValidSelection = selectionCount >= 1 && selectionCount <= 25;
 
   return (
     <Frame>
       <Page
         title="Product Selection"
-        subtitle="Choose 10-50 products to upsell"
+        subtitle="Choose 1-25 products to upsell"
         backAction={{ content: 'Dashboard', onAction: () => router.push('/dashboard') }}
         primaryAction={{
           content: 'Save Selection',
@@ -182,8 +199,8 @@ export default function ProductsPage() {
             title={`${selectionCount} products selected`}
             tone={isValidSelection ? 'success' : 'warning'}
           >
-            {selectionCount < 10 && <p>Select at least {10 - selectionCount} more products</p>}
-            {selectionCount > 50 && <p>You can select maximum 50 products (remove {selectionCount - 50})</p>}
+            {selectionCount < 1 && <p>Select at least 1 product</p>}
+            {selectionCount > 25 && <p>You can select maximum 25 products (remove {selectionCount - 25})</p>}
             {isValidSelection && <p>Perfect! Click "Save Selection" to continue.</p>}
           </Banner>
         </div>
