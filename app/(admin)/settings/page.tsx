@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { Page, Card, Checkbox, Button, Banner, BlockStack, Text, InlineStack } from '@shopify/polaris';
 import DisplayStylePreview from '@/components/DisplayStylePreview';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
 type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'masonry-grid' | 'vertical-scroll' | 'sticky-tabs' | 'comparison-table';
 
@@ -97,7 +98,7 @@ export default function SettingsPage() {
   const fetchCurrentSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/settings');
+      const response = await authenticatedFetch('/api/admin/settings');
 
       if (!response.ok) {
         throw new Error('Failed to fetch settings');
@@ -142,7 +143,7 @@ export default function SettingsPage() {
       setSaving(true);
       setSaved(false);
 
-      const response = await fetch('/api/admin/settings', {
+      const response = await authenticatedFetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

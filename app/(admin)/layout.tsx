@@ -10,6 +10,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { AppProvider } from '@shopify/polaris';
 import '@shopify/polaris/build/esm/styles.css';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
 // Polaris i18n config
 const POLARIS_I18N = {
@@ -75,7 +76,7 @@ function AdminLayoutContent({
       }
 
       try {
-        const response = await fetch('/api/admin/shop/onboarding-status');
+        const response = await authenticatedFetch('/api/admin/shop/onboarding-status');
         if (response.ok) {
           const data = await response.json();
           if (!data.onboardingComplete) {

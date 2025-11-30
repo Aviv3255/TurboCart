@@ -16,6 +16,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
 // Types
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
@@ -991,7 +992,7 @@ function ProductSelectionStep({
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products');
+      const response = await authenticatedFetch('/api/admin/products');
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);

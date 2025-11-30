@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { Page, Card, Button, Badge, Text, Banner, Spinner } from '@shopify/polaris';
 import { PRICING_TIERS, formatPrice, type PricingTier } from '@/lib/pricing';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
 interface BillingStatus {
   status: string;
@@ -33,7 +34,7 @@ export default function BillingPage() {
   const fetchBillingStatus = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/billing');
+      const response = await authenticatedFetch('/api/admin/billing');
 
       if (!response.ok) {
         throw new Error('Failed to fetch billing status');
@@ -54,7 +55,7 @@ export default function BillingPage() {
       setSubscribing(true);
       setSelectedPlan(planId);
 
-      const response = await fetch('/api/admin/billing/subscribe', {
+      const response = await authenticatedFetch('/api/admin/billing/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planId, annual }),
@@ -84,7 +85,7 @@ export default function BillingPage() {
     }
 
     try {
-      const response = await fetch('/api/admin/billing/cancel', {
+      const response = await authenticatedFetch('/api/admin/billing/cancel', {
         method: 'POST',
       });
 

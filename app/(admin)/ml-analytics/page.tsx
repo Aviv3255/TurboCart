@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { Page, Card, Button, Spinner, EmptyState, Badge, Tabs } from '@shopify/polaris';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 import {
   LineChart,
   Line,
@@ -87,7 +88,7 @@ export default function MLAnalyticsPage() {
   const fetchMLAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/ml-analytics?shop=demo-store.myshopify.com');
+      const response = await authenticatedFetch('/api/admin/ml-analytics');
 
       if (!response.ok) throw new Error('Failed to fetch');
 

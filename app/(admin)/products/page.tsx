@@ -29,6 +29,7 @@ import {
   TextContainer,
 } from '@shopify/polaris';
 import { SearchIcon, ProductIcon } from '@shopify/polaris-icons';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
 interface Product {
   id: string;
@@ -72,7 +73,7 @@ export default function ProductsPage() {
 
   const fetchSelectedProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products/selected');
+      const response = await authenticatedFetch('/api/admin/products/selected');
       if (!response.ok) return;
 
       const data = await response.json();
@@ -91,7 +92,7 @@ export default function ProductsPage() {
       if (query) params.append('query', query);
       if (productType) params.append('productType', productType);
 
-      const response = await fetch(`/api/admin/products?${params}`);
+      const response = await authenticatedFetch(`/api/admin/products?${params}`);
       if (!response.ok) throw new Error('Failed to fetch products');
 
       const data = await response.json();
@@ -112,7 +113,7 @@ export default function ProductsPage() {
         selectedProducts.includes(p.id)
       );
 
-      const response = await fetch('/api/admin/products/selected', {
+      const response = await authenticatedFetch('/api/admin/products/selected', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ products: selectedProductsData }),
