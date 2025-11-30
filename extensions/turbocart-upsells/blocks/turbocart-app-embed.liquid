@@ -1,0 +1,68 @@
+{% comment %}
+  TurboCart App Embed
+  This embed loads globally on the store and injects the upsell functionality
+  on cart pages and cart drawers.
+{% endcomment %}
+
+{% if request.page_type == 'cart' or request.design_mode %}
+  <script>
+    window.TurboCartConfig = {
+      shopDomain: '{{ shop.permanent_domain }}',
+      enabled: true,
+      appUrl: '{{ shop.metafields.turbocart.app_url | default: "" }}'
+    };
+  </script>
+
+  <div id="turbocart-container" data-turbocart-embed style="display: none;">
+    <!-- TurboCart upsells will be rendered here -->
+  </div>
+
+  {{ 'turbocart.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'turbocart.js' | asset_url }}" defer></script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "TurboCart AI Upsells",
+  "target": "body",
+  "javascript": "turbocart.js",
+  "stylesheet": "turbocart.css",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable TurboCart Upsells",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "display_position",
+      "label": "Display Position",
+      "default": "before_checkout",
+      "options": [
+        {
+          "value": "before_checkout",
+          "label": "Before checkout button"
+        },
+        {
+          "value": "after_items",
+          "label": "After cart items"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom of cart"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Maximum products to show",
+      "default": 3
+    }
+  ]
+}
+{% endschema %}

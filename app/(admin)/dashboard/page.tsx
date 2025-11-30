@@ -283,7 +283,7 @@ export default function DashboardPage() {
           <div className="card">
             <div className="card-header">
               <h3>Top Performing Styles</h3>
-              <span className="badge">ML Optimized</span>
+              <span className="badge ml-badge">Machine Learning</span>
             </div>
             {data?.topStyles && data.topStyles.length > 0 ? (
               <div className="styles-list">
@@ -667,6 +667,27 @@ export default function DashboardPage() {
           font-weight: 600;
           padding: 4px 10px;
           border-radius: 10px;
+        }
+
+        .badge.ml-badge {
+          background: #000;
+          color: transparent;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          position: relative;
+          padding: 6px 12px;
+          border-radius: 8px;
+        }
+
+        .badge.ml-badge::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: #000;
+          border-radius: 8px;
+          z-index: -1;
         }
 
         .status-badge {
