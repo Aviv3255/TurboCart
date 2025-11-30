@@ -62,6 +62,14 @@ export async function createShop(
     enable_ab_testing: true,
   };
 
+  // First, check if this shop already exists (reinstall scenario)
+  const existingShop = await query<{ id: string; uninstalled_at: Date | null }>(
+    'SELECT id, uninstalled_at FROM shops WHERE shop_domain = $1',
+    [domain]
+  );
+
+  const isReinstall = existingShop.rows.length > 0;
+
   const result = await query<Shop>(
     `INSERT INTO shops (shop_domain, access_token, settings)
      VALUES ($1, $2, $3::jsonb)
@@ -69,6 +77,7 @@ export async function createShop(
      DO UPDATE SET
        access_token = $2,
        uninstalled_at = NULL,
+       onboarding_completed_at = NULL,
        last_active_at = NOW(),
        settings = $3::jsonb,
        plan = 'free',
@@ -82,8 +91,27 @@ export async function createShop(
 
   const shop = result.rows[0]!;
 
-  // Clear any existing upsell products (for reinstalls)
-  await query('DELETE FROM upsell_products WHERE shop_id = $1', [shop.id]);
+  // If this is a reinstall, clear ALL old data for a fresh start
+  if (isReinstall) {
+    console.log('[createShop] Reinstall detected - clearing all old data for shop:', domain);
+
+    // Clear upsell products
+    await query('DELETE FROM upsell_products WHERE shop_id = $1', [shop.id]);
+
+    // Clear upsell events
+    await query('DELETE FROM upsell_events WHERE shop_id = $1', [shop.id]);
+
+    // Clear analytics data
+    await query('DELETE FROM analytics_daily WHERE shop_id = $1', [shop.id]);
+
+    // Clear A/B tests
+    await query('DELETE FROM ab_tests WHERE shop_id = $1', [shop.id]);
+
+    // Clear product affinities
+    await query('DELETE FROM product_affinities WHERE shop_id = $1', [shop.id]);
+
+    console.log('[createShop] All old data cleared - shop starts fresh');
+  }
 
   return shop;
 }

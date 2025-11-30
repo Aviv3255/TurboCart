@@ -2,6 +2,65 @@
 # Learn more: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions
 
 api_version = "2024-01"
+
+[[extensions]]
 type = "theme"
 name = "TurboCart Upsells"
 handle = "turbocart-upsells"
+
+  # App Embed Block - appears in App Embeds section
+  [[extensions.blocks]]
+  type = "app_embed"
+  name = "TurboCart AI Upsells"
+  file = "blocks/turbocart-app-embed.liquid"
+
+  # Section Blocks - appear when adding blocks to sections
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Minimal Strip"
+  file = "blocks/upsell-minimal-strip.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Product Cards"
+  file = "blocks/upsell-cards.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Frequently Bought"
+  file = "blocks/upsell-frequently-bought.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Banner"
+  file = "blocks/upsell-banner.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Simple List"
+  file = "blocks/upsell-list.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Carousel"
+  file = "blocks/upsell-carousel.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Masonry Grid"
+  file = "blocks/upsell-masonry-grid.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Vertical Scroll"
+  file = "blocks/upsell-vertical-scroll.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Sticky Tabs"
+  file = "blocks/upsell-sticky-tabs.liquid"
+
+  [[extensions.blocks]]
+  type = "theme_block"
+  name = "Comparison Table"
+  file = "blocks/upsell-comparison-table.liquid"
