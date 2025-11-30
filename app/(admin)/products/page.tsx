@@ -93,12 +93,28 @@ export default function ProductsPage() {
       if (productType) params.append('productType', productType);
 
       const response = await authenticatedFetch(`/api/admin/products?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch products');
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+
+        // Handle re-authentication required
+        if (errorData.code === 'REAUTH_REQUIRED' || response.status === 401) {
+          setToastMessage('Session expired. Please reinstall the app from your Shopify admin.');
+          setToastError(true);
+          setToastActive(true);
+          return;
+        }
+
+        throw new Error('Failed to fetch products');
+      }
 
       const data = await response.json();
       setProducts(data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setToastMessage('Failed to load products. Please try again.');
+      setToastError(true);
+      setToastActive(true);
     } finally {
       setLoading(false);
     }

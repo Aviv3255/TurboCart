@@ -21,40 +21,35 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
-      // Check if shop has completed onboarding
-      // This checks for: 1) ML config exists, 2) At least one upsell product, 3) Widget enabled
+      // Check if shop has completed onboarding by checking:
+      // 1) Has at least one upsell product selected
+      // 2) Has settings configured (enabled_display_styles)
       const result = await query<{
-        has_ml_config: boolean;
         has_products: boolean;
-        widget_enabled: boolean;
-        onboarding_completed_at: Date | null;
+        settings: { enabled_display_styles?: string[] } | null;
       }>(
         `SELECT
-          EXISTS(SELECT 1 FROM ml_configurations WHERE shop_id = $1) as has_ml_config,
           EXISTS(SELECT 1 FROM upsell_products WHERE shop_id = $1 AND is_active = true) as has_products,
-          COALESCE(
-            (SELECT widget_enabled FROM shop_settings WHERE shop_id = $1),
-            false
-          ) as widget_enabled,
-          (SELECT onboarding_completed_at FROM shops WHERE id = $1) as onboarding_completed_at
-        `,
+          settings
+        FROM shops
+        WHERE id = $1`,
         [req.shop.id]
       );
 
-      const status = result.rows[0];
+      const data = result.rows[0];
+      const hasProducts = data?.has_products || false;
+      const hasSettings = data?.settings?.enabled_display_styles &&
+                          data.settings.enabled_display_styles.length > 0;
 
-      // Onboarding is complete if they've explicitly completed it OR have all required setup
-      const onboardingComplete =
-        status?.onboarding_completed_at !== null ||
-        (status?.has_ml_config && status?.has_products);
+      // Onboarding is complete if they have products selected
+      // (settings have defaults so they're always valid)
+      const onboardingComplete = hasProducts;
 
       return NextResponse.json({
         onboardingComplete,
         status: {
-          hasMLConfig: status?.has_ml_config || false,
-          hasProducts: status?.has_products || false,
-          widgetEnabled: status?.widget_enabled || false,
-          completedAt: status?.onboarding_completed_at,
+          hasProducts,
+          hasSettings: !!hasSettings,
         },
       });
     } catch (error) {
