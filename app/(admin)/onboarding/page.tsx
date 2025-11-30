@@ -17,6 +17,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
+import DisplayStylePreview from '@/components/DisplayStylePreview';
 
 // Types
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
@@ -43,7 +44,7 @@ interface OnboardingData {
   displayStyles: DisplayStyleConfig[];
   selectedProducts: SelectedProduct[];
   settings: {
-    position: 'above_cart' | 'below_cart' | 'popup';
+    cartType: 'page' | 'drawer';
     maxProducts: number;
     showPrices: boolean;
     showCompareAt: boolean;
@@ -57,7 +58,7 @@ const INITIAL_DATA: OnboardingData = {
   displayStyles: [],
   selectedProducts: [],
   settings: {
-    position: 'above_cart',
+    cartType: 'drawer',
     maxProducts: 3,
     showPrices: true,
     showCompareAt: true,
@@ -76,12 +77,60 @@ const STEP_CONFIG = [
   { title: 'You\'re Live!', subtitle: 'Start earning more' },
 ];
 
+// LocalStorage key for persisting onboarding data
+const ONBOARDING_STORAGE_KEY = 'turbocart_onboarding_data';
+
+function saveToStorage(data: OnboardingData, step: OnboardingStep) {
+  try {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify({ data, step }));
+  } catch (e) {
+    console.error('Failed to save onboarding data:', e);
+  }
+}
+
+function loadFromStorage(): { data: OnboardingData; step: OnboardingStep } | null {
+  try {
+    const saved = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Failed to load onboarding data:', e);
+  }
+  return null;
+}
+
+function clearStorage() {
+  try {
+    localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+  } catch (e) {
+    console.error('Failed to clear onboarding data:', e);
+  }
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(1);
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Load saved data on mount
+  useEffect(() => {
+    const saved = loadFromStorage();
+    if (saved) {
+      setData(saved.data);
+      setCurrentStep(saved.step);
+    }
+    setLoading(false);
+  }, []);
+
+  // Save data whenever it changes
+  useEffect(() => {
+    if (!loading) {
+      saveToStorage(data, currentStep);
+    }
+  }, [data, currentStep, loading]);
 
   const progress = (currentStep / 6) * 100;
 
@@ -107,13 +156,6 @@ export default function OnboardingPage() {
     try {
       setSaving(true);
 
-      // Map position values to API format
-      const positionMap: Record<string, 'top' | 'bottom'> = {
-        'above_cart': 'top',
-        'below_cart': 'bottom',
-        'popup': 'top',
-      };
-
       // Save settings using authenticated fetch
       const settingsResponse = await authenticatedFetch('/api/admin/settings', {
         method: 'POST',
@@ -125,7 +167,7 @@ export default function OnboardingPage() {
               .sort((a, b) => a.priority - b.priority)
               .map(s => s.id),
             display_style: data.displayStyles.find(s => s.enabled)?.id || 'minimal-strip',
-            position: positionMap[data.settings.position] || 'top',
+            cart_type: data.settings.cartType,
             max_upsells: data.settings.maxProducts,
             enable_ab_testing: data.settings.mlEnabled,
           },
@@ -160,6 +202,9 @@ export default function OnboardingPage() {
         body: JSON.stringify({}),
       });
 
+      // Clear onboarding progress data
+      clearStorage();
+
       // Mark onboarding complete locally
       localStorage.setItem('turbocart_onboarding_complete', 'true');
 
@@ -192,6 +237,30 @@ export default function OnboardingPage() {
         return false;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="onboarding-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner" style={{
+            width: '40px',
+            height: '40px',
+            border: '3px solid #e5e5ea',
+            borderTopColor: '#000',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+            margin: '0 auto 16px'
+          }} />
+          <p style={{ color: '#86868b' }}>Loading...</p>
+        </div>
+        <style jsx>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="onboarding-container">
@@ -414,7 +483,7 @@ export default function OnboardingPage() {
         }
 
         .btn-primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           color: #fff;
           border: none;
           padding: 12px 32px;
@@ -427,7 +496,7 @@ export default function OnboardingPage() {
 
         .btn-primary:hover:not(:disabled) {
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .btn-primary:disabled {
@@ -563,7 +632,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         .logo {
           width: 100px;
           height: 100px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           border-radius: 24px;
           display: flex;
           align-items: center;
@@ -586,7 +655,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           transform: translate(-50%, -50%);
           width: 120px;
           height: 120px;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+          background: rgba(0, 0, 0, 0.15);
           border-radius: 32px;
           filter: blur(20px);
           z-index: 1;
@@ -666,7 +735,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         }
 
         .cta-button {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           color: #fff;
           border: none;
           padding: 16px 40px;
@@ -682,7 +751,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 
         .cta-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
 
         .cta-note {
@@ -820,9 +889,7 @@ function DisplayStylesStep({
             onClick={() => toggleStyle(style.id)}
           >
             <div className="style-preview">
-              <div className="preview-placeholder">
-                <span>{style.name}</span>
-              </div>
+              <DisplayStylePreview style={style.id as 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'masonry-grid' | 'vertical-scroll' | 'sticky-tabs' | 'comparison-table'} />
             </div>
             <div className="style-info">
               <div className="style-header">
@@ -913,32 +980,29 @@ function DisplayStylesStep({
         }
 
         .style-card:hover {
-          border-color: rgba(102, 126, 234, 0.3);
+          border-color: #000;
           transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .style-card.selected {
-          border-color: #667eea;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, rgba(118, 75, 162, 0.04) 100%);
-        }
-
-        .style-preview {
-          width: 120px;
-          height: 80px;
-          border-radius: 8px;
-          overflow: hidden;
+          border-color: #000;
           background: #f5f5f7;
         }
 
-        .preview-placeholder {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          color: #86868b;
-          font-weight: 500;
+        .style-preview {
+          width: 160px;
+          height: 140px;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #f5f5f7;
+          flex-shrink: 0;
+        }
+
+        .style-preview :global(.preview-wrapper) {
+          transform: scale(0.42);
+          transform-origin: top left;
+          width: 380px;
         }
 
         .style-info {
@@ -986,7 +1050,7 @@ function DisplayStylesStep({
         }
 
         .style-card.selected .checkbox {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           border-color: transparent;
         }
 
@@ -1322,7 +1386,7 @@ function ProductSelectionStep({
         }
 
         .product-card.selected .checkbox {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           border-color: transparent;
         }
       `}</style>
@@ -1351,27 +1415,47 @@ function SettingsStep({
       </div>
 
       <div className="settings-grid">
-        {/* Position Setting */}
+        {/* Cart Type Setting */}
         <div className="setting-card">
           <div className="setting-header">
-            <h3>Display Position</h3>
-            <p>Where upsells appear on the cart page</p>
+            <h3>Cart Type</h3>
+            <p>Where do customers see their cart?</p>
           </div>
-          <div className="position-options">
-            {[
-              { value: 'above_cart', label: 'Above Cart', icon: '⬆️' },
-              { value: 'below_cart', label: 'Below Cart', icon: '⬇️' },
-              { value: 'popup', label: 'Popup Modal', icon: '📱' },
-            ].map((option) => (
-              <button
-                key={option.value}
-                className={`position-option ${settings.position === option.value ? 'selected' : ''}`}
-                onClick={() => onUpdate({ ...settings, position: option.value as typeof settings.position })}
-              >
-                <span className="option-icon">{option.icon}</span>
-                <span>{option.label}</span>
-              </button>
-            ))}
+          <div className="cart-type-options">
+            <button
+              className={`cart-type-option ${settings.cartType === 'drawer' ? 'selected' : ''}`}
+              onClick={() => onUpdate({ ...settings, cartType: 'drawer' })}
+            >
+              <div className="cart-type-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="14" y="2" width="8" height="20" rx="1"/>
+                  <line x1="2" y1="6" x2="10" y2="6"/>
+                  <line x1="2" y1="10" x2="8" y2="10"/>
+                  <line x1="2" y1="14" x2="6" y2="14"/>
+                </svg>
+              </div>
+              <div className="cart-type-text">
+                <strong>Cart Drawer</strong>
+                <span>Slide-out drawer</span>
+              </div>
+            </button>
+            <button
+              className={`cart-type-option ${settings.cartType === 'page' ? 'selected' : ''}`}
+              onClick={() => onUpdate({ ...settings, cartType: 'page' })}
+            >
+              <div className="cart-type-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <line x1="7" y1="8" x2="17" y2="8"/>
+                  <line x1="7" y1="12" x2="15" y2="12"/>
+                  <line x1="7" y1="16" x2="13" y2="16"/>
+                </svg>
+              </div>
+              <div className="cart-type-text">
+                <strong>Cart Page</strong>
+                <span>Full cart page</span>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -1525,7 +1609,7 @@ function SettingsStep({
         }
 
         .pro-badge {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           color: #fff;
           font-size: 11px;
           font-weight: 600;
@@ -1533,36 +1617,56 @@ function SettingsStep({
           border-radius: 10px;
         }
 
-        .position-options {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
+        .cart-type-options {
+          display: flex;
           gap: 12px;
         }
 
-        .position-option {
-          background: #f5f5f7;
-          border: 2px solid transparent;
-          border-radius: 12px;
-          padding: 16px;
-          cursor: pointer;
+        .cart-type-option {
+          flex: 1;
           display: flex;
-          flex-direction: column;
           align-items: center;
-          gap: 8px;
+          gap: 12px;
+          padding: 16px;
+          background: #fff;
+          border: 2px solid #e5e5ea;
+          border-radius: 12px;
+          cursor: pointer;
           transition: all 0.2s ease;
         }
 
-        .position-option:hover {
-          background: #e5e5ea;
+        .cart-type-option:hover {
+          border-color: #000;
         }
 
-        .position-option.selected {
-          border-color: #667eea;
-          background: rgba(102, 126, 234, 0.1);
+        .cart-type-option.selected {
+          border-color: #000;
+          background: #f5f5f7;
         }
 
-        .option-icon {
-          font-size: 24px;
+        .cart-type-icon {
+          color: #86868b;
+        }
+
+        .cart-type-option.selected .cart-type-icon {
+          color: #000;
+        }
+
+        .cart-type-text {
+          display: flex;
+          flex-direction: column;
+          text-align: left;
+        }
+
+        .cart-type-text strong {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1d1d1f;
+        }
+
+        .cart-type-text span {
+          font-size: 12px;
+          color: #86868b;
         }
 
         .slider-control {
@@ -1584,7 +1688,7 @@ function SettingsStep({
           appearance: none;
           width: 20px;
           height: 20px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           border-radius: 50%;
           cursor: pointer;
         }
@@ -1592,7 +1696,7 @@ function SettingsStep({
         .slider-value {
           font-size: 15px;
           font-weight: 600;
-          color: #667eea;
+          color: #1d1d1f;
           min-width: 100px;
         }
 
@@ -1664,7 +1768,7 @@ function SettingsStep({
         }
 
         .toggle input:checked + .toggle-slider {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
         }
 
         .toggle input:checked + .toggle-slider:before {
@@ -1822,7 +1926,7 @@ function ThemeEnableStep({
         .step-number {
           width: 32px;
           height: 32px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           color: #fff;
           border-radius: 50%;
           display: flex;
@@ -1906,7 +2010,7 @@ function ThemeEnableStep({
         }
 
         .checkbox-label input:checked + .checkmark {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           border-color: transparent;
         }
 
@@ -2035,7 +2139,7 @@ function LiveStep({
         .success-circle {
           width: 100px;
           height: 100px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -2206,7 +2310,7 @@ function LiveStep({
         }
 
         .complete-button {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: #000;
           color: #fff;
           border: none;
           padding: 16px 40px;
@@ -2222,7 +2326,7 @@ function LiveStep({
 
         .complete-button:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
 
         .complete-button:disabled {

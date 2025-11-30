@@ -85,7 +85,7 @@ const MAX_STYLES = 3;
 export default function SettingsPage() {
   const [selectedStyles, setSelectedStyles] = useState<DisplayStyle[]>(['minimal-strip']);
   const [maxUpsells, setMaxUpsells] = useState<number>(3);
-  const [cartPosition, setCartPosition] = useState<'top' | 'bottom'>('top');
+  const [cartType, setCartType] = useState<'page' | 'drawer'>('drawer');
   const [abTestingEnabled, setAbTestingEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -113,7 +113,7 @@ export default function SettingsPage() {
           setSelectedStyles([data.settings.display_style]);
         }
         setMaxUpsells(data.settings.max_upsells || 3);
-        setCartPosition(data.settings.position || 'top');
+        setCartType(data.settings.cart_type || 'drawer');
         setAbTestingEnabled(data.settings.enable_ab_testing !== false);
       }
     } catch (error) {
@@ -151,7 +151,7 @@ export default function SettingsPage() {
             enabled_display_styles: selectedStyles,
             display_style: selectedStyles[0], // Keep backward compatibility
             max_upsells: maxUpsells,
-            position: cartPosition,
+            cart_type: cartType,
             enable_ab_testing: abTestingEnabled,
           },
         }),
@@ -227,7 +227,7 @@ export default function SettingsPage() {
             <div className="selection-badge" style={{
               padding: '8px 16px',
               borderRadius: '20px',
-              background: isValidSelection ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : '#ff6b6b',
+              background: isValidSelection ? '#000' : '#ff6b6b',
               color: '#fff',
               fontWeight: '600',
               fontSize: '14px'
@@ -309,6 +309,49 @@ export default function SettingsPage() {
           </h2>
 
           <div className="setting-item">
+            <div className="setting-label">Cart Type</div>
+            <div className="setting-description">
+              Choose where your upsells will appear - in your cart page or cart drawer
+            </div>
+            <div className="cart-type-options">
+              <button
+                className={`cart-type-option ${cartType === 'drawer' ? 'selected' : ''}`}
+                onClick={() => setCartType('drawer')}
+              >
+                <div className="cart-type-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="14" y="2" width="8" height="20" rx="1"/>
+                    <line x1="2" y1="6" x2="10" y2="6"/>
+                    <line x1="2" y1="10" x2="8" y2="10"/>
+                    <line x1="2" y1="14" x2="6" y2="14"/>
+                  </svg>
+                </div>
+                <div className="cart-type-text">
+                  <strong>Cart Drawer</strong>
+                  <span>Slide-out drawer</span>
+                </div>
+              </button>
+              <button
+                className={`cart-type-option ${cartType === 'page' ? 'selected' : ''}`}
+                onClick={() => setCartType('page')}
+              >
+                <div className="cart-type-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <line x1="7" y1="8" x2="17" y2="8"/>
+                    <line x1="7" y1="12" x2="15" y2="12"/>
+                    <line x1="7" y1="16" x2="13" y2="16"/>
+                  </svg>
+                </div>
+                <div className="cart-type-text">
+                  <strong>Cart Page</strong>
+                  <span>Full cart page</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div className="setting-item">
             <div className="setting-label">Maximum Upsells to Show</div>
             <div className="setting-description">
               How many upsell products to display at once (ML will select the best)
@@ -329,20 +372,6 @@ export default function SettingsPage() {
               <option value="15">15 products</option>
               <option value="20">20 products</option>
               <option value="25">25 products</option>
-            </select>
-          </div>
-
-          <div className="setting-item">
-            <div className="setting-label">Cart Position</div>
-            <div className="setting-description">Where to display upsells in the cart</div>
-            <select
-              className="input"
-              style={{ maxWidth: '200px', marginTop: '8px' }}
-              value={cartPosition}
-              onChange={(e) => setCartPosition(e.target.value as 'top' | 'bottom')}
-            >
-              <option value="top">Top of cart</option>
-              <option value="bottom">Bottom of cart</option>
             </select>
           </div>
 
@@ -399,13 +428,13 @@ export default function SettingsPage() {
         }
 
         .style-option:hover:not(.disabled) {
-          border-color: var(--cosmic-from);
-          box-shadow: var(--shadow-cosmic);
+          border-color: #000;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .style-option.selected {
-          border-color: var(--cosmic-from);
-          background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, transparent 100%);
+          border-color: #000;
+          background: #f5f5f7;
         }
 
         .style-option.disabled {
@@ -504,7 +533,7 @@ export default function SettingsPage() {
         }
 
         input:checked + .toggle-slider {
-          background: var(--cosmic-gradient);
+          background: #000;
         }
 
         input:checked + .toggle-slider:before {
@@ -535,6 +564,59 @@ export default function SettingsPage() {
           color: var(--text-secondary);
           margin: 0;
           line-height: 1.5;
+        }
+
+        .cart-type-options {
+          display: flex;
+          gap: 12px;
+          margin-top: 12px;
+        }
+
+        .cart-type-option {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px;
+          background: #fff;
+          border: 2px solid var(--border-color);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .cart-type-option:hover {
+          border-color: #000;
+        }
+
+        .cart-type-option.selected {
+          border-color: #000;
+          background: #f5f5f7;
+        }
+
+        .cart-type-icon {
+          color: #86868b;
+        }
+
+        .cart-type-option.selected .cart-type-icon {
+          color: #000;
+        }
+
+        .cart-type-text {
+          display: flex;
+          flex-direction: column;
+          text-align: left;
+        }
+
+        .cart-type-text strong {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1d1d1f;
+        }
+
+        .cart-type-text span {
+          font-size: 12px;
+          color: #86868b;
         }
       `}</style>
     </Page>
