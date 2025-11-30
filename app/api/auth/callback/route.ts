@@ -111,15 +111,26 @@ export async function GET(request: NextRequest) {
     // Set session cookie with correct attributes for embedded apps
     // SameSite=None is required for cross-origin iframe (Shopify embedded app)
     // Secure=true is required when using SameSite=None
+    // freshInstall flag tells frontend to clear localStorage
     response.cookies.set('shopify_session', JSON.stringify({
       shop: shop,
       shopId: shopRecord.id,
       accessToken: access_token,
+      freshInstall: true, // Always true after OAuth - triggers localStorage clear
     }), {
       httpOnly: true,
       secure: true, // Always true for SameSite=None
       sameSite: 'none', // Required for embedded apps in iframe
       maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
+
+    // Also set a non-httpOnly cookie that frontend can read to detect fresh install
+    response.cookies.set('turbocart_fresh_install', 'true', {
+      httpOnly: false, // Frontend can read this
+      secure: true,
+      sameSite: 'none',
+      maxAge: 60, // Only valid for 1 minute - just to trigger localStorage clear
       path: '/',
     });
 

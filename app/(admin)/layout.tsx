@@ -156,7 +156,24 @@ function AdminLayoutContent({
   // Check if user needs onboarding and theme status
   useEffect(() => {
     const checkOnboarding = async () => {
-      // Skip check if already on onboarding page
+      // Check for fresh install cookie (set by OAuth callback)
+      const freshInstallCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('turbocart_fresh_install='));
+
+      if (freshInstallCookie) {
+        console.log('[TurboCart] Fresh install detected - clearing ALL localStorage');
+        // Clear ALL TurboCart localStorage items
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('turbocart_')) {
+            localStorage.removeItem(key);
+          }
+        });
+        // Delete the cookie so this only runs once
+        document.cookie = 'turbocart_fresh_install=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      }
+
+      // Skip API check if already on onboarding page
       if (pathname === '/onboarding') {
         setOnboardingChecked(true);
         return;
@@ -167,14 +184,9 @@ function AdminLayoutContent({
         if (response.ok) {
           const data = await response.json();
 
-          // If app was reinstalled, clear all localStorage data to start fresh
+          // If app was reinstalled (detected by API), also clear localStorage
           if (data.wasReinstalled) {
-            console.log('[TurboCart] App reinstalled - clearing localStorage for fresh start');
-            localStorage.removeItem('turbocart_onboarding_data');
-            localStorage.removeItem('turbocart_onboarding_complete');
-            localStorage.removeItem('turbocart_selected_products');
-            localStorage.removeItem('turbocart_display_settings');
-            // Clear any other TurboCart-related localStorage items
+            console.log('[TurboCart] App reinstalled (API) - clearing localStorage for fresh start');
             Object.keys(localStorage).forEach(key => {
               if (key.startsWith('turbocart_')) {
                 localStorage.removeItem(key);

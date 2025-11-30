@@ -1518,13 +1518,13 @@ function SettingsStep({
         <div className="setting-card">
           <div className="setting-header">
             <h3>Products to Show</h3>
-            <p>Maximum upsells displayed at once</p>
+            <p>Maximum products displayed at once</p>
           </div>
           <div className="slider-control">
             <input
               type="range"
               min="1"
-              max="6"
+              max="25"
               value={settings.maxProducts}
               onChange={(e) => onUpdate({ ...settings, maxProducts: parseInt(e.target.value) })}
             />
