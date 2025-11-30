@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (products.length < 10 || products.length > 50) {
+      if (products.length < 1 || products.length > 25) {
         return NextResponse.json(
-          { error: 'Must select 10-50 products' },
+          { error: 'Must select 1-25 products' },
           { status: 400 }
         );
       }

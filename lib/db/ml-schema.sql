@@ -109,6 +109,13 @@ CREATE TABLE IF NOT EXISTS ml_combination_performance (
     cart_product_types VARCHAR(100)[],
     time_of_day VARCHAR(20),                  -- 'morning', 'afternoon', 'evening', 'night'
     day_of_week INTEGER,                      -- 0-6
+    hour INTEGER,                             -- 0-23
+
+    -- Multi-factor context (for enhanced ML)
+    is_weekend BOOLEAN DEFAULT FALSE,
+    is_holiday BOOLEAN DEFAULT FALSE,
+    customer_segment VARCHAR(20),             -- 'new', 'returning', 'vip', 'at_risk'
+    device_type VARCHAR(20),                  -- 'mobile', 'tablet', 'desktop'
 
     -- Performance
     impressions INTEGER DEFAULT 0,
@@ -141,6 +148,9 @@ CREATE INDEX idx_ml_combo_context ON ml_combination_performance(
 CREATE INDEX idx_ml_combo_performance ON ml_combination_performance(revenue_per_impression DESC);
 CREATE INDEX idx_ml_combo_products ON ml_combination_performance USING GIN (product_ids);
 CREATE INDEX idx_ml_combo_time ON ml_combination_performance(day_of_week, time_of_day);
+CREATE INDEX idx_ml_combo_weekend ON ml_combination_performance(shop_id, is_weekend);
+CREATE INDEX idx_ml_combo_customer ON ml_combination_performance(shop_id, customer_segment);
+CREATE INDEX idx_ml_combo_device ON ml_combination_performance(shop_id, device_type);
 
 -- ============================================
 -- ML DECISIONS LOG

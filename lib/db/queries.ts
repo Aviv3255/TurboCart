@@ -21,8 +21,11 @@ export interface Shop {
   updated_at: Date;
 }
 
+export type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'inline';
+
 export interface ShopSettings {
-  display_style: 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought' | 'inline';
+  display_style: DisplayStyle;
+  enabled_display_styles?: DisplayStyle[]; // For ML A/B testing (1-3 styles)
   cart_type: 'drawer' | 'page' | 'both';
   max_upsells: number;
   position: 'top' | 'bottom';
