@@ -6,6 +6,11 @@
  * BULLETPROOF VERSION - handles all edge cases
  */
 
+// IMMEDIATE LOG - if you see this, the script file is loading!
+console.log('[TurboCart] ✅ turbocart.js file loaded!');
+console.log('[TurboCart] TurboCartConfig:', window.TurboCartConfig);
+console.log('[TurboCart] Shopify object:', window.Shopify);
+
 (function() {
   'use strict';
 

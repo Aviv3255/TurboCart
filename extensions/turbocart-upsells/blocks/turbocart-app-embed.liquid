@@ -1,37 +1,36 @@
 {% comment %}
   TurboCart App Embed Block
-  Appears in Theme Editor > App embeds
-  Automatically injects upsells into cart drawer and cart page
+  This MUST appear in Theme Editor > App embeds
+  Injects upsells into cart drawer and cart page
 {% endcomment %}
 
+{% comment %} ALWAYS output config and load scripts - no conditionals! {% endcomment %}
 <script>
+  console.log('[TurboCart] App Embed loading...');
   window.TurboCartConfig = {
     apiUrl: 'https://turbocart.onrender.com',
     shopDomain: '{{ shop.permanent_domain }}',
-    enabled: {{ block.settings.enabled | default: true }},
+    shopId: '{{ shop.id }}',
+    enabled: true,
     maxProducts: {{ block.settings.max_products | default: 3 }},
     displayStyle: '{{ block.settings.display_style | default: "minimal-strip" }}',
     position: '{{ block.settings.position | default: "top" }}',
-    debug: {{ block.settings.debug | default: false }}
+    debug: true,
+    version: '2.0.0'
   };
+  console.log('[TurboCart] Config:', window.TurboCartConfig);
 </script>
 
-{% if block.settings.enabled %}
-  {{ 'turbocart.css' | asset_url | stylesheet_tag }}
-  <script src="{{ 'turbocart.js' | asset_url }}" defer></script>
-{% endif %}
+{{ 'turbocart.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'turbocart.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
   "name": "TurboCart Upsells",
   "target": "body",
+  "javascript": "turbocart.js",
+  "stylesheet": "turbocart.css",
   "settings": [
-    {
-      "type": "checkbox",
-      "id": "enabled",
-      "label": "Enable TurboCart",
-      "default": true
-    },
     {
       "type": "select",
       "id": "display_style",
@@ -63,12 +62,6 @@
       "step": 1,
       "label": "Max products to show",
       "default": 3
-    },
-    {
-      "type": "checkbox",
-      "id": "debug",
-      "label": "Enable debug mode",
-      "default": false
     }
   ]
 }
