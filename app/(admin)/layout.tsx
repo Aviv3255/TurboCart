@@ -132,6 +132,7 @@ function AdminLayoutContent({
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
   const [themeEnabled, setThemeEnabled] = useState(true); // Assume enabled until checked
+  const [shopDomain, setShopDomain] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -200,6 +201,13 @@ function AdminLayoutContent({
           }
           // Check theme enabled status
           setThemeEnabled(data.themeEnabled !== false);
+
+          // Get shop domain for embed status polling
+          const urlParams = new URLSearchParams(window.location.search);
+          const shop = urlParams.get('shop') || (window as { shopify?: { config?: { shop?: string } } }).shopify?.config?.shop;
+          if (shop) {
+            setShopDomain(shop);
+          }
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -209,6 +217,34 @@ function AdminLayoutContent({
 
     checkOnboarding();
   }, [pathname, router]);
+
+  // Poll for embed status when banner is shown
+  useEffect(() => {
+    if (themeEnabled || !shopDomain || pathname === '/onboarding') return;
+
+    const checkEmbedStatus = async () => {
+      try {
+        const response = await fetch(`/api/storefront/ping?shop=${encodeURIComponent(shopDomain)}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.active) {
+            console.log('[TurboCart] Embed is active, hiding warning banner');
+            setThemeEnabled(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking embed status:', error);
+      }
+    };
+
+    // Check immediately
+    checkEmbedStatus();
+
+    // Poll every 5 seconds
+    const interval = setInterval(checkEmbedStatus, 5000);
+
+    return () => clearInterval(interval);
+  }, [themeEnabled, shopDomain, pathname]);
 
   // Don't render until onboarding check is complete
   if (!onboardingChecked || isNewUser) {

@@ -885,10 +885,13 @@ function DisplayStylesStep({
   onNext: () => void;
   onBack: () => void;
 }) {
+  const [showMaxWarning, setShowMaxWarning] = useState(false);
+
   const toggleStyle = (id: string) => {
     const existing = displayStyles.find(s => s.id === id);
     if (existing) {
       onUpdate(displayStyles.filter(s => s.id !== id));
+      setShowMaxWarning(false);
     } else {
       const enabledCount = displayStyles.filter(s => s.enabled).length;
       if (enabledCount < 3) {
@@ -896,12 +899,18 @@ function DisplayStylesStep({
           ...displayStyles,
           { id, enabled: true, priority: enabledCount + 1 },
         ]);
+        setShowMaxWarning(false);
+      } else {
+        // Show warning when trying to select more than 3
+        setShowMaxWarning(true);
+        setTimeout(() => setShowMaxWarning(false), 3000);
       }
     }
   };
 
   const isSelected = (id: string) => displayStyles.some(s => s.id === id);
   const selectedCount = displayStyles.length;
+  const isMaxSelected = selectedCount >= 3;
 
   return (
     <div className="display-styles-step">
@@ -917,11 +926,22 @@ function DisplayStylesStep({
         {selectedCount >= 3 && <span className="max-hint">Maximum reached</span>}
       </div>
 
+      {showMaxWarning && (
+        <div className="max-warning-toast">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+            <path d="M8 5V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            <circle cx="8" cy="10.5" r="0.75" fill="currentColor"/>
+          </svg>
+          <span>You can only select up to 3 display styles. Deselect one to choose another.</span>
+        </div>
+      )}
+
       <div className="styles-grid">
         {DISPLAY_STYLES.map((style) => (
           <div
             key={style.id}
-            className={`style-card ${isSelected(style.id) ? 'selected' : ''}`}
+            className={`style-card ${isSelected(style.id) ? 'selected' : ''} ${isMaxSelected && !isSelected(style.id) ? 'disabled' : ''}`}
             onClick={() => toggleStyle(style.id)}
           >
             <div className="style-preview">
@@ -1011,6 +1031,34 @@ function DisplayStylesStep({
           font-style: italic;
         }
 
+        .max-warning-toast {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          color: #dc2626;
+          padding: 12px 16px;
+          border-radius: 10px;
+          margin-bottom: 16px;
+          animation: shake 0.5s ease-in-out;
+        }
+
+        .max-warning-toast svg {
+          flex-shrink: 0;
+        }
+
+        .max-warning-toast span {
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
         .styles-grid {
           display: flex;
           flex-direction: column;
@@ -1039,6 +1087,17 @@ function DisplayStylesStep({
         .style-card.selected {
           border-color: #000;
           background: #f5f5f7;
+        }
+
+        .style-card.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .style-card.disabled:hover {
+          border-color: rgba(0, 0, 0, 0.06);
+          transform: none;
+          box-shadow: none;
         }
 
         .style-preview {

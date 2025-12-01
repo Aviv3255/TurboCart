@@ -5,6 +5,7 @@
 
 <script>
   window.TurboCartConfig = {
+    apiUrl: 'https://turbocart.onrender.com',
     shopDomain: '{{ shop.permanent_domain }}',
     enabled: {{ block.settings.enabled | default: true }},
     maxProducts: {{ block.settings.max_products | default: 3 }}

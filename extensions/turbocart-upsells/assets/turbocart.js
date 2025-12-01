@@ -23,6 +23,9 @@
   function init() {
     log('TurboCart initializing...');
 
+    // Ping the server to indicate the app embed is active
+    pingServer();
+
     // Get current cart
     fetchCart().then(cart => {
       currentCart = cart;
@@ -34,6 +37,34 @@
 
     // Initialize all upsell blocks
     initializeBlocks();
+  }
+
+  /**
+   * Ping the server to indicate the embed is active
+   */
+  function pingServer() {
+    if (!CONFIG.apiUrl) return;
+
+    const shopDomain = window.Shopify?.shop || window.TurboCartConfig?.shopDomain;
+    if (!shopDomain) {
+      log('No shop domain available for ping');
+      return;
+    }
+
+    fetch(`${CONFIG.apiUrl}/api/storefront/ping`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        shop: shopDomain,
+        timestamp: new Date().toISOString(),
+      }),
+    }).then(() => {
+      log('Ping sent successfully');
+    }).catch(error => {
+      log('Ping error:', error);
+    });
   }
 
   /**
