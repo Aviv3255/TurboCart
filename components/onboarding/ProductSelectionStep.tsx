@@ -63,7 +63,7 @@ export default function ProductSelectionStep({
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
             Select 10-50 products that you want to recommend as upsells. Our AI will automatically
-            match them to items in your customer's cart.
+            match them to items in your customer&apos;s cart.
           </p>
 
           {/* Selection Status */}

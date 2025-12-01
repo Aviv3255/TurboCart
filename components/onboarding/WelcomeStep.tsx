@@ -42,7 +42,7 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
         </h1>
 
         <p style={{ fontSize: '18px', color: 'var(--text-secondary)', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>
-          Boost your revenue with AI-powered cart upsells. Let's get you set up in just a few minutes.
+          Boost your revenue with AI-powered cart upsells. Let&apos;s get you set up in just a few minutes.
         </p>
 
         {/* Features */}

@@ -21,7 +21,8 @@ export default function RootLayout({
       <head>
         {/* App Bridge v4: Meta tag MUST come before script */}
         <meta name="shopify-api-key" content={apiKey} />
-        {/* App Bridge v4: Synchronous script load - no async/defer */}
+        {/* App Bridge v4: Synchronous script load required - no async/defer */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
       </head>
       <body className={fontClass}>

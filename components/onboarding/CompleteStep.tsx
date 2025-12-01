@@ -43,7 +43,7 @@ export default function CompleteStep({ data, onComplete, loading }: CompleteStep
 
         {/* Title */}
         <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '12px', color: 'var(--text-primary)' }}>
-          You're All Set!
+          You&apos;re All Set!
         </h1>
 
         <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '32px', maxWidth: '500px', margin: '0 auto 32px' }}>

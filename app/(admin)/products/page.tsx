@@ -201,7 +201,7 @@ export default function ProductsPage() {
           >
             {selectionCount < 1 && <p>Select at least 1 product</p>}
             {selectionCount > 25 && <p>You can select maximum 25 products (remove {selectionCount - 25})</p>}
-            {isValidSelection && <p>Perfect! Click "Save Selection" to continue.</p>}
+            {isValidSelection && <p>Perfect! Click Save Selection to continue.</p>}
           </Banner>
         </div>
       )}
@@ -334,7 +334,7 @@ export default function ProductsPage() {
               💡 Selection Tips
             </Text>
             <ul style={{ marginTop: '12px', paddingLeft: '20px', color: 'var(--text-secondary)' }}>
-              <li>Choose products that complement items in your customer's cart</li>
+              <li>Choose products that complement items in your customer&apos;s cart</li>
               <li>Mix high and low-priced items for better conversion</li>
               <li>Include products from popular collections</li>
               <li>Our AI will automatically optimize which products to show</li>

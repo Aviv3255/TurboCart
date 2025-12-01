@@ -124,7 +124,7 @@ export default function OnboardingPage() {
         if (response.ok) {
           const statusData = await response.json();
           if (statusData.wasReinstalled) {
-            console.log('[TurboCart Onboarding] App reinstalled - clearing localStorage for fresh start');
+            // App reinstalled - clearing localStorage for fresh start
             clearStorage();
             localStorage.removeItem('turbocart_onboarding_complete');
             localStorage.removeItem('turbocart_selected_products');
@@ -272,22 +272,127 @@ export default function OnboardingPage() {
 
   if (loading) {
     return (
-      <div className="onboarding-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="spinner" style={{
-            width: '40px',
-            height: '40px',
-            border: '3px solid #e5e5ea',
-            borderTopColor: '#000',
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite',
-            margin: '0 auto 16px'
-          }} />
-          <p style={{ color: '#86868b' }}>Loading...</p>
+      <div className="loading-screen">
+        <div className="loading-content">
+          {/* Premium loading animation */}
+          <div className="loading-logo">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              <defs>
+                <linearGradient id="loadingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#667eea" />
+                  <stop offset="100%" stopColor="#764ba2" />
+                </linearGradient>
+              </defs>
+              <circle cx="32" cy="32" r="28" stroke="url(#loadingGradient)" strokeWidth="3" fill="none" strokeLinecap="round" className="loading-circle" />
+              <path d="M32 12L36 24L48 28L36 32L32 44L28 32L16 28L28 24L32 12Z" fill="url(#loadingGradient)" className="loading-star" />
+            </svg>
+          </div>
+
+          {/* Skeleton preview of what's coming */}
+          <div className="skeleton-preview">
+            <div className="skeleton-title" />
+            <div className="skeleton-subtitle" />
+            <div className="skeleton-button" />
+          </div>
+
+          <p className="loading-text">Preparing your experience...</p>
         </div>
+
         <style jsx>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
+          .loading-screen {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #000 0%, #0a0a0a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+          }
+
+          .loading-content {
+            text-align: center;
+          }
+
+          .loading-logo {
+            margin-bottom: 40px;
+            animation: logoFloat 2s ease-in-out infinite;
+          }
+
+          .loading-logo :global(.loading-circle) {
+            stroke-dasharray: 175;
+            stroke-dashoffset: 175;
+            animation: drawCircle 1.5s ease-in-out infinite;
+          }
+
+          .loading-logo :global(.loading-star) {
+            transform-origin: center;
+            animation: starPulse 1.5s ease-in-out infinite;
+          }
+
+          @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+          }
+
+          @keyframes drawCircle {
+            0% { stroke-dashoffset: 175; }
+            50% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -175; }
+          }
+
+          @keyframes starPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+          }
+
+          .skeleton-preview {
+            margin-bottom: 32px;
+          }
+
+          .skeleton-title {
+            width: 280px;
+            height: 32px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            border-radius: 8px;
+            margin: 0 auto 16px;
+            animation: shimmer 1.5s infinite;
+          }
+
+          .skeleton-subtitle {
+            width: 200px;
+            height: 20px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            border-radius: 6px;
+            margin: 0 auto 24px;
+            animation: shimmer 1.5s infinite 0.2s;
+          }
+
+          .skeleton-button {
+            width: 160px;
+            height: 48px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            border-radius: 12px;
+            margin: 0 auto;
+            animation: shimmer 1.5s infinite 0.4s;
+          }
+
+          @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+
+          .loading-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.5px;
+            animation: fadeInOut 2s ease-in-out infinite;
+          }
+
+          @keyframes fadeInOut {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
           }
         `}</style>
       </div>
@@ -577,34 +682,191 @@ export default function OnboardingPage() {
 // ============================================================================
 
 /**
- * Step 1: Welcome - Premium Dark Cinematic Design
+ * Premium SVG Icons - Clean, Luxurious Design
+ */
+const PremiumBrainIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#667eea" />
+        <stop offset="100%" stopColor="#764ba2" />
+      </linearGradient>
+      <filter id="brainGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+    <g filter="url(#brainGlow)">
+      {/* Left hemisphere */}
+      <path d="M18 36C18 28 22 22 28 20C24 18 22 14 24 10C28 6 34 8 36 12"
+        stroke="url(#brainGradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M36 12C38 8 44 6 48 10C50 14 48 18 44 20C50 22 54 28 54 36"
+        stroke="url(#brainGradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M18 36C18 44 22 50 28 52C24 54 22 58 24 62C28 66 34 64 36 60"
+        stroke="url(#brainGradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M36 60C38 64 44 66 48 62C50 58 48 54 44 52C50 50 54 44 54 36"
+        stroke="url(#brainGradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      {/* Center connection */}
+      <path d="M36 12V60" stroke="url(#brainGradient)" strokeWidth="2" strokeLinecap="round" strokeDasharray="4 4" />
+      {/* Neural nodes */}
+      <circle cx="28" cy="28" r="3" fill="url(#brainGradient)" opacity="0.8" />
+      <circle cx="44" cy="28" r="3" fill="url(#brainGradient)" opacity="0.8" />
+      <circle cx="28" cy="44" r="3" fill="url(#brainGradient)" opacity="0.8" />
+      <circle cx="44" cy="44" r="3" fill="url(#brainGradient)" opacity="0.8" />
+      <circle cx="36" cy="36" r="4" fill="url(#brainGradient)" />
+      {/* Neural connections */}
+      <path d="M28 28L36 36L44 28" stroke="url(#brainGradient)" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+      <path d="M28 44L36 36L44 44" stroke="url(#brainGradient)" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+    </g>
+  </svg>
+);
+
+const PremiumRevenueIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="revenueGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#10b981" />
+        <stop offset="100%" stopColor="#34d399" />
+      </linearGradient>
+      <filter id="revenueGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+    <g filter="url(#revenueGlow)">
+      {/* Upward trending chart */}
+      <path d="M14 54L26 42L38 48L58 22" stroke="url(#revenueGradient)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      {/* Arrow head */}
+      <path d="M52 22H58V28" stroke="url(#revenueGradient)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Chart bars */}
+      <rect x="18" y="48" width="8" height="10" rx="2" fill="url(#revenueGradient)" opacity="0.3" />
+      <rect x="32" y="44" width="8" height="14" rx="2" fill="url(#revenueGradient)" opacity="0.5" />
+      <rect x="46" y="36" width="8" height="22" rx="2" fill="url(#revenueGradient)" opacity="0.7" />
+      {/* Dollar sign */}
+      <text x="36" y="20" textAnchor="middle" fill="url(#revenueGradient)" fontSize="14" fontWeight="700" fontFamily="system-ui">$</text>
+      {/* Percentage badge */}
+      <circle cx="56" cy="16" r="8" fill="url(#revenueGradient)" opacity="0.2" />
+      <text x="56" y="19" textAnchor="middle" fill="url(#revenueGradient)" fontSize="8" fontWeight="700" fontFamily="system-ui">+32</text>
+    </g>
+  </svg>
+);
+
+const PremiumSpeedIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="speedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#f59e0b" />
+        <stop offset="100%" stopColor="#fbbf24" />
+      </linearGradient>
+      <filter id="speedGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="3" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+    <g filter="url(#speedGlow)">
+      {/* Lightning bolt - premium design */}
+      <path d="M40 12L24 36H34L30 60L50 32H38L40 12Z"
+        fill="url(#speedGradient)"
+        stroke="url(#speedGradient)"
+        strokeWidth="1"
+        strokeLinejoin="round" />
+      {/* Speed lines */}
+      <path d="M16 28H24" stroke="url(#speedGradient)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+      <path d="M12 36H20" stroke="url(#speedGradient)" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+      <path d="M16 44H24" stroke="url(#speedGradient)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+      {/* Sparkles */}
+      <circle cx="54" cy="20" r="2" fill="url(#speedGradient)" opacity="0.6" />
+      <circle cx="58" cy="28" r="1.5" fill="url(#speedGradient)" opacity="0.4" />
+      <circle cx="52" cy="50" r="2" fill="url(#speedGradient)" opacity="0.6" />
+    </g>
+  </svg>
+);
+
+const PremiumStarIcon = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#667eea" />
+        <stop offset="50%" stopColor="#764ba2" />
+        <stop offset="100%" stopColor="#667eea" />
+      </linearGradient>
+      <filter id="starGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+    <g filter="url(#starGlow)">
+      {/* Main 4-point star */}
+      <path d="M36 8L40 28L60 32L40 36L36 56L32 36L12 32L32 28L36 8Z"
+        fill="url(#starGradient)" />
+      {/* Inner glow */}
+      <circle cx="36" cy="32" r="8" fill="white" opacity="0.3" />
+      {/* Smaller accent stars */}
+      <path d="M56 16L58 22L64 24L58 26L56 32L54 26L48 24L54 22L56 16Z"
+        fill="url(#starGradient)" opacity="0.6" />
+      <path d="M16 48L18 52L22 54L18 56L16 60L14 56L10 54L14 52L16 48Z"
+        fill="url(#starGradient)" opacity="0.6" />
+    </g>
+  </svg>
+);
+
+/**
+ * Step 1: Welcome - Premium Dark Cinematic Design with 4K Quality
  */
 function WelcomeStep({ onNext }: { onNext: () => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'next' | 'prev'>('next');
+
   const slides = [
     {
-      icon: '✦',
+      icon: 'star',
       title: 'The World\'s Most Advanced Algorithm.',
       subtitle: 'Now In Your Hands.',
       description: null,
+      stats: null,
     },
     {
-      icon: '🧠',
+      icon: 'brain',
       title: 'AI That Actually Learns',
       subtitle: null,
       description: 'Our algorithm analyzes every cart, every click, every purchase. Then optimizes automatically.',
+      stats: [
+        { value: '50M+', label: 'Data Points Analyzed' },
+        { value: '24/7', label: 'Real-time Learning' },
+      ],
     },
     {
-      icon: '💰',
+      icon: 'revenue',
       title: '+32% Average Order Value',
       subtitle: null,
       description: 'Real results from real stores. No gimmicks. Just math.',
+      stats: [
+        { value: '10K+', label: 'Stores Trust Us' },
+        { value: '$2.4B', label: 'Revenue Generated' },
+      ],
     },
     {
-      icon: '⚡',
+      icon: 'speed',
       title: 'Set It. Forget It.',
       subtitle: null,
       description: '5 minutes to setup. Then we handle everything.',
+      stats: [
+        { value: '5 min', label: 'Setup Time' },
+        { value: '0', label: 'Maintenance Needed' },
+      ],
     },
   ];
 
@@ -612,37 +874,94 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
   const slide = slides[currentSlide]!;
 
   const handleNext = () => {
+    if (isTransitioning) return;
+
     if (isLastSlide) {
       onNext();
     } else {
-      setCurrentSlide(prev => prev + 1);
+      setIsTransitioning(true);
+      setSlideDirection('next');
+      setTimeout(() => {
+        setCurrentSlide(prev => prev + 1);
+        setIsTransitioning(false);
+      }, 300);
+    }
+  };
+
+  const handleSlideChange = (index: number) => {
+    if (isTransitioning || index === currentSlide) return;
+
+    setIsTransitioning(true);
+    setSlideDirection(index > currentSlide ? 'next' : 'prev');
+    setTimeout(() => {
+      setCurrentSlide(index);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  const renderIcon = () => {
+    switch (slide.icon) {
+      case 'brain': return <PremiumBrainIcon />;
+      case 'revenue': return <PremiumRevenueIcon />;
+      case 'speed': return <PremiumSpeedIcon />;
+      default: return <PremiumStarIcon />;
     }
   };
 
   return (
     <div className="welcome-step-dark">
       <div className="dark-container">
-        {/* Cosmic glow background */}
+        {/* Premium gradient mesh background */}
+        <div className="gradient-mesh" />
+
+        {/* Animated grid lines - luxury tech feel */}
+        <div className="grid-lines">
+          {[...Array(10)].map((_, i) => (
+            <div key={`v-${i}`} className="grid-line vertical" style={{ left: `${i * 11}%` }} />
+          ))}
+          {[...Array(8)].map((_, i) => (
+            <div key={`h-${i}`} className="grid-line horizontal" style={{ top: `${i * 14}%` }} />
+          ))}
+        </div>
+
+        {/* Cosmic glow background - enhanced */}
         <div className="cosmic-glow" />
         <div className="cosmic-glow-2" />
+        <div className="cosmic-glow-3" />
 
-        {/* Floating particles */}
+        {/* Floating particles - enhanced with varying sizes */}
         <div className="particles">
-          {[...Array(20)].map((_, i) => (
-            <div key={i} className="particle" style={{
+          {[...Array(30)].map((_, i) => (
+            <div key={i} className={`particle ${i % 3 === 0 ? 'large' : i % 2 === 0 ? 'medium' : ''}`} style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${3 + Math.random() * 4}s`,
+              animationDuration: `${4 + Math.random() * 6}s`,
             }} />
           ))}
         </div>
 
-        {/* Content */}
-        <div className="slide-content">
-          <div className="slide-icon">{slide.icon}</div>
+        {/* Orbiting rings - motion graphics */}
+        <div className="orbit-container">
+          <div className="orbit orbit-1">
+            <div className="orbit-dot" />
+          </div>
+          <div className="orbit orbit-2">
+            <div className="orbit-dot" />
+          </div>
+          <div className="orbit orbit-3">
+            <div className="orbit-dot" />
+          </div>
+        </div>
 
-          <h1 className="slide-title glow">{slide.title}</h1>
+        {/* Content */}
+        <div className={`slide-content ${isTransitioning ? `transitioning-${slideDirection}` : ''}`} key={currentSlide}>
+          <div className="slide-icon-wrapper">
+            <div className="icon-glow" />
+            {renderIcon()}
+          </div>
+
+          <h1 className="slide-title">{slide.title}</h1>
 
           {slide.subtitle && (
             <p className="slide-subtitle">{slide.subtitle}</p>
@@ -651,29 +970,58 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           {slide.description && (
             <p className="slide-description">{slide.description}</p>
           )}
+
+          {/* Stats row - visual enhancement */}
+          {slide.stats && (
+            <div className="stats-row">
+              {slide.stats.map((stat, i) => (
+                <div key={i} className="stat-item">
+                  <span className="stat-value">{stat.value}</span>
+                  <span className="stat-label">{stat.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Slide indicators */}
+        {/* Progress bar - premium design */}
+        <div className="progress-track">
+          <div className="progress-fill" style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }} />
+        </div>
+
+        {/* Slide indicators - enhanced */}
         <div className="slide-indicators">
           {slides.map((_, i) => (
             <button
               key={i}
-              className={`indicator ${i === currentSlide ? 'active' : ''}`}
-              onClick={() => setCurrentSlide(i)}
-            />
+              className={`indicator ${i === currentSlide ? 'active' : ''} ${i < currentSlide ? 'completed' : ''}`}
+              onClick={() => handleSlideChange(i)}
+            >
+              <span className="indicator-inner" />
+            </button>
           ))}
         </div>
 
-        {/* CTA Button */}
+        {/* CTA Button - premium with gradient border */}
         <button className="cta-button-dark" onClick={handleNext}>
-          {isLastSlide ? 'Let\'s Begin' : 'Continue'}
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <span className="btn-gradient-border" />
+          <span className="btn-content">
+            {isLastSlide ? 'Let\'s Begin' : 'Continue'}
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
         </button>
 
         {currentSlide === 0 && (
-          <p className="trust-note">Trusted by 10,000+ Shopify stores</p>
+          <div className="trust-section">
+            <p className="trust-note">Trusted by 10,000+ Shopify stores worldwide</p>
+            <div className="trust-logos">
+              <div className="trust-logo">Shopify Plus</div>
+              <div className="trust-logo">Built for Scale</div>
+              <div className="trust-logo">Enterprise Ready</div>
+            </div>
+          </div>
         )}
       </div>
 
@@ -697,35 +1045,93 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           padding: 40px 24px;
           position: relative;
           overflow: hidden;
+          /* 4K Sharp rendering */
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          text-rendering: optimizeLegibility;
         }
 
-        /* Cosmic glow effects */
+        /* Premium gradient mesh background */
+        .gradient-mesh {
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(ellipse 80% 50% at 20% 40%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
+            radial-gradient(ellipse 60% 40% at 80% 60%, rgba(118, 75, 162, 0.08) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 30% at 50% 90%, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
+          pointer-events: none;
+        }
+
+        /* Grid lines - luxury tech aesthetic */
+        .grid-lines {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: 0.03;
+        }
+
+        .grid-line {
+          position: absolute;
+          background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+        }
+
+        .grid-line.vertical {
+          width: 1px;
+          height: 100%;
+        }
+
+        .grid-line.horizontal {
+          height: 1px;
+          width: 100%;
+        }
+
+        /* Enhanced cosmic glow effects */
         .cosmic-glow {
           position: absolute;
           top: 30%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: 600px;
-          height: 600px;
-          background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.08) 40%, transparent 70%);
+          width: 800px;
+          height: 800px;
+          background: radial-gradient(circle, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.06) 40%, transparent 70%);
           border-radius: 50%;
-          filter: blur(60px);
+          filter: blur(80px);
           pointer-events: none;
+          animation: cosmicPulse 8s ease-in-out infinite;
         }
 
         .cosmic-glow-2 {
           position: absolute;
           bottom: 20%;
-          right: 20%;
-          width: 400px;
-          height: 400px;
+          right: 15%;
+          width: 500px;
+          height: 500px;
           background: radial-gradient(circle, rgba(118, 75, 162, 0.1) 0%, transparent 60%);
           border-radius: 50%;
-          filter: blur(40px);
+          filter: blur(60px);
           pointer-events: none;
+          animation: cosmicPulse 10s ease-in-out infinite 2s;
         }
 
-        /* Floating particles */
+        .cosmic-glow-3 {
+          position: absolute;
+          top: 60%;
+          left: 10%;
+          width: 400px;
+          height: 400px;
+          background: radial-gradient(circle, rgba(102, 126, 234, 0.08) 0%, transparent 60%);
+          border-radius: 50%;
+          filter: blur(50px);
+          pointer-events: none;
+          animation: cosmicPulse 12s ease-in-out infinite 4s;
+        }
+
+        @keyframes cosmicPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+
+        /* Enhanced floating particles */
         .particles {
           position: absolute;
           top: 0;
@@ -739,168 +1145,418 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           position: absolute;
           width: 2px;
           height: 2px;
-          background: rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.4);
           border-radius: 50%;
-          animation: float linear infinite;
+          animation: floatParticle linear infinite;
         }
 
-        @keyframes float {
+        .particle.medium {
+          width: 3px;
+          height: 3px;
+          background: rgba(102, 126, 234, 0.6);
+        }
+
+        .particle.large {
+          width: 4px;
+          height: 4px;
+          background: rgba(118, 75, 162, 0.5);
+          box-shadow: 0 0 10px rgba(118, 75, 162, 0.5);
+        }
+
+        @keyframes floatParticle {
           0%, 100% {
             transform: translateY(0) translateX(0);
             opacity: 0;
           }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
           100% {
-            transform: translateY(-100px) translateX(20px);
+            transform: translateY(-150px) translateX(30px);
             opacity: 0;
           }
         }
 
-        /* Slide content */
+        /* Orbiting rings - motion graphics */
+        .orbit-container {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 600px;
+          height: 600px;
+          pointer-events: none;
+        }
+
+        .orbit {
+          position: absolute;
+          border: 1px solid rgba(102, 126, 234, 0.1);
+          border-radius: 50%;
+        }
+
+        .orbit-1 {
+          inset: 20%;
+          animation: orbitRotate 20s linear infinite;
+        }
+
+        .orbit-2 {
+          inset: 10%;
+          animation: orbitRotate 30s linear infinite reverse;
+        }
+
+        .orbit-3 {
+          inset: 0;
+          animation: orbitRotate 40s linear infinite;
+        }
+
+        .orbit-dot {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 6px;
+          height: 6px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 50%;
+          box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
+
+        @keyframes orbitRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        /* Slide content with smooth transitions */
         .slide-content {
           text-align: center;
-          max-width: 600px;
+          max-width: 700px;
           z-index: 10;
-          animation: fadeIn 0.6s ease-out;
+          animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes fadeIn {
+        .slide-content.transitioning-next {
+          animation: slideOutLeft 0.3s ease-in forwards;
+        }
+
+        .slide-content.transitioning-prev {
+          animation: slideOutRight 0.3s ease-in forwards;
+        }
+
+        @keyframes slideIn {
           from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px) scale(0.98);
           }
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
           }
         }
 
-        .slide-icon {
-          font-size: 48px;
-          margin-bottom: 32px;
-          animation: pulse 2s ease-in-out infinite;
+        @keyframes slideOutLeft {
+          to {
+            opacity: 0;
+            transform: translateX(-40px) scale(0.98);
+          }
         }
 
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
+        @keyframes slideOutRight {
+          to {
+            opacity: 0;
+            transform: translateX(40px) scale(0.98);
           }
-          50% {
-            transform: scale(1.1);
-          }
+        }
+
+        .slide-icon-wrapper {
+          position: relative;
+          width: 120px;
+          height: 120px;
+          margin: 0 auto 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        .icon-glow {
+          position: absolute;
+          inset: -20px;
+          background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: iconGlowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+
+        @keyframes iconGlowPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.1); }
         }
 
         .slide-title {
-          font-size: 42px;
+          font-size: 48px;
           font-weight: 700;
           color: #FFFFFF;
           margin: 0 0 16px 0;
-          letter-spacing: -1px;
-          line-height: 1.2;
-        }
-
-        .slide-title.glow {
-          text-shadow:
-            0 0 40px rgba(102, 126, 234, 0.5),
-            0 0 80px rgba(118, 75, 162, 0.3),
-            0 0 120px rgba(102, 126, 234, 0.2);
+          letter-spacing: -1.5px;
+          line-height: 1.15;
+          background: linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.9) 50%, #FFFFFF 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-shadow: 0 0 80px rgba(102, 126, 234, 0.5);
         }
 
         .slide-subtitle {
-          font-size: 24px;
-          color: rgba(255, 255, 255, 0.9);
+          font-size: 28px;
+          color: rgba(255, 255, 255, 0.95);
           margin: 0 0 24px 0;
           font-weight: 500;
+          letter-spacing: -0.5px;
         }
 
         .slide-description {
           font-size: 18px;
           color: rgba(255, 255, 255, 0.6);
-          margin: 0;
-          line-height: 1.6;
-          max-width: 450px;
-          margin: 0 auto;
+          margin: 0 auto 32px;
+          line-height: 1.7;
+          max-width: 480px;
+          letter-spacing: 0.2px;
         }
 
-        /* Slide indicators */
+        /* Stats row - visual content addition */
+        .stats-row {
+          display: flex;
+          justify-content: center;
+          gap: 48px;
+          margin-top: 32px;
+        }
+
+        .stat-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .stat-value {
+          font-size: 32px;
+          font-weight: 700;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .stat-label {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.5);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        /* Premium progress bar */
+        .progress-track {
+          width: 200px;
+          height: 3px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 2px;
+          margin-top: 48px;
+          z-index: 10;
+          overflow: hidden;
+        }
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+          border-radius: 2px;
+          transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Enhanced slide indicators */
         .slide-indicators {
           display: flex;
-          gap: 12px;
-          margin-top: 48px;
+          gap: 16px;
+          margin-top: 24px;
           z-index: 10;
         }
 
         .indicator {
-          width: 10px;
-          height: 10px;
+          width: 12px;
+          height: 12px;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.3);
-          border: none;
+          background: transparent;
+          border: 1.5px solid rgba(255, 255, 255, 0.3);
           cursor: pointer;
           transition: all 0.3s ease;
           padding: 0;
+          position: relative;
+        }
+
+        .indicator-inner {
+          position: absolute;
+          inset: 2px;
+          border-radius: 50%;
+          background: transparent;
+          transition: all 0.3s ease;
         }
 
         .indicator.active {
-          background: #FFFFFF;
+          border-color: #FFFFFF;
           transform: scale(1.2);
         }
 
-        .indicator:hover {
-          background: rgba(255, 255, 255, 0.6);
+        .indicator.active .indicator-inner {
+          background: #FFFFFF;
         }
 
-        /* CTA Button */
+        .indicator.completed {
+          border-color: rgba(102, 126, 234, 0.6);
+        }
+
+        .indicator.completed .indicator-inner {
+          background: rgba(102, 126, 234, 0.6);
+        }
+
+        .indicator:hover {
+          border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Premium CTA Button with gradient border */
         .cta-button-dark {
-          background: #FFFFFF;
-          color: #000000;
+          position: relative;
+          background: transparent;
           border: none;
-          padding: 16px 48px;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
+          padding: 0;
+          margin-top: 40px;
+          z-index: 10;
           cursor: pointer;
+        }
+
+        .btn-gradient-border {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+          border-radius: 12px;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .cta-button-dark:hover .btn-gradient-border {
+          opacity: 1;
+        }
+
+        .btn-content {
+          position: relative;
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          margin-top: 40px;
-          z-index: 10;
-          transition: all 0.2s ease;
+          background: #FFFFFF;
+          color: #000000;
+          padding: 18px 56px;
+          border-radius: 12px;
+          font-size: 17px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          letter-spacing: -0.3px;
         }
 
-        .cta-button-dark:hover {
+        .cta-button-dark:hover .btn-content {
           transform: translateY(-2px);
-          box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
+          box-shadow: 0 12px 40px rgba(255, 255, 255, 0.25);
+          background: #FFFFFF;
+          margin: 2px;
+        }
+
+        /* Trust section */
+        .trust-section {
+          margin-top: 48px;
+          z-index: 10;
+          text-align: center;
         }
 
         .trust-note {
           font-size: 14px;
           color: rgba(255, 255, 255, 0.4);
-          margin-top: 24px;
-          z-index: 10;
+          margin: 0 0 20px 0;
+          letter-spacing: 0.5px;
         }
 
-        @media (max-width: 640px) {
+        .trust-logos {
+          display: flex;
+          gap: 32px;
+          justify-content: center;
+        }
+
+        .trust-logo {
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.3);
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          padding: 8px 16px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 6px;
+        }
+
+        @media (max-width: 768px) {
           .slide-title {
-            font-size: 28px;
+            font-size: 32px;
+            letter-spacing: -1px;
           }
 
           .slide-subtitle {
-            font-size: 18px;
+            font-size: 20px;
           }
 
           .slide-description {
             font-size: 16px;
           }
 
-          .cosmic-glow {
+          .stats-row {
+            gap: 24px;
+          }
+
+          .stat-value {
+            font-size: 24px;
+          }
+
+          .orbit-container {
             width: 300px;
             height: 300px;
+          }
+
+          .cosmic-glow {
+            width: 400px;
+            height: 400px;
+          }
+
+          .trust-logos {
+            flex-wrap: wrap;
+            gap: 12px;
+          }
+
+          .slide-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 24px;
+          }
+        }
+
+        @media (max-width: 375px) {
+          .slide-title {
+            font-size: 26px;
+          }
+
+          .stats-row {
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .btn-content {
+            padding: 16px 40px;
+            font-size: 15px;
           }
         }
       `}</style>
@@ -935,7 +1591,7 @@ const DISPLAY_STYLES = [
   {
     id: 'frequently-bought',
     name: 'Frequently Bought',
-    description: 'Bundle-style "Add both" display',
+    description: 'Bundle-style Add Both display',
     recommended: true,
     preview: '/previews/frequently-bought.png',
   },
@@ -1408,8 +2064,18 @@ function ProductSelectionStep({
 
       {loading ? (
         <div className="loading-state">
-          <div className="spinner" />
-          <p>Loading products...</p>
+          {/* Skeleton product grid */}
+          <div className="skeleton-grid">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="skeleton-card" style={{ animationDelay: `${i * 0.1}s` }}>
+                <div className="skeleton-image" />
+                <div className="skeleton-info">
+                  <div className="skeleton-name" />
+                  <div className="skeleton-price" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="products-grid">
@@ -1506,22 +2172,62 @@ function ProductSelectionStep({
         }
 
         .loading-state {
-          text-align: center;
-          padding: 60px;
+          padding: 20px 0;
         }
 
-        .spinner {
-          width: 40px;
-          height: 40px;
-          border: 3px solid #e5e5ea;
-          border-top-color: #667eea;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-          margin: 0 auto 16px;
+        .skeleton-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 16px;
         }
 
-        @keyframes spin {
-          to { transform: rotate(360deg); }
+        .skeleton-card {
+          background: #fff;
+          border: 2px solid rgba(0, 0, 0, 0.04);
+          border-radius: 12px;
+          overflow: hidden;
+          animation: skeletonFadeIn 0.5s ease-out backwards;
+        }
+
+        @keyframes skeletonFadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .skeleton-image {
+          width: 100%;
+          height: 140px;
+          background: linear-gradient(90deg, #f0f0f5 25%, #fafafa 50%, #f0f0f5 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-info {
+          padding: 12px;
+        }
+
+        .skeleton-name {
+          width: 80%;
+          height: 16px;
+          background: linear-gradient(90deg, #f0f0f5 25%, #fafafa 50%, #f0f0f5 75%);
+          background-size: 200% 100%;
+          border-radius: 4px;
+          margin-bottom: 8px;
+          animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-price {
+          width: 40%;
+          height: 14px;
+          background: linear-gradient(90deg, #f0f0f5 25%, #fafafa 50%, #f0f0f5 75%);
+          background-size: 200% 100%;
+          border-radius: 4px;
+          animation: shimmer 1.5s infinite 0.2s;
+        }
+
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
         }
 
         .products-grid {
@@ -2073,7 +2779,7 @@ function ThemeEnableStep({
           <div className="step-number">3</div>
           <div className="step-content">
             <h4>Add TurboCart Block</h4>
-            <p>Click "Add section" → Apps → TurboCart Upsells</p>
+            <p>Click &quot;Add section&quot; → Apps → TurboCart Upsells</p>
           </div>
         </div>
 
@@ -2251,7 +2957,7 @@ function ThemeEnableStep({
 }
 
 /**
- * Step 6: Live!
+ * Step 6: Live! - Premium Success Celebration with Confetti
  */
 function LiveStep({
   data,
@@ -2264,12 +2970,79 @@ function LiveStep({
 }) {
   const selectedStyleCount = data.displayStyles.length;
   const selectedProductCount = data.selectedProducts.length;
+  const [showConfetti, setShowConfetti] = useState(true);
+  const [animatedValues, setAnimatedValues] = useState({ styles: 0, products: 0 });
+
+  // Animated counting effect
+  useEffect(() => {
+    const duration = 1500;
+    const steps = 30;
+    const interval = duration / steps;
+
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      const progress = step / steps;
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+
+      setAnimatedValues({
+        styles: Math.round(selectedStyleCount * easeOut),
+        products: Math.round(selectedProductCount * easeOut),
+      });
+
+      if (step >= steps) {
+        clearInterval(timer);
+      }
+    }, interval);
+
+    // Hide confetti after 5 seconds
+    const confettiTimer = setTimeout(() => setShowConfetti(false), 5000);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(confettiTimer);
+    };
+  }, [selectedStyleCount, selectedProductCount]);
+
+  // Generate confetti pieces
+  const confettiPieces = [...Array(50)].map((_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 2}s`,
+    duration: `${2 + Math.random() * 3}s`,
+    color: ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'][Math.floor(Math.random() * 6)],
+    size: 6 + Math.random() * 8,
+    rotation: Math.random() * 360,
+  }));
 
   return (
     <div className="live-step">
+      {/* Confetti celebration */}
+      {showConfetti && (
+        <div className="confetti-container">
+          {confettiPieces.map((piece) => (
+            <div
+              key={piece.id}
+              className="confetti"
+              style={{
+                left: piece.left,
+                animationDelay: piece.delay,
+                animationDuration: piece.duration,
+                backgroundColor: piece.color,
+                width: `${piece.size}px`,
+                height: `${piece.size}px`,
+                transform: `rotate(${piece.rotation}deg)`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Premium success animation */}
       <div className="success-animation">
+        <div className="success-glow" />
         <div className="success-circle">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="check-icon">
             <path
               d="M16 32L28 44L48 20"
               stroke="currentColor"
@@ -2284,26 +3057,46 @@ function LiveStep({
           <div className="ring ring-2" />
           <div className="ring ring-3" />
         </div>
+        {/* Floating sparkles */}
+        <div className="sparkles">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="sparkle" style={{
+              '--angle': `${i * 45}deg`,
+              '--delay': `${i * 0.1}s`,
+            } as React.CSSProperties} />
+          ))}
+        </div>
       </div>
 
-      <h2 className="live-title">You're All Set!</h2>
+      <h2 className="live-title">
+        <span className="title-gradient">You&apos;re All Set!</span>
+      </h2>
       <p className="live-subtitle">
         TurboCart is now configured and ready to boost your revenue.
       </p>
 
       <div className="summary-card">
-        <h3>Your Setup Summary</h3>
+        <div className="summary-header">
+          <span className="summary-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 2L12 8L18 10L12 12L10 18L8 12L2 10L8 8L10 2Z" fill="currentColor" />
+            </svg>
+          </span>
+          <h3>Your Setup Summary</h3>
+        </div>
         <div className="summary-grid">
           <div className="summary-item">
-            <span className="summary-value">{selectedStyleCount}</span>
+            <span className="summary-value">{animatedValues.styles}</span>
             <span className="summary-label">Display Styles</span>
           </div>
           <div className="summary-item">
-            <span className="summary-value">{selectedProductCount}</span>
+            <span className="summary-value">{animatedValues.products}</span>
             <span className="summary-label">Upsell Products</span>
           </div>
           <div className="summary-item">
-            <span className="summary-value">{data.settings.mlEnabled ? 'ON' : 'OFF'}</span>
+            <span className={`summary-value ${data.settings.mlEnabled ? 'enabled' : ''}`}>
+              {data.settings.mlEnabled ? 'ON' : 'OFF'}
+            </span>
             <span className="summary-label">Machine Learning</span>
           </div>
         </div>
@@ -2312,16 +3105,30 @@ function LiveStep({
       <div className="whats-next">
         <h3>What Happens Now?</h3>
         <ul>
-          <li>
-            <span className="bullet">1</span>
+          <li className="animate-item" style={{ animationDelay: '0.2s' }}>
+            <span className="bullet">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M7 4V7L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </span>
             Machine Learning engine starts learning from customer behavior immediately
           </li>
-          <li>
-            <span className="bullet">2</span>
+          <li className="animate-item" style={{ animationDelay: '0.4s' }}>
+            <span className="bullet">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7H12M5 4L2 7L5 10M9 4L12 7L9 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
             Display styles are A/B tested to find the best performer
           </li>
-          <li>
-            <span className="bullet">3</span>
+          <li className="animate-item" style={{ animationDelay: '0.6s' }}>
+            <span className="bullet">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 10L5 7L8 9L12 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 4H12V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
             Revenue analytics update in real-time on your dashboard
           </li>
         </ul>
@@ -2339,7 +3146,7 @@ function LiveStep({
           </>
         ) : (
           <>
-            Go to Dashboard
+            <span className="btn-text">Go to Dashboard</span>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -2350,19 +3157,64 @@ function LiveStep({
       <style jsx>{`
         .live-step {
           text-align: center;
+          position: relative;
+          overflow: visible;
+        }
+
+        /* Confetti celebration */
+        .confetti-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          pointer-events: none;
+          z-index: 1000;
+          overflow: hidden;
+        }
+
+        .confetti {
+          position: absolute;
+          top: -20px;
+          border-radius: 2px;
+          animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+          0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+          }
         }
 
         .success-animation {
           position: relative;
-          width: 120px;
-          height: 120px;
-          margin: 0 auto 32px;
+          width: 140px;
+          height: 140px;
+          margin: 0 auto 40px;
+        }
+
+        .success-glow {
+          position: absolute;
+          inset: -20px;
+          background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(1.1); }
         }
 
         .success-circle {
           width: 100px;
           height: 100px;
-          background: #000;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -2373,7 +3225,17 @@ function LiveStep({
           left: 50%;
           transform: translate(-50%, -50%);
           z-index: 2;
-          animation: scaleIn 0.5s ease-out;
+          animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+          box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .success-circle :global(.check-icon) {
+          animation: drawCheck 0.5s ease-out 0.3s both;
+        }
+
+        @keyframes drawCheck {
+          from { stroke-dasharray: 100; stroke-dashoffset: 100; }
+          to { stroke-dashoffset: 0; }
         }
 
         @keyframes scaleIn {
@@ -2394,7 +3256,7 @@ function LiveStep({
 
         .ring {
           position: absolute;
-          border: 2px solid rgba(102, 126, 234, 0.3);
+          border: 2px solid rgba(102, 126, 234, 0.4);
           border-radius: 50%;
           animation: ripple 2s ease-out infinite;
         }
@@ -2407,19 +3269,19 @@ function LiveStep({
         }
 
         .ring-2 {
-          width: 130px;
-          height: 130px;
-          top: -65px;
-          left: -65px;
-          animation-delay: 0.3s;
+          width: 140px;
+          height: 140px;
+          top: -70px;
+          left: -70px;
+          animation-delay: 0.4s;
         }
 
         .ring-3 {
-          width: 160px;
-          height: 160px;
-          top: -80px;
-          left: -80px;
-          animation-delay: 0.6s;
+          width: 180px;
+          height: 180px;
+          top: -90px;
+          left: -90px;
+          animation-delay: 0.8s;
         }
 
         @keyframes ripple {
@@ -2428,39 +3290,104 @@ function LiveStep({
             opacity: 1;
           }
           100% {
-            transform: scale(1.5);
+            transform: scale(1.6);
             opacity: 0;
           }
         }
 
+        /* Sparkles */
+        .sparkles {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+        }
+
+        .sparkle {
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 50%;
+          animation: sparkleFloat 1.5s ease-out var(--delay, 0s) infinite;
+          transform: rotate(var(--angle, 0deg)) translateY(-80px);
+        }
+
+        @keyframes sparkleFloat {
+          0% { opacity: 0; transform: rotate(var(--angle)) translateY(-60px) scale(0); }
+          50% { opacity: 1; transform: rotate(var(--angle)) translateY(-90px) scale(1); }
+          100% { opacity: 0; transform: rotate(var(--angle)) translateY(-120px) scale(0); }
+        }
+
         .live-title {
-          font-size: 32px;
+          font-size: 36px;
           font-weight: 700;
-          color: #1d1d1f;
-          margin: 0 0 8px 0;
+          margin: 0 0 12px 0;
+          animation: fadeSlideUp 0.6s ease-out 0.3s both;
+        }
+
+        .title-gradient {
+          background: linear-gradient(135deg, #1d1d1f 0%, #667eea 50%, #1d1d1f 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+          0%, 100% { background-position: 0% center; }
+          50% { background-position: 100% center; }
+        }
+
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         .live-subtitle {
           font-size: 17px;
           color: #86868b;
           margin: 0 0 40px 0;
+          animation: fadeSlideUp 0.6s ease-out 0.4s both;
         }
 
         .summary-card {
           background: #fff;
           border: 1px solid rgba(0, 0, 0, 0.06);
-          border-radius: 16px;
-          padding: 24px;
+          border-radius: 20px;
+          padding: 28px;
           margin-bottom: 32px;
+          animation: fadeSlideUp 0.6s ease-out 0.5s both;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .summary-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 24px;
+        }
+
+        .summary-icon {
+          color: #667eea;
+          animation: starSpin 3s linear infinite;
+        }
+
+        @keyframes starSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
 
         .summary-card h3 {
-          font-size: 15px;
+          font-size: 13px;
           font-weight: 600;
           color: #86868b;
-          margin: 0 0 20px 0;
+          margin: 0;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
         }
 
         .summary-grid {
@@ -2473,33 +3400,55 @@ function LiveStep({
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 4px;
+          gap: 6px;
+          padding: 16px;
+          background: rgba(102, 126, 234, 0.04);
+          border-radius: 12px;
+          transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+          background: rgba(102, 126, 234, 0.08);
+          transform: translateY(-2px);
         }
 
         .summary-value {
-          font-size: 28px;
+          font-size: 32px;
           font-weight: 700;
-          color: #667eea;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .summary-value.enabled {
+          background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .summary-label {
-          font-size: 13px;
+          font-size: 12px;
           color: #86868b;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .whats-next {
           background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, rgba(118, 75, 162, 0.06) 100%);
-          border-radius: 16px;
-          padding: 24px;
+          border-radius: 20px;
+          padding: 28px;
           margin-bottom: 40px;
           text-align: left;
+          animation: fadeSlideUp 0.6s ease-out 0.6s both;
         }
 
         .whats-next h3 {
           font-size: 16px;
           font-weight: 600;
           color: #1d1d1f;
-          margin: 0 0 16px 0;
+          margin: 0 0 20px 0;
         }
 
         .whats-next ul {
@@ -2511,45 +3460,69 @@ function LiveStep({
         .whats-next li {
           display: flex;
           align-items: flex-start;
-          gap: 12px;
-          padding: 10px 0;
+          gap: 14px;
+          padding: 12px 0;
           font-size: 15px;
           color: #1d1d1f;
           line-height: 1.5;
         }
 
+        .whats-next li.animate-item {
+          animation: fadeSlideUp 0.5s ease-out backwards;
+        }
+
         .bullet {
-          width: 24px;
-          height: 24px;
-          background: #667eea;
+          width: 28px;
+          height: 28px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: #fff;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
-          font-weight: 700;
           flex-shrink: 0;
         }
 
         .complete-button {
-          background: #000;
+          background: linear-gradient(135deg, #000 0%, #1d1d1f 100%);
           color: #fff;
           border: none;
-          padding: 16px 40px;
-          border-radius: 14px;
+          padding: 18px 48px;
+          border-radius: 16px;
           font-size: 17px;
           font-weight: 600;
           cursor: pointer;
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          transition: all 0.2s ease;
+          transition: all 0.3s ease;
+          animation: fadeSlideUp 0.6s ease-out 0.7s both;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .complete-button::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .complete-button:hover::before {
+          opacity: 1;
+        }
+
+        .complete-button .btn-text,
+        .complete-button svg {
+          position: relative;
+          z-index: 1;
         }
 
         .complete-button:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
         }
 
         .complete-button:disabled {
@@ -2564,6 +3537,31 @@ function LiveStep({
           border-top-color: #fff;
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 640px) {
+          .summary-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+
+          .summary-item {
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 14px 16px;
+          }
+
+          .summary-value {
+            font-size: 24px;
+          }
+
+          .live-title {
+            font-size: 28px;
+          }
         }
       `}</style>
     </div>
