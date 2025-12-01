@@ -1,0 +1,68 @@
+{% comment %}
+  TurboCart App Embed Block
+  This MUST appear in Theme Editor > App embeds
+  Injects upsells into cart drawer and cart page
+{% endcomment %}
+
+{% comment %} ALWAYS output config and load scripts - no conditionals! {% endcomment %}
+<script>
+  console.log('[TurboCart] App Embed loading...');
+  window.TurboCartConfig = {
+    apiUrl: 'https://turbocart.onrender.com',
+    shopDomain: '{{ shop.permanent_domain }}',
+    shopId: '{{ shop.id }}',
+    enabled: true,
+    maxProducts: {{ block.settings.max_products | default: 3 }},
+    displayStyle: '{{ block.settings.display_style | default: "minimal-strip" }}',
+    position: '{{ block.settings.position | default: "top" }}',
+    debug: true,
+    version: '2.0.0'
+  };
+  console.log('[TurboCart] Config:', window.TurboCartConfig);
+</script>
+
+{{ 'turbocart.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'turbocart.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "TurboCart Upsells",
+  "target": "body",
+  "javascript": "turbocart.js",
+  "stylesheet": "turbocart.css",
+  "settings": [
+    {
+      "type": "select",
+      "id": "display_style",
+      "label": "Display Style",
+      "default": "minimal-strip",
+      "options": [
+        { "value": "minimal-strip", "label": "Minimal Strip" },
+        { "value": "cards", "label": "Cards Grid" },
+        { "value": "list", "label": "List" },
+        { "value": "frequently-bought", "label": "Frequently Bought Together" },
+        { "value": "banner", "label": "Banner" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position in Cart",
+      "default": "top",
+      "options": [
+        { "value": "top", "label": "Above cart items" },
+        { "value": "bottom", "label": "Below cart items" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "label": "Max products to show",
+      "default": 3
+    }
+  ]
+}
+{% endschema %}

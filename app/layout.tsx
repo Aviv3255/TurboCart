@@ -36,6 +36,8 @@ export default function RootLayout({
           <a href="/dashboard">Dashboard</a>
           <a href="/products">Products</a>
           <a href="/analytics">Analytics</a>
+          <a href="/ml-config">ML Config</a>
+          <a href="/billing">Billing</a>
           <a href="/settings">Settings</a>
         </ui-nav-menu>
 

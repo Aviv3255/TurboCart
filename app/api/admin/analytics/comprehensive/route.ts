@@ -178,9 +178,10 @@ export async function GET(request: NextRequest) {
       const totalImpressions = summaryResult.totalImpressions || 0;
       const totalAdds = summaryResult.totalAdds || 0;
       const totalRevenue = summaryResult.totalRevenue || 0;
-      const totalOrders = summaryResult.totalOrders || 1;
+      const totalOrders = summaryResult.totalOrders || 0;
 
       const acceptanceRate = totalImpressions > 0 ? (totalAdds / totalImpressions) * 100 : 0;
+      // Use max(1, totalOrders) for division only to prevent divide by zero
       const revenuePerOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
       const prevAcceptanceRate = prevSummaryResult.totalImpressions > 0

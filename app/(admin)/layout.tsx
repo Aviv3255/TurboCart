@@ -132,6 +132,7 @@ function AdminLayoutContent({
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
   const [themeEnabled, setThemeEnabled] = useState(true); // Assume enabled until checked
+  const [shopDomain, setShopDomain] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -156,7 +157,24 @@ function AdminLayoutContent({
   // Check if user needs onboarding and theme status
   useEffect(() => {
     const checkOnboarding = async () => {
-      // Skip check if already on onboarding page
+      // Check for fresh install cookie (set by OAuth callback)
+      const freshInstallCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('turbocart_fresh_install='));
+
+      if (freshInstallCookie) {
+        console.log('[TurboCart] Fresh install detected - clearing ALL localStorage');
+        // Clear ALL TurboCart localStorage items
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('turbocart_')) {
+            localStorage.removeItem(key);
+          }
+        });
+        // Delete the cookie so this only runs once
+        document.cookie = 'turbocart_fresh_install=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      }
+
+      // Skip API check if already on onboarding page
       if (pathname === '/onboarding') {
         setOnboardingChecked(true);
         return;
@@ -166,12 +184,30 @@ function AdminLayoutContent({
         const response = await authenticatedFetch('/api/admin/shop/onboarding-status');
         if (response.ok) {
           const data = await response.json();
+
+          // If app was reinstalled (detected by API), also clear localStorage
+          if (data.wasReinstalled) {
+            console.log('[TurboCart] App reinstalled (API) - clearing localStorage for fresh start');
+            Object.keys(localStorage).forEach(key => {
+              if (key.startsWith('turbocart_')) {
+                localStorage.removeItem(key);
+              }
+            });
+          }
+
           if (!data.onboardingComplete) {
             setIsNewUser(true);
             router.push('/onboarding');
           }
           // Check theme enabled status
           setThemeEnabled(data.themeEnabled !== false);
+
+          // Get shop domain for embed status polling
+          const urlParams = new URLSearchParams(window.location.search);
+          const shop = urlParams.get('shop') || (window as { shopify?: { config?: { shop?: string } } }).shopify?.config?.shop;
+          if (shop) {
+            setShopDomain(shop);
+          }
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -181,6 +217,34 @@ function AdminLayoutContent({
 
     checkOnboarding();
   }, [pathname, router]);
+
+  // Poll for embed status when banner is shown
+  useEffect(() => {
+    if (themeEnabled || !shopDomain || pathname === '/onboarding') return;
+
+    const checkEmbedStatus = async () => {
+      try {
+        const response = await fetch(`/api/storefront/ping?shop=${encodeURIComponent(shopDomain)}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.active) {
+            console.log('[TurboCart] Embed is active, hiding warning banner');
+            setThemeEnabled(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking embed status:', error);
+      }
+    };
+
+    // Check immediately
+    checkEmbedStatus();
+
+    // Poll every 5 seconds
+    const interval = setInterval(checkEmbedStatus, 5000);
+
+    return () => clearInterval(interval);
+  }, [themeEnabled, shopDomain, pathname]);
 
   // Don't render until onboarding check is complete
   if (!onboardingChecked || isNewUser) {

@@ -1,6 +1,6 @@
 /**
  * Settings Page - Multi-Display Style Selector
- * Choose 1-3 display styles for ML A/B testing optimization
+ * Choose 1-3 display styles for Machine Learning A/B testing optimization
  */
 
 'use client';
@@ -90,6 +90,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
     fetchCurrentSettings();
@@ -124,7 +126,7 @@ export default function SettingsPage() {
     }
   };
 
-  const toggleStyle = (style: DisplayStyle) => {
+  const toggleStyle = (style: DisplayStyle, event?: React.MouseEvent) => {
     if (selectedStyles.includes(style)) {
       // Don't allow removing the last style
       if (selectedStyles.length > 1) {
@@ -134,6 +136,15 @@ export default function SettingsPage() {
       // Only add if under max limit
       if (selectedStyles.length < MAX_STYLES) {
         setSelectedStyles([...selectedStyles, style]);
+      } else if (event) {
+        // Show tooltip BELOW the clicked element so user can see it
+        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+        setTooltipPosition({
+          x: rect.left + rect.width / 2,
+          y: rect.bottom + 10 // Position below the element with 10px gap
+        });
+        setShowTooltip(true);
+        setTimeout(() => setShowTooltip(false), 3000);
       }
     }
   };
@@ -195,10 +206,29 @@ export default function SettingsPage() {
         disabled: !isValidSelection,
       }}
     >
+      {/* Tooltip for max styles - appears BELOW clicked element */}
+      {showTooltip && tooltipPosition && (
+        <div
+          className="max-styles-tooltip"
+          style={{
+            position: 'fixed',
+            left: tooltipPosition.x,
+            top: tooltipPosition.y,
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+          }}
+        >
+          <div className="tooltip-arrow-up" />
+          <div className="tooltip-content">
+            You can select up to 3 styles. Please deselect one to choose this option.
+          </div>
+        </div>
+      )}
+
       {saved && (
         <div style={{ marginBottom: '20px' }}>
           <Banner tone="success" title="Settings saved successfully!">
-            <p>Your display styles have been updated. The ML engine will A/B test them automatically.</p>
+            <p>Your display styles have been updated. The Machine Learning engine will A/B test them automatically.</p>
           </Banner>
         </div>
       )}
@@ -207,7 +237,7 @@ export default function SettingsPage() {
       <div style={{ marginBottom: '20px' }}>
         <Banner tone="info">
           <p>
-            <strong>ML A/B Testing:</strong> Select 1-3 display styles. The ML engine will automatically test all selected styles
+            <strong>Machine Learning A/B Testing:</strong> Select 1-3 display styles. The Machine Learning engine will automatically test all selected styles
             and optimize towards the one that converts best for each cart context.
           </p>
         </Banner>
@@ -221,7 +251,7 @@ export default function SettingsPage() {
                 Display Styles
               </h2>
               <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0 }}>
-                Choose 1-3 styles for ML optimization
+                Choose 1-3 styles for Machine Learning optimization
               </p>
             </div>
             <div className="selection-badge" style={{
@@ -244,9 +274,9 @@ export default function SettingsPage() {
               return (
                 <div
                   key={option.value}
-                  className={`style-option ${isSelected ? 'selected' : ''} ${!canSelect ? 'disabled' : ''}`}
-                  onClick={() => canSelect && toggleStyle(option.value)}
-                  style={{ opacity: canSelect ? 1 : 0.5, cursor: canSelect ? 'pointer' : 'not-allowed' }}
+                  className={`style-option ${isSelected ? 'selected' : ''} ${!canSelect && !isSelected ? 'disabled' : ''}`}
+                  onClick={(e) => toggleStyle(option.value, e)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="style-option-header">
                     <InlineStack gap="300" align="center">
@@ -254,8 +284,7 @@ export default function SettingsPage() {
                         label=""
                         labelHidden
                         checked={isSelected}
-                        onChange={() => canSelect && toggleStyle(option.value)}
-                        disabled={!canSelect}
+                        onChange={() => {}}
                       />
                       <Text variant="bodyMd" fontWeight="bold" as="span">
                         {option.label}
@@ -354,7 +383,7 @@ export default function SettingsPage() {
           <div className="setting-item">
             <div className="setting-label">Maximum Upsells to Show</div>
             <div className="setting-description">
-              How many upsell products to display at once (ML will select the best)
+              How many upsell products to display at once (Machine Learning will select the best)
             </div>
             <select
               className="input"
@@ -376,7 +405,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="setting-item">
-            <div className="setting-label">Enable ML A/B Testing</div>
+            <div className="setting-label">Enable Machine Learning A/B Testing</div>
             <div className="setting-description">
               Automatically test selected display styles and optimize for highest conversion
             </div>
@@ -392,11 +421,11 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      {/* ML Info Card */}
+      {/* Machine Learning Info Card */}
       <Card>
         <div style={{ padding: '24px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>
-            How ML Optimization Works
+            How Machine Learning Optimization Works
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
             <div className="info-card">
@@ -617,6 +646,44 @@ export default function SettingsPage() {
         .cart-type-text span {
           font-size: 12px;
           color: #86868b;
+        }
+
+        .max-styles-tooltip {
+          animation: fadeIn 0.2s ease-out;
+        }
+
+        .tooltip-content {
+          background: #1d1d1f;
+          color: #fff;
+          padding: 12px 16px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          white-space: nowrap;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip-arrow {
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-top: 8px solid #1d1d1f;
+          margin: 0 auto;
+        }
+
+        .tooltip-arrow-up {
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-bottom: 8px solid #1d1d1f;
+          margin: 0 auto;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translate(-50%, -90%); }
+          to { opacity: 1; transform: translate(-50%, -100%); }
         }
       `}</style>
     </Page>

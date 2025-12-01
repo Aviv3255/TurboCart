@@ -115,14 +115,45 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Load saved data on mount
+  // Load saved data on mount, but first check if this is a reinstall
   useEffect(() => {
-    const saved = loadFromStorage();
-    if (saved) {
-      setData(saved.data);
-      setCurrentStep(saved.step);
-    }
-    setLoading(false);
+    const checkAndLoad = async () => {
+      try {
+        // Check if this is a reinstall - if so, clear localStorage
+        const response = await authenticatedFetch('/api/admin/shop/onboarding-status');
+        if (response.ok) {
+          const statusData = await response.json();
+          if (statusData.wasReinstalled) {
+            console.log('[TurboCart Onboarding] App reinstalled - clearing localStorage for fresh start');
+            clearStorage();
+            localStorage.removeItem('turbocart_onboarding_complete');
+            localStorage.removeItem('turbocart_selected_products');
+            localStorage.removeItem('turbocart_display_settings');
+            // Clear any other TurboCart-related localStorage items
+            Object.keys(localStorage).forEach(key => {
+              if (key.startsWith('turbocart_')) {
+                localStorage.removeItem(key);
+              }
+            });
+            // Start fresh - don't load from localStorage
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error checking reinstall status:', error);
+      }
+
+      // Not a reinstall - load saved data normally
+      const saved = loadFromStorage();
+      if (saved) {
+        setData(saved.data);
+        setCurrentStep(saved.step);
+      }
+      setLoading(false);
+    };
+
+    checkAndLoad();
   }, []);
 
   // Save data whenever it changes
@@ -546,222 +577,331 @@ export default function OnboardingPage() {
 // ============================================================================
 
 /**
- * Step 1: Welcome
+ * Step 1: Welcome - Premium Dark Cinematic Design
  */
 function WelcomeStep({ onNext }: { onNext: () => void }) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slides = [
+    {
+      icon: '✦',
+      title: 'The World\'s Most Advanced Algorithm.',
+      subtitle: 'Now In Your Hands.',
+      description: null,
+    },
+    {
+      icon: '🧠',
+      title: 'AI That Actually Learns',
+      subtitle: null,
+      description: 'Our algorithm analyzes every cart, every click, every purchase. Then optimizes automatically.',
+    },
+    {
+      icon: '💰',
+      title: '+32% Average Order Value',
+      subtitle: null,
+      description: 'Real results from real stores. No gimmicks. Just math.',
+    },
+    {
+      icon: '⚡',
+      title: 'Set It. Forget It.',
+      subtitle: null,
+      description: '5 minutes to setup. Then we handle everything.',
+    },
+  ];
+
+  const isLastSlide = currentSlide === slides.length - 1;
+  const slide = slides[currentSlide]!;
+
+  const handleNext = () => {
+    if (isLastSlide) {
+      onNext();
+    } else {
+      setCurrentSlide(prev => prev + 1);
+    }
+  };
+
   return (
-    <div className="welcome-step">
-      <div className="logo-container">
-        <div className="logo">
-          <span className="logo-icon">TC</span>
-        </div>
-        <div className="logo-glow" />
-      </div>
+    <div className="welcome-step-dark">
+      <div className="dark-container">
+        {/* Cosmic glow background */}
+        <div className="cosmic-glow" />
+        <div className="cosmic-glow-2" />
 
-      <h2 className="welcome-title">Welcome to TurboCart</h2>
-      <p className="welcome-subtitle">
-        The AI-powered upsell engine that automatically increases your average order value.
-      </p>
-
-      <div className="features-grid">
-        <div className="feature-card">
-          <div className="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h3>ML Optimization</h3>
-          <p>Thompson Sampling algorithm learns what converts best for each cart type</p>
+        {/* Floating particles */}
+        <div className="particles">
+          {[...Array(20)].map((_, i) => (
+            <div key={i} className="particle" style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 4}s`,
+            }} />
+          ))}
         </div>
 
-        <div className="feature-card">
-          <div className="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M3 9L12 2L21 9V20C21 21.1 20.1 22 19 22H5C3.9 22 3 21.1 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h3>5+ Display Styles</h3>
-          <p>Choose from minimal strips, cards, banners, and more beautiful layouts</p>
+        {/* Content */}
+        <div className="slide-content">
+          <div className="slide-icon">{slide.icon}</div>
+
+          <h1 className="slide-title glow">{slide.title}</h1>
+
+          {slide.subtitle && (
+            <p className="slide-subtitle">{slide.subtitle}</p>
+          )}
+
+          {slide.description && (
+            <p className="slide-description">{slide.description}</p>
+          )}
         </div>
 
-        <div className="feature-card">
-          <div className="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M18 20V10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 20V4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M6 20V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h3>Advanced Analytics</h3>
-          <p>Track revenue per order, conversion rates, and A/B test results in real-time</p>
+        {/* Slide indicators */}
+        <div className="slide-indicators">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              className={`indicator ${i === currentSlide ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(i)}
+            />
+          ))}
         </div>
 
-        <div className="feature-card">
-          <div className="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-              <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h3>5-Minute Setup</h3>
-          <p>No code required. Just select products and display styles, then enable</p>
-        </div>
-      </div>
-
-      <div className="cta-section">
-        <button className="cta-button" onClick={onNext}>
-          Let's Get Started
+        {/* CTA Button */}
+        <button className="cta-button-dark" onClick={handleNext}>
+          {isLastSlide ? 'Let\'s Begin' : 'Continue'}
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <p className="cta-note">14-day free trial included</p>
+
+        {currentSlide === 0 && (
+          <p className="trust-note">Trusted by 10,000+ Shopify stores</p>
+        )}
       </div>
 
       <style jsx>{`
-        .welcome-step {
-          text-align: center;
+        .welcome-step-dark {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 1000;
         }
 
-        .logo-container {
-          position: relative;
-          width: 100px;
-          height: 100px;
-          margin: 0 auto 32px;
-        }
-
-        .logo {
-          width: 100px;
-          height: 100px;
-          background: #000;
-          border-radius: 24px;
+        .dark-container {
+          background: #000000;
+          min-height: 100vh;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          padding: 40px 24px;
           position: relative;
-          z-index: 2;
+          overflow: hidden;
         }
 
-        .logo-icon {
-          color: #fff;
-          font-size: 36px;
-          font-weight: 700;
-          letter-spacing: -1px;
-        }
-
-        .logo-glow {
+        /* Cosmic glow effects */
+        .cosmic-glow {
           position: absolute;
-          top: 50%;
+          top: 30%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: 120px;
-          height: 120px;
-          background: rgba(0, 0, 0, 0.15);
-          border-radius: 32px;
-          filter: blur(20px);
-          z-index: 1;
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.08) 40%, transparent 70%);
+          border-radius: 50%;
+          filter: blur(60px);
+          pointer-events: none;
         }
 
-        .welcome-title {
-          font-size: 36px;
-          font-weight: 700;
-          color: #1d1d1f;
-          margin: 0 0 12px 0;
-          letter-spacing: -0.5px;
+        .cosmic-glow-2 {
+          position: absolute;
+          bottom: 20%;
+          right: 20%;
+          width: 400px;
+          height: 400px;
+          background: radial-gradient(circle, rgba(118, 75, 162, 0.1) 0%, transparent 60%);
+          border-radius: 50%;
+          filter: blur(40px);
+          pointer-events: none;
         }
 
-        .welcome-subtitle {
-          font-size: 19px;
-          color: #86868b;
-          margin: 0 auto 48px;
-          max-width: 500px;
-          line-height: 1.5;
+        /* Floating particles */
+        .particles {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          pointer-events: none;
         }
 
-        .features-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 20px;
-          margin-bottom: 48px;
+        .particle {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          animation: float linear infinite;
         }
 
-        @media (max-width: 640px) {
-          .features-grid {
-            grid-template-columns: 1fr;
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-100px) translateX(20px);
+            opacity: 0;
           }
         }
 
-        .feature-card {
-          background: #fff;
-          border-radius: 16px;
-          padding: 24px;
-          text-align: left;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          transition: all 0.2s ease;
+        /* Slide content */
+        .slide-content {
+          text-align: center;
+          max-width: 600px;
+          z-index: 10;
+          animation: fadeIn 0.6s ease-out;
         }
 
-        .feature-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
-        .feature-icon {
-          width: 48px;
-          height: 48px;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #667eea;
-          margin-bottom: 16px;
+        .slide-icon {
+          font-size: 48px;
+          margin-bottom: 32px;
+          animation: pulse 2s ease-in-out infinite;
         }
 
-        .feature-card h3 {
-          font-size: 17px;
-          font-weight: 600;
-          color: #1d1d1f;
-          margin: 0 0 8px 0;
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
         }
 
-        .feature-card p {
-          font-size: 14px;
-          color: #86868b;
+        .slide-title {
+          font-size: 42px;
+          font-weight: 700;
+          color: #FFFFFF;
+          margin: 0 0 16px 0;
+          letter-spacing: -1px;
+          line-height: 1.2;
+        }
+
+        .slide-title.glow {
+          text-shadow:
+            0 0 40px rgba(102, 126, 234, 0.5),
+            0 0 80px rgba(118, 75, 162, 0.3),
+            0 0 120px rgba(102, 126, 234, 0.2);
+        }
+
+        .slide-subtitle {
+          font-size: 24px;
+          color: rgba(255, 255, 255, 0.9);
+          margin: 0 0 24px 0;
+          font-weight: 500;
+        }
+
+        .slide-description {
+          font-size: 18px;
+          color: rgba(255, 255, 255, 0.6);
           margin: 0;
-          line-height: 1.5;
+          line-height: 1.6;
+          max-width: 450px;
+          margin: 0 auto;
         }
 
-        .cta-section {
-          margin-top: 32px;
+        /* Slide indicators */
+        .slide-indicators {
+          display: flex;
+          gap: 12px;
+          margin-top: 48px;
+          z-index: 10;
         }
 
-        .cta-button {
-          background: #000;
-          color: #fff;
+        .indicator {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.3);
           border: none;
-          padding: 16px 40px;
-          border-radius: 14px;
-          font-size: 17px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          padding: 0;
+        }
+
+        .indicator.active {
+          background: #FFFFFF;
+          transform: scale(1.2);
+        }
+
+        .indicator:hover {
+          background: rgba(255, 255, 255, 0.6);
+        }
+
+        /* CTA Button */
+        .cta-button-dark {
+          background: #FFFFFF;
+          color: #000000;
+          border: none;
+          padding: 16px 48px;
+          border-radius: 8px;
+          font-size: 16px;
           font-weight: 600;
           cursor: pointer;
           display: inline-flex;
           align-items: center;
           gap: 12px;
+          margin-top: 40px;
+          z-index: 10;
           transition: all 0.2s ease;
         }
 
-        .cta-button:hover {
+        .cta-button-dark:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
         }
 
-        .cta-note {
-          font-size: 13px;
-          color: #86868b;
-          margin-top: 16px;
+        .trust-note {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.4);
+          margin-top: 24px;
+          z-index: 10;
+        }
+
+        @media (max-width: 640px) {
+          .slide-title {
+            font-size: 28px;
+          }
+
+          .slide-subtitle {
+            font-size: 18px;
+          }
+
+          .slide-description {
+            font-size: 16px;
+          }
+
+          .cosmic-glow {
+            width: 300px;
+            height: 300px;
+          }
         }
       `}</style>
     </div>
@@ -854,10 +994,13 @@ function DisplayStylesStep({
   onNext: () => void;
   onBack: () => void;
 }) {
+  const [showMaxWarning, setShowMaxWarning] = useState(false);
+
   const toggleStyle = (id: string) => {
     const existing = displayStyles.find(s => s.id === id);
     if (existing) {
       onUpdate(displayStyles.filter(s => s.id !== id));
+      setShowMaxWarning(false);
     } else {
       const enabledCount = displayStyles.filter(s => s.enabled).length;
       if (enabledCount < 3) {
@@ -865,17 +1008,23 @@ function DisplayStylesStep({
           ...displayStyles,
           { id, enabled: true, priority: enabledCount + 1 },
         ]);
+        setShowMaxWarning(false);
+      } else {
+        // Show warning when trying to select more than 3
+        setShowMaxWarning(true);
+        setTimeout(() => setShowMaxWarning(false), 3000);
       }
     }
   };
 
   const isSelected = (id: string) => displayStyles.some(s => s.id === id);
   const selectedCount = displayStyles.length;
+  const isMaxSelected = selectedCount >= 3;
 
   return (
     <div className="display-styles-step">
       <div className="step-intro">
-        <p>Select 1-3 display styles. The ML engine will automatically A/B test them to find what converts best for your store.</p>
+        <p>Select 1-3 display styles. The Machine Learning engine will automatically A/B test them to find what converts best for your store.</p>
       </div>
 
       <div className="selection-counter">
@@ -886,11 +1035,22 @@ function DisplayStylesStep({
         {selectedCount >= 3 && <span className="max-hint">Maximum reached</span>}
       </div>
 
+      {showMaxWarning && (
+        <div className="max-warning-toast">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+            <path d="M8 5V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            <circle cx="8" cy="10.5" r="0.75" fill="currentColor"/>
+          </svg>
+          <span>You can only select up to 3 display styles. Deselect one to choose another.</span>
+        </div>
+      )}
+
       <div className="styles-grid">
         {DISPLAY_STYLES.map((style) => (
           <div
             key={style.id}
-            className={`style-card ${isSelected(style.id) ? 'selected' : ''}`}
+            className={`style-card ${isSelected(style.id) ? 'selected' : ''} ${isMaxSelected && !isSelected(style.id) ? 'disabled' : ''}`}
             onClick={() => toggleStyle(style.id)}
           >
             <div className="style-preview">
@@ -923,7 +1083,7 @@ function DisplayStylesStep({
           </svg>
         </div>
         <div>
-          <strong>Pro tip:</strong> Select 2-3 styles to let the ML engine find the optimal combination for different cart types.
+          <strong>Pro tip:</strong> Select 2-3 styles to let the Machine Learning engine find the optimal combination for different cart types.
         </div>
       </div>
 
@@ -980,6 +1140,34 @@ function DisplayStylesStep({
           font-style: italic;
         }
 
+        .max-warning-toast {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          color: #dc2626;
+          padding: 12px 16px;
+          border-radius: 10px;
+          margin-bottom: 16px;
+          animation: shake 0.5s ease-in-out;
+        }
+
+        .max-warning-toast svg {
+          flex-shrink: 0;
+        }
+
+        .max-warning-toast span {
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
         .styles-grid {
           display: flex;
           flex-direction: column;
@@ -1008,6 +1196,17 @@ function DisplayStylesStep({
         .style-card.selected {
           border-color: #000;
           background: #f5f5f7;
+        }
+
+        .style-card.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .style-card.disabled:hover {
+          border-color: rgba(0, 0, 0, 0.06);
+          transform: none;
+          box-shadow: none;
         }
 
         .style-preview {
@@ -1487,13 +1686,13 @@ function SettingsStep({
         <div className="setting-card">
           <div className="setting-header">
             <h3>Products to Show</h3>
-            <p>Maximum upsells displayed at once</p>
+            <p>Maximum products displayed at once</p>
           </div>
           <div className="slider-control">
             <input
               type="range"
               min="1"
-              max="6"
+              max="25"
               value={settings.maxProducts}
               onChange={(e) => onUpdate({ ...settings, maxProducts: parseInt(e.target.value) })}
             />
@@ -1534,11 +1733,11 @@ function SettingsStep({
           </div>
         </div>
 
-        {/* ML Settings */}
+        {/* Machine Learning Settings */}
         <div className="setting-card highlight">
           <div className="setting-header">
             <div className="header-with-badge">
-              <h3>ML Optimization</h3>
+              <h3>Machine Learning Optimization</h3>
               <span className="pro-badge">Recommended</span>
             </div>
             <p>Let AI automatically optimize your upsells</p>
@@ -1547,7 +1746,7 @@ function SettingsStep({
           <div className="toggle-row">
             <div>
               <h4>Auto-Optimize Products</h4>
-              <p>ML selects best products for each cart</p>
+              <p>Machine Learning selects best products for each cart</p>
             </div>
             <label className="toggle">
               <input
@@ -2105,7 +2304,7 @@ function LiveStep({
           </div>
           <div className="summary-item">
             <span className="summary-value">{data.settings.mlEnabled ? 'ON' : 'OFF'}</span>
-            <span className="summary-label">ML Optimization</span>
+            <span className="summary-label">Machine Learning</span>
           </div>
         </div>
       </div>
@@ -2115,7 +2314,7 @@ function LiveStep({
         <ul>
           <li>
             <span className="bullet">1</span>
-            ML engine starts learning from customer behavior immediately
+            Machine Learning engine starts learning from customer behavior immediately
           </li>
           <li>
             <span className="bullet">2</span>

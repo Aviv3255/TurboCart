@@ -283,7 +283,7 @@ export default function DashboardPage() {
           <div className="card">
             <div className="card-header">
               <h3>Top Performing Styles</h3>
-              <span className="badge">ML Optimized</span>
+              <span className="badge ml-badge">Machine Learning</span>
             </div>
             {data?.topStyles && data.topStyles.length > 0 ? (
               <div className="styles-list">
@@ -362,7 +362,7 @@ export default function DashboardPage() {
                 <path d="M8 5V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 <circle cx="8" cy="11" r="1" fill="currentColor"/>
               </svg>
-              <span>Frequent changes may impact ML optimization. Let the system learn for best results.</span>
+              <span>Frequent changes may impact Machine Learning optimization. Let the system learn for best results.</span>
             </div>
 
             {/* Quick View */}
@@ -432,10 +432,10 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* ML Status */}
+          {/* Machine Learning Status */}
           <div className="card ml-card">
             <div className="card-header">
-              <h3>ML Optimization</h3>
+              <h3>Machine Learning Optimization</h3>
               <span className="status-badge active">Active</span>
             </div>
             <div className="ml-info">
@@ -667,6 +667,16 @@ export default function DashboardPage() {
           font-weight: 600;
           padding: 4px 10px;
           border-radius: 10px;
+        }
+
+        .badge.ml-badge {
+          background: #000;
+          color: #a78bfa;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-weight: 700;
+          font-size: 12px;
+          letter-spacing: 0.3px;
         }
 
         .status-badge {
@@ -999,7 +1009,7 @@ export default function DashboardPage() {
           background: #e5e5e5;
         }
 
-        /* ML Card */
+        /* Machine Learning Card */
         .ml-info {
           padding: 16px;
         }

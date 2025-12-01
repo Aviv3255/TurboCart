@@ -2,6 +2,40 @@ import { Pool, PoolClient, QueryResult } from 'pg';
 
 // Database connection pool
 let pool: Pool | null = null;
+let migrationsRun = false;
+
+/**
+ * Run automatic migrations to ensure database schema is up to date
+ */
+async function runAutoMigrations(pool: Pool): Promise<void> {
+  if (migrationsRun) return;
+
+  try {
+    console.log('[DB] Running auto-migrations...');
+
+    // Check if onboarding_completed_at column exists
+    const columnCheck = await pool.query(`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_name = 'shops' AND column_name = 'onboarding_completed_at'
+    `);
+
+    if (columnCheck.rows.length === 0) {
+      console.log('[DB] Adding missing column: onboarding_completed_at');
+      await pool.query(`
+        ALTER TABLE shops
+        ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP
+      `);
+      console.log('[DB] Column onboarding_completed_at added successfully');
+    }
+
+    migrationsRun = true;
+    console.log('[DB] Auto-migrations completed');
+  } catch (error) {
+    console.error('[DB] Auto-migration error:', error);
+    // Don't throw - allow app to continue even if migration fails
+  }
+}
 
 /**
  * Get or create database connection pool
@@ -18,6 +52,9 @@ export function getPool(): Pool {
     pool.on('error', (err) => {
       console.error('Unexpected database pool error:', err);
     });
+
+    // Run migrations on first connection
+    runAutoMigrations(pool);
   }
 
   return pool;

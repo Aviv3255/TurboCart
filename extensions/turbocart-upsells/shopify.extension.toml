@@ -1,16 +1,8 @@
-# TurboCart Theme App Extension Configuration
-# Learn more: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions
-
+type = "theme_app_extension"
 api_version = "2024-01"
 name = "TurboCart Upsells"
 handle = "turbocart-upsells"
 
-[[extensions]]
-type = "theme"
-name = "TurboCart AI Upsells"
-
-[extensions.settings]
-# Extension-level settings
-[[extensions.settings.blocks]]
-type = "app_block"
-name = "turbocart_upsells"
+# Blocks are auto-discovered from blocks/ directory
+# App Embed blocks have "target": "body" in their schema
+# Section blocks have "target": "section" in their schema

@@ -1,39 +1,459 @@
 /**
  * TurboCart - Theme App Extension JavaScript
  * Handles all storefront upsell functionality
+ * Auto-injects upsells into cart drawer and cart page
+ *
+ * BULLETPROOF VERSION - handles all edge cases
  */
+
+// IMMEDIATE LOG - if you see this, the script file is loading!
+console.log('[TurboCart] ✅ turbocart.js file loaded!');
+console.log('[TurboCart] TurboCartConfig:', window.TurboCartConfig);
+console.log('[TurboCart] Shopify object:', window.Shopify);
 
 (function() {
   'use strict';
 
+  // Get shop domain - PRIORITIZE TurboCartConfig (from Liquid {{ shop.permanent_domain }})
+  function getShopDomain() {
+    // #1 PRIORITY: TurboCartConfig.shopDomain from Liquid - ALWAYS the myshopify.com domain
+    if (window.TurboCartConfig?.shopDomain) {
+      console.log('[TurboCart] ✅ Shop from TurboCartConfig:', window.TurboCartConfig.shopDomain);
+      return window.TurboCartConfig.shopDomain;
+    }
+
+    // #2: Shopify global object
+    if (window.Shopify?.shop) {
+      console.log('[TurboCart] ✅ Shop from Shopify object:', window.Shopify.shop);
+      return window.Shopify.shop;
+    }
+
+    // #3: Meta tag
+    const metaShop = document.querySelector('meta[name="shopify-shop-domain"]')?.content;
+    if (metaShop) {
+      console.log('[TurboCart] ✅ Shop from meta tag:', metaShop);
+      return metaShop;
+    }
+
+    // #4: URL hostname (for myshopify.com domains)
+    const hostname = window.location.hostname;
+    if (hostname.includes('myshopify.com')) {
+      console.log('[TurboCart] ✅ Shop from hostname:', hostname);
+      return hostname;
+    }
+
+    console.error('[TurboCart] ❌ CRITICAL: Could not determine shop domain!');
+    console.error('[TurboCart] TurboCartConfig:', window.TurboCartConfig);
+    console.error('[TurboCart] Shopify:', window.Shopify);
+    return null;
+  }
+
+  // Get shop domain FIRST
+  const SHOP_DOMAIN = getShopDomain();
+  console.log('[TurboCart] 🏪 Final shop domain:', SHOP_DOMAIN);
+
   // Configuration
   const CONFIG = {
-    apiUrl: window.TurboCartConfig?.apiUrl || '',
-    debug: window.TurboCartConfig?.debug || false,
+    apiUrl: window.TurboCartConfig?.apiUrl || 'https://turbocart.onrender.com',
+    shopDomain: SHOP_DOMAIN,
+    debug: true, // ALWAYS debug for now
+    displayStyle: window.TurboCartConfig?.displayStyle || 'minimal-strip',
+    position: window.TurboCartConfig?.position || 'top',
+    maxProducts: window.TurboCartConfig?.maxProducts || 3,
+    enabled: true,
   };
+
+  console.log('[TurboCart] 📋 Full config:', JSON.stringify(CONFIG, null, 2));
 
   // State
   let currentCart = null;
   let upsellProducts = [];
   let sessionId = generateSessionId();
+  let upsellContainer = null;
+  let isInjected = false;
+  let loadAttempts = 0;
+  const MAX_LOAD_ATTEMPTS = 3;
+
+  // Common cart drawer selectors for various themes (expanded)
+  const CART_DRAWER_SELECTORS = [
+    // Dawn theme (most common)
+    'cart-drawer',
+    'cart-drawer-items',
+    '#cart-drawer',
+    '.cart-drawer',
+    '[data-cart-drawer]',
+    // Other themes
+    '.drawer--is-open .drawer__inner',
+    '.drawer[open]',
+    '.mini-cart',
+    '.side-cart',
+    '#CartDrawer',
+    '.cart-slide',
+    'aside[id*="cart"]',
+    'div[id*="cart-drawer"]',
+    '.cart__drawer',
+    '.js-drawer-open-right',
+    '[data-section-type="cart-drawer"]',
+    'cart-notification',
+    '.cart-notification',
+    // Additional selectors
+    '#cart-notification',
+    '.cart-flyout',
+    '.ajax-cart',
+    '.slide-cart',
+    '#slide-cart',
+    '.offcanvas-cart',
+  ];
+
+  // Common cart page selectors (expanded)
+  const CART_PAGE_SELECTORS = [
+    '.cart-items',
+    '.cart__items',
+    '#cart-items',
+    '[data-cart-items]',
+    'form[action="/cart"]',
+    '.cart-form',
+    '#cart',
+    '.cart-page',
+    '[data-section-type="cart"]',
+    'main .cart',
+    '#main-cart-items',
+    '.cart-container',
+    '.cart__content',
+    '#CartPageForm',
+  ];
+
+  /**
+   * Debug log function
+   */
+  function log(...args) {
+    if (CONFIG.debug) {
+      console.log('[TurboCart]', ...args);
+    }
+  }
+
+  /**
+   * Error log function (always logs)
+   */
+  function errorLog(...args) {
+    console.error('[TurboCart ERROR]', ...args);
+  }
+
+  /**
+   * Generate session ID
+   */
+  function generateSessionId() {
+    return 'tc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
 
   /**
    * Initialize TurboCart
    */
   function init() {
-    log('TurboCart initializing...');
+    log('Initializing TurboCart...', {
+      apiUrl: CONFIG.apiUrl,
+      shopDomain: CONFIG.shopDomain,
+      enabled: CONFIG.enabled,
+      displayStyle: CONFIG.displayStyle,
+    });
 
-    // Get current cart
+    // Check if enabled
+    if (!CONFIG.enabled) {
+      log('TurboCart is disabled');
+      return;
+    }
+
+    // Check shop domain
+    if (!CONFIG.shopDomain) {
+      errorLog('No shop domain found! TurboCart cannot function.');
+      return;
+    }
+
+    // Ping server to indicate embed is active
+    pingServer();
+
+    // Get current cart and load upsells
     fetchCart().then(cart => {
       currentCart = cart;
-      loadUpsells();
+      log('Cart fetched:', cart);
+
+      // Detect and inject into cart
+      detectAndInjectCart();
+
+      // Load upsells if cart has items
+      if (cart && cart.items && cart.items.length > 0) {
+        loadUpsells();
+      } else {
+        log('Cart is empty, waiting for items...');
+      }
+    }).catch(err => {
+      errorLog('Failed to fetch cart:', err);
     });
 
     // Listen for cart updates
     document.addEventListener('cart:updated', handleCartUpdate);
+    document.addEventListener('cart:refresh', handleCartUpdate);
 
-    // Initialize all upsell blocks
+    // Watch for cart drawer opening
+    setupCartObserver();
+
+    // Initialize any existing blocks
     initializeBlocks();
+
+    // Also intercept add-to-cart events
+    interceptAddToCart();
+
+    log('TurboCart initialized successfully');
+  }
+
+  /**
+   * Intercept add-to-cart events to refresh upsells
+   */
+  function interceptAddToCart() {
+    // Listen for form submissions
+    document.addEventListener('submit', (e) => {
+      const form = e.target;
+      if (form.action && form.action.includes('/cart/add')) {
+        log('Add to cart detected via form');
+        setTimeout(() => {
+          fetchCart().then(cart => {
+            currentCart = cart;
+            loadUpsells();
+            detectAndInjectCart();
+          });
+        }, 1000);
+      }
+    });
+
+    // Also watch for fetch/XHR to cart/add
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+      const result = originalFetch.apply(this, args);
+      const url = args[0];
+      if (typeof url === 'string' && url.includes('/cart/add')) {
+        log('Add to cart detected via fetch');
+        result.then(() => {
+          setTimeout(() => {
+            fetchCart().then(cart => {
+              currentCart = cart;
+              loadUpsells();
+              detectAndInjectCart();
+            });
+          }, 500);
+        });
+      }
+      return result;
+    };
+  }
+
+  /**
+   * Setup mutation observer to detect cart drawer opening
+   */
+  function setupCartObserver() {
+    // Watch for DOM changes (cart drawer appearing)
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+          // Check if cart drawer appeared
+          setTimeout(() => {
+            detectAndInjectCart();
+          }, 100);
+        }
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'open', 'aria-hidden']
+    });
+
+    // Also listen for common cart events
+    document.addEventListener('cart:open', () => {
+      log('Cart open event detected');
+      setTimeout(detectAndInjectCart, 100);
+    });
+
+    // Check periodically for cart drawer (fallback)
+    setInterval(() => {
+      if (!isInjected || !document.contains(upsellContainer)) {
+        detectAndInjectCart();
+      }
+    }, 2000);
+  }
+
+  /**
+   * Detect cart drawer or cart page and inject upsells
+   */
+  function detectAndInjectCart() {
+    // First, try cart drawer
+    let cartElement = null;
+
+    for (const selector of CART_DRAWER_SELECTORS) {
+      try {
+        const el = document.querySelector(selector);
+        if (el && isElementVisible(el)) {
+          cartElement = el;
+          log('Found cart drawer:', selector);
+          break;
+        }
+      } catch (e) {
+        // Invalid selector, skip
+      }
+    }
+
+    // If no drawer, try cart page
+    if (!cartElement && window.location.pathname.includes('/cart')) {
+      for (const selector of CART_PAGE_SELECTORS) {
+        try {
+          const el = document.querySelector(selector);
+          if (el) {
+            cartElement = el;
+            log('Found cart page:', selector);
+            break;
+          }
+        } catch (e) {
+          // Invalid selector, skip
+        }
+      }
+    }
+
+    if (cartElement) {
+      injectUpsellContainer(cartElement);
+    }
+  }
+
+  /**
+   * Check if element is visible
+   */
+  function isElementVisible(el) {
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' &&
+           style.visibility !== 'hidden' &&
+           style.opacity !== '0' &&
+           el.offsetParent !== null;
+  }
+
+  /**
+   * Inject the upsell container into the cart
+   */
+  function injectUpsellContainer(cartElement) {
+    // Check if already injected
+    if (upsellContainer && document.contains(upsellContainer)) {
+      log('Upsell container already exists');
+      return;
+    }
+
+    // Create container
+    upsellContainer = document.createElement('div');
+    upsellContainer.id = 'turbocart-upsells';
+    upsellContainer.className = `turbocart-${CONFIG.displayStyle}`;
+    upsellContainer.setAttribute('data-turbocart-block', CONFIG.displayStyle);
+
+    // Create inner structure
+    upsellContainer.innerHTML = `
+      <div class="turbocart-${CONFIG.displayStyle}__header">
+        <h3 class="turbocart-${CONFIG.displayStyle}__title">You might also like</h3>
+      </div>
+      <div class="turbocart-${CONFIG.displayStyle}__container">
+        <div class="turbocart-${CONFIG.displayStyle}__items" data-turbocart-upsells>
+          <div class="turbocart-${CONFIG.displayStyle}__loading">
+            <div class="turbocart-spinner"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Insert based on position
+    if (CONFIG.position === 'top') {
+      cartElement.insertBefore(upsellContainer, cartElement.firstChild);
+    } else {
+      cartElement.appendChild(upsellContainer);
+    }
+
+    isInjected = true;
+    log('Upsell container injected');
+
+    // If we have products, render them
+    if (upsellProducts.length > 0) {
+      renderUpsells();
+    } else if (currentCart && currentCart.items && currentCart.items.length > 0) {
+      loadUpsells();
+    }
+  }
+
+  /**
+   * Render upsells into the injected container
+   */
+  function renderUpsells() {
+    if (!upsellContainer) {
+      log('No upsell container to render into');
+      return;
+    }
+
+    const container = upsellContainer.querySelector('[data-turbocart-upsells]');
+    if (!container) {
+      log('No upsells container found');
+      return;
+    }
+
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">No recommendations available</p>';
+      return;
+    }
+
+    log('Rendering', upsellProducts.length, 'upsells');
+
+    // Render based on display style
+    switch (CONFIG.displayStyle) {
+      case 'minimal-strip':
+        renderMinimalStrip(container);
+        break;
+      case 'cards':
+        renderCards(container);
+        break;
+      case 'list':
+        renderList(container);
+        break;
+      case 'frequently-bought':
+        renderFrequentlyBought(container);
+        break;
+      case 'banner':
+        renderBanner(container);
+        break;
+      default:
+        renderMinimalStrip(container);
+    }
+  }
+
+  /**
+   * Ping the server to indicate the embed is active
+   */
+  function pingServer() {
+    if (!CONFIG.apiUrl || !CONFIG.shopDomain) {
+      log('Cannot ping - missing apiUrl or shopDomain');
+      return;
+    }
+
+    fetch(`${CONFIG.apiUrl}/api/storefront/ping`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        shop: CONFIG.shopDomain,
+        timestamp: new Date().toISOString(),
+      }),
+    }).then(response => {
+      if (response.ok) {
+        log('Ping sent successfully');
+      } else {
+        log('Ping failed with status:', response.status);
+      }
+    }).catch(error => {
+      log('Ping error:', error.message);
+    });
   }
 
   /**
@@ -46,6 +466,9 @@
       log(`Initializing ${type} block`);
 
       switch(type) {
+        case 'minimal-strip':
+          initMinimalStrip(block);
+          break;
         case 'carousel':
           initCarousel(block);
           break;
@@ -109,56 +532,127 @@
   }
 
   /**
-   * Load upsell recommendations
+   * Load upsell recommendations with retry logic
    */
   async function loadUpsells() {
-    if (!currentCart || !currentCart.items.length) {
+    if (!currentCart || !currentCart.items || currentCart.items.length === 0) {
       log('Cart is empty, no upsells to show');
+      hideAllBlocks();
       return;
     }
 
+    if (!CONFIG.shopDomain) {
+      errorLog('No shop domain available - cannot load upsells');
+      return;
+    }
+
+    log('Loading upsells for shop:', CONFIG.shopDomain, 'Cart items:', currentCart.items.length);
+
     try {
-      const response = await fetch(`${CONFIG.apiUrl}/api/storefront/upsells`, {
+      const apiUrl = `${CONFIG.apiUrl}/api/storefront/upsells?shop=${encodeURIComponent(CONFIG.shopDomain)}`;
+      log('Calling API:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           cart_items: currentCart.items,
           session_id: sessionId,
+          shop: CONFIG.shopDomain,
         }),
       });
 
+      log('API Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
+      log('API Response data:', data);
+
       upsellProducts = data.upsells || [];
+      loadAttempts = 0; // Reset on success
 
-      log('Loaded upsells:', upsellProducts);
-
-      // Track impressions
-      trackImpressions();
-
-      // Render upsells in all blocks
-      renderAllBlocks();
+      if (upsellProducts.length > 0) {
+        log('Loaded', upsellProducts.length, 'upsells');
+        trackImpressions();
+        renderUpsells();
+        renderAllBlocks();
+      } else {
+        log('No upsells returned from API - check if products are configured');
+        // Show helpful message
+        if (upsellContainer) {
+          const container = upsellContainer.querySelector('[data-turbocart-upsells]');
+          if (container) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:10px;font-size:12px;">No recommendations available</p>';
+          }
+        }
+      }
 
     } catch (error) {
-      log('Error loading upsells:', error);
+      errorLog('Error loading upsells:', error.message);
+      loadAttempts++;
+
+      // Retry up to MAX_LOAD_ATTEMPTS times
+      if (loadAttempts < MAX_LOAD_ATTEMPTS) {
+        log(`Retrying in 2 seconds (attempt ${loadAttempts + 1}/${MAX_LOAD_ATTEMPTS})...`);
+        setTimeout(loadUpsells, 2000);
+      } else {
+        errorLog('Max retry attempts reached. Please check:');
+        errorLog('1. Is TurboCart app installed and configured?');
+        errorLog('2. Are upsell products selected?');
+        errorLog('3. Is the API URL correct?', CONFIG.apiUrl);
+      }
     }
+  }
+
+  /**
+   * Hide all upsell blocks when cart is empty
+   */
+  function hideAllBlocks() {
+    const containers = document.querySelectorAll('[data-turbocart-upsells]');
+    containers.forEach(container => {
+      const block = container.closest('[data-turbocart-block]');
+      if (block) {
+        block.style.display = 'none';
+      }
+    });
+  }
+
+  /**
+   * Show all upsell blocks
+   */
+  function showAllBlocks() {
+    const containers = document.querySelectorAll('[data-turbocart-upsells]');
+    containers.forEach(container => {
+      const block = container.closest('[data-turbocart-block]');
+      if (block) {
+        block.style.display = '';
+      }
+    });
   }
 
   /**
    * Render upsells in all blocks
    */
   function renderAllBlocks() {
+    // Show blocks first (they might have been hidden when cart was empty)
+    showAllBlocks();
+
     const containers = document.querySelectorAll('[data-turbocart-upsells]');
     containers.forEach(container => {
       const block = container.closest('[data-turbocart-block]');
       const type = block?.dataset.turbocartBlock;
 
       switch(type) {
+        case 'minimal-strip':
+          renderMinimalStrip(container);
+          break;
         case 'carousel':
           renderCarousel(container);
           break;
@@ -205,6 +699,54 @@
           renderComparisonTable(container);
           break;
       }
+    });
+  }
+
+  /* ============================================ */
+  /* MINIMAL STRIP IMPLEMENTATION */
+  /* ============================================ */
+
+  function initMinimalStrip(block) {
+    // Minimal strip doesn't require special initialization
+    log('Minimal strip block initialized');
+  }
+
+  function renderMinimalStrip(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">No recommendations available</p>';
+      return;
+    }
+
+    const html = upsellProducts.slice(0, 4).map(product => `
+      <div class="turbocart-minimal-strip__item" data-product-id="${product.id}">
+        <img
+          src="${product.image}"
+          alt="${escapeHtml(product.title)}"
+          class="turbocart-minimal-strip__item-image"
+          loading="lazy"
+        />
+        <div class="turbocart-minimal-strip__item-info">
+          <h4 class="turbocart-minimal-strip__item-title">${escapeHtml(product.title)}</h4>
+          <div class="turbocart-minimal-strip__item-price">${formatMoney(product.price)}</div>
+        </div>
+        <button
+          class="turbocart-btn turbocart-btn--primary turbocart-minimal-strip__item-btn"
+          data-turbocart-add="${product.variant_id}"
+        >
+          Add
+        </button>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
     });
   }
 
@@ -633,9 +1175,9 @@
   }
 
   function trackEvent(eventType, productId) {
-    if (!CONFIG.apiUrl) return;
+    if (!CONFIG.apiUrl || !CONFIG.shopDomain) return;
 
-    fetch(`${CONFIG.apiUrl}/api/storefront/track`, {
+    fetch(`${CONFIG.apiUrl}/api/storefront/track?shop=${encodeURIComponent(CONFIG.shopDomain)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -645,9 +1187,12 @@
         product_id: productId,
         session_id: sessionId,
         cart_token: currentCart?.token,
+        shop: CONFIG.shopDomain,
+        cart_value: currentCart?.total_price || 0,
+        cart_item_count: currentCart?.item_count || 0,
       }),
     }).catch(error => {
-      log('Error tracking event:', error);
+      log('Error tracking event:', error.message);
     });
   }
 
@@ -1399,19 +1944,9 @@
     return div.innerHTML;
   }
 
-  function generateSessionId() {
-    return 'tc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  }
-
   function showNotification(message, type = 'success') {
     // Simple notification (can be enhanced)
     log(`Notification [${type}]:`, message);
-  }
-
-  function log(...args) {
-    if (CONFIG.debug) {
-      console.log('[TurboCart]', ...args);
-    }
   }
 
   /* ============================================ */
