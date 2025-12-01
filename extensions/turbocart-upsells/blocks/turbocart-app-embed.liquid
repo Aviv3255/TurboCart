@@ -1,6 +1,7 @@
 {% comment %}
   TurboCart App Embed Block
   Appears in Theme Editor > App embeds
+  Automatically injects upsells into cart drawer and cart page
 {% endcomment %}
 
 <script>
@@ -8,12 +9,14 @@
     apiUrl: 'https://turbocart.onrender.com',
     shopDomain: '{{ shop.permanent_domain }}',
     enabled: {{ block.settings.enabled | default: true }},
-    maxProducts: {{ block.settings.max_products | default: 3 }}
+    maxProducts: {{ block.settings.max_products | default: 3 }},
+    displayStyle: '{{ block.settings.display_style | default: "minimal-strip" }}',
+    position: '{{ block.settings.position | default: "top" }}',
+    debug: {{ block.settings.debug | default: false }}
   };
 </script>
 
 {% if block.settings.enabled %}
-  <div id="turbocart-app-embed" data-turbocart-embed></div>
   {{ 'turbocart.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'turbocart.js' | asset_url }}" defer></script>
 {% endif %}
@@ -30,13 +33,42 @@
       "default": true
     },
     {
+      "type": "select",
+      "id": "display_style",
+      "label": "Display Style",
+      "default": "minimal-strip",
+      "options": [
+        { "value": "minimal-strip", "label": "Minimal Strip" },
+        { "value": "cards", "label": "Cards Grid" },
+        { "value": "list", "label": "List" },
+        { "value": "frequently-bought", "label": "Frequently Bought Together" },
+        { "value": "banner", "label": "Banner" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position in Cart",
+      "default": "top",
+      "options": [
+        { "value": "top", "label": "Above cart items" },
+        { "value": "bottom", "label": "Below cart items" }
+      ]
+    },
+    {
       "type": "range",
       "id": "max_products",
       "min": 1,
-      "max": 20,
+      "max": 10,
       "step": 1,
       "label": "Max products to show",
       "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "debug",
+      "label": "Enable debug mode",
+      "default": false
     }
   ]
 }

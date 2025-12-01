@@ -1,6 +1,7 @@
 /**
  * TurboCart - Theme App Extension JavaScript
  * Handles all storefront upsell functionality
+ * Auto-injects upsells into cart drawer and cart page
  */
 
 (function() {
@@ -10,18 +11,57 @@
   const CONFIG = {
     apiUrl: window.TurboCartConfig?.apiUrl || '',
     debug: window.TurboCartConfig?.debug || false,
+    displayStyle: window.TurboCartConfig?.displayStyle || 'minimal-strip',
+    position: window.TurboCartConfig?.position || 'top',
+    maxProducts: window.TurboCartConfig?.maxProducts || 3,
   };
 
   // State
   let currentCart = null;
   let upsellProducts = [];
   let sessionId = generateSessionId();
+  let upsellContainer = null;
+  let isInjected = false;
+
+  // Common cart drawer selectors for various themes
+  const CART_DRAWER_SELECTORS = [
+    'cart-drawer',
+    '.cart-drawer',
+    '#cart-drawer',
+    '[data-cart-drawer]',
+    '.drawer--is-open .drawer__inner',
+    '.mini-cart',
+    '.side-cart',
+    '#CartDrawer',
+    '.cart-slide',
+    'aside[id*="cart"]',
+    'div[id*="cart-drawer"]',
+    '.cart__drawer',
+    '.js-drawer-open-right',
+    '[data-section-type="cart-drawer"]',
+    'cart-notification',
+    '.cart-notification',
+  ];
+
+  // Common cart page selectors
+  const CART_PAGE_SELECTORS = [
+    '.cart-items',
+    '.cart__items',
+    '#cart-items',
+    '[data-cart-items]',
+    'form[action="/cart"]',
+    '.cart-form',
+    '#cart',
+    '.cart-page',
+    '[data-section-type="cart"]',
+    'main .cart',
+  ];
 
   /**
    * Initialize TurboCart
    */
   function init() {
-    log('TurboCart initializing...');
+    log('TurboCart initializing...', CONFIG);
 
     // Ping the server to indicate the app embed is active
     pingServer();
@@ -29,14 +69,207 @@
     // Get current cart
     fetchCart().then(cart => {
       currentCart = cart;
-      loadUpsells();
+
+      // Try to detect and inject into cart
+      detectAndInjectCart();
+
+      // Load upsells if we have cart items
+      if (cart && cart.items && cart.items.length > 0) {
+        loadUpsells();
+      }
     });
 
     // Listen for cart updates
     document.addEventListener('cart:updated', handleCartUpdate);
 
-    // Initialize all upsell blocks
+    // Watch for cart drawer opening (many themes use this event)
+    setupCartObserver();
+
+    // Also check existing blocks on page
     initializeBlocks();
+
+    log('TurboCart initialized');
+  }
+
+  /**
+   * Setup mutation observer to detect cart drawer opening
+   */
+  function setupCartObserver() {
+    // Watch for DOM changes (cart drawer appearing)
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+          // Check if cart drawer appeared
+          setTimeout(() => {
+            detectAndInjectCart();
+          }, 100);
+        }
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'open', 'aria-hidden']
+    });
+
+    // Also listen for common cart events
+    document.addEventListener('cart:open', () => {
+      log('Cart open event detected');
+      setTimeout(detectAndInjectCart, 100);
+    });
+
+    // Check periodically for cart drawer (fallback)
+    setInterval(() => {
+      if (!isInjected || !document.contains(upsellContainer)) {
+        detectAndInjectCart();
+      }
+    }, 2000);
+  }
+
+  /**
+   * Detect cart drawer or cart page and inject upsells
+   */
+  function detectAndInjectCart() {
+    // First, try cart drawer
+    let cartElement = null;
+
+    for (const selector of CART_DRAWER_SELECTORS) {
+      try {
+        const el = document.querySelector(selector);
+        if (el && isElementVisible(el)) {
+          cartElement = el;
+          log('Found cart drawer:', selector);
+          break;
+        }
+      } catch (e) {
+        // Invalid selector, skip
+      }
+    }
+
+    // If no drawer, try cart page
+    if (!cartElement && window.location.pathname.includes('/cart')) {
+      for (const selector of CART_PAGE_SELECTORS) {
+        try {
+          const el = document.querySelector(selector);
+          if (el) {
+            cartElement = el;
+            log('Found cart page:', selector);
+            break;
+          }
+        } catch (e) {
+          // Invalid selector, skip
+        }
+      }
+    }
+
+    if (cartElement) {
+      injectUpsellContainer(cartElement);
+    }
+  }
+
+  /**
+   * Check if element is visible
+   */
+  function isElementVisible(el) {
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' &&
+           style.visibility !== 'hidden' &&
+           style.opacity !== '0' &&
+           el.offsetParent !== null;
+  }
+
+  /**
+   * Inject the upsell container into the cart
+   */
+  function injectUpsellContainer(cartElement) {
+    // Check if already injected
+    if (upsellContainer && document.contains(upsellContainer)) {
+      log('Upsell container already exists');
+      return;
+    }
+
+    // Create container
+    upsellContainer = document.createElement('div');
+    upsellContainer.id = 'turbocart-upsells';
+    upsellContainer.className = `turbocart-${CONFIG.displayStyle}`;
+    upsellContainer.setAttribute('data-turbocart-block', CONFIG.displayStyle);
+
+    // Create inner structure
+    upsellContainer.innerHTML = `
+      <div class="turbocart-${CONFIG.displayStyle}__header">
+        <h3 class="turbocart-${CONFIG.displayStyle}__title">You might also like</h3>
+      </div>
+      <div class="turbocart-${CONFIG.displayStyle}__container">
+        <div class="turbocart-${CONFIG.displayStyle}__items" data-turbocart-upsells>
+          <div class="turbocart-${CONFIG.displayStyle}__loading">
+            <div class="turbocart-spinner"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Insert based on position
+    if (CONFIG.position === 'top') {
+      cartElement.insertBefore(upsellContainer, cartElement.firstChild);
+    } else {
+      cartElement.appendChild(upsellContainer);
+    }
+
+    isInjected = true;
+    log('Upsell container injected');
+
+    // If we have products, render them
+    if (upsellProducts.length > 0) {
+      renderUpsells();
+    } else if (currentCart && currentCart.items && currentCart.items.length > 0) {
+      loadUpsells();
+    }
+  }
+
+  /**
+   * Render upsells into the injected container
+   */
+  function renderUpsells() {
+    if (!upsellContainer) {
+      log('No upsell container to render into');
+      return;
+    }
+
+    const container = upsellContainer.querySelector('[data-turbocart-upsells]');
+    if (!container) {
+      log('No upsells container found');
+      return;
+    }
+
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">No recommendations available</p>';
+      return;
+    }
+
+    log('Rendering', upsellProducts.length, 'upsells');
+
+    // Render based on display style
+    switch (CONFIG.displayStyle) {
+      case 'minimal-strip':
+        renderMinimalStrip(container);
+        break;
+      case 'cards':
+        renderCards(container);
+        break;
+      case 'list':
+        renderList(container);
+        break;
+      case 'frequently-bought':
+        renderFrequentlyBought(container);
+        break;
+      case 'banner':
+        renderBanner(container);
+        break;
+      default:
+        renderMinimalStrip(container);
+    }
   }
 
   /**
@@ -181,13 +414,25 @@
       log('Loaded upsells:', upsellProducts);
 
       // Track impressions
-      trackImpressions();
+      if (upsellProducts.length > 0) {
+        trackImpressions();
+      }
 
-      // Render upsells in all blocks
+      // Render upsells in injected container
+      renderUpsells();
+
+      // Also render in any existing blocks on page
       renderAllBlocks();
 
     } catch (error) {
       log('Error loading upsells:', error);
+      // Try to show a fallback message
+      if (upsellContainer) {
+        const container = upsellContainer.querySelector('[data-turbocart-upsells]');
+        if (container) {
+          container.innerHTML = '';
+        }
+      }
     }
   }
 
