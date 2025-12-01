@@ -1,6 +1,7 @@
 type = "theme_app_extension"
 api_version = "2024-01"
 name = "TurboCart Upsells"
+handle = "turbocart-upsells"
 
 # Blocks are auto-discovered from blocks/ directory
 # App Embed blocks have "target": "body" in their schema
