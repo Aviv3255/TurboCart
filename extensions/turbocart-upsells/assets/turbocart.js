@@ -14,42 +14,56 @@ console.log('[TurboCart] Shopify object:', window.Shopify);
 (function() {
   'use strict';
 
-  // Get shop domain from multiple sources (bulletproof)
+  // Get shop domain - PRIORITIZE TurboCartConfig (from Liquid {{ shop.permanent_domain }})
   function getShopDomain() {
-    // Try multiple sources
-    const sources = [
-      window.Shopify?.shop,
-      window.TurboCartConfig?.shopDomain,
-      document.querySelector('meta[name="shopify-shop-domain"]')?.content,
-      window.location.hostname,
-    ];
-
-    for (const source of sources) {
-      if (source && source.includes('.myshopify.com')) {
-        return source;
-      }
+    // #1 PRIORITY: TurboCartConfig.shopDomain from Liquid - ALWAYS the myshopify.com domain
+    if (window.TurboCartConfig?.shopDomain) {
+      console.log('[TurboCart] ✅ Shop from TurboCartConfig:', window.TurboCartConfig.shopDomain);
+      return window.TurboCartConfig.shopDomain;
     }
 
-    // Last resort - extract from current URL if on Shopify
+    // #2: Shopify global object
+    if (window.Shopify?.shop) {
+      console.log('[TurboCart] ✅ Shop from Shopify object:', window.Shopify.shop);
+      return window.Shopify.shop;
+    }
+
+    // #3: Meta tag
+    const metaShop = document.querySelector('meta[name="shopify-shop-domain"]')?.content;
+    if (metaShop) {
+      console.log('[TurboCart] ✅ Shop from meta tag:', metaShop);
+      return metaShop;
+    }
+
+    // #4: URL hostname (for myshopify.com domains)
     const hostname = window.location.hostname;
-    if (hostname.endsWith('.myshopify.com')) {
+    if (hostname.includes('myshopify.com')) {
+      console.log('[TurboCart] ✅ Shop from hostname:', hostname);
       return hostname;
     }
 
+    console.error('[TurboCart] ❌ CRITICAL: Could not determine shop domain!');
+    console.error('[TurboCart] TurboCartConfig:', window.TurboCartConfig);
+    console.error('[TurboCart] Shopify:', window.Shopify);
     return null;
   }
 
-  // Configuration - with bulletproof defaults
+  // Get shop domain FIRST
   const SHOP_DOMAIN = getShopDomain();
+  console.log('[TurboCart] 🏪 Final shop domain:', SHOP_DOMAIN);
+
+  // Configuration
   const CONFIG = {
     apiUrl: window.TurboCartConfig?.apiUrl || 'https://turbocart.onrender.com',
     shopDomain: SHOP_DOMAIN,
-    debug: window.TurboCartConfig?.debug || true, // Enable debug by default for now
+    debug: true, // ALWAYS debug for now
     displayStyle: window.TurboCartConfig?.displayStyle || 'minimal-strip',
     position: window.TurboCartConfig?.position || 'top',
     maxProducts: window.TurboCartConfig?.maxProducts || 3,
-    enabled: window.TurboCartConfig?.enabled !== false, // Default to enabled
+    enabled: true,
   };
+
+  console.log('[TurboCart] 📋 Full config:', JSON.stringify(CONFIG, null, 2));
 
   // State
   let currentCart = null;
