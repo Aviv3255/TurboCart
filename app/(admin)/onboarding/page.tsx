@@ -682,148 +682,47 @@ export default function OnboardingPage() {
 // ============================================================================
 
 /**
- * Premium SVG Icons - Clean, Luxurious Design
+ * Clean SVG Icons - Solid White, Consistent Style
  */
-const PremiumBrainIcon = () => (
-  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#667eea" />
-        <stop offset="100%" stopColor="#764ba2" />
-      </linearGradient>
-      <filter id="brainGlow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="4" result="blur" />
-        <feMerge>
-          <feMergeNode in="blur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-    <g filter="url(#brainGlow)">
-      {/* Left hemisphere */}
-      <path d="M18 36C18 28 22 22 28 20C24 18 22 14 24 10C28 6 34 8 36 12"
-        stroke="url(#brainGradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      <path d="M36 12C38 8 44 6 48 10C50 14 48 18 44 20C50 22 54 28 54 36"
-        stroke="url(#brainGradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      <path d="M18 36C18 44 22 50 28 52C24 54 22 58 24 62C28 66 34 64 36 60"
-        stroke="url(#brainGradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      <path d="M36 60C38 64 44 66 48 62C50 58 48 54 44 52C50 50 54 44 54 36"
-        stroke="url(#brainGradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      {/* Center connection */}
-      <path d="M36 12V60" stroke="url(#brainGradient)" strokeWidth="2" strokeLinecap="round" strokeDasharray="4 4" />
-      {/* Neural nodes */}
-      <circle cx="28" cy="28" r="3" fill="url(#brainGradient)" opacity="0.8" />
-      <circle cx="44" cy="28" r="3" fill="url(#brainGradient)" opacity="0.8" />
-      <circle cx="28" cy="44" r="3" fill="url(#brainGradient)" opacity="0.8" />
-      <circle cx="44" cy="44" r="3" fill="url(#brainGradient)" opacity="0.8" />
-      <circle cx="36" cy="36" r="4" fill="url(#brainGradient)" />
-      {/* Neural connections */}
-      <path d="M28 28L36 36L44 28" stroke="url(#brainGradient)" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-      <path d="M28 44L36 36L44 44" stroke="url(#brainGradient)" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-    </g>
+const CleanBrainIcon = () => (
+  <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M28 8C22 8 17 12 16 18C12 19 9 23 9 28C9 33 12 37 16 38C17 44 22 48 28 48C34 48 39 44 40 38C44 37 47 33 47 28C47 23 44 19 40 18C39 12 34 8 28 8Z"
+      stroke="white" strokeWidth="2" fill="none" />
+    <path d="M28 18V38" stroke="white" strokeWidth="1.5" strokeDasharray="3 3" />
+    <circle cx="22" cy="24" r="2" fill="white" />
+    <circle cx="34" cy="24" r="2" fill="white" />
+    <circle cx="22" cy="32" r="2" fill="white" />
+    <circle cx="34" cy="32" r="2" fill="white" />
+    <circle cx="28" cy="28" r="2.5" fill="white" />
   </svg>
 );
 
-const PremiumRevenueIcon = () => (
-  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="revenueGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#10b981" />
-        <stop offset="100%" stopColor="#34d399" />
-      </linearGradient>
-      <filter id="revenueGlow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="3" result="blur" />
-        <feMerge>
-          <feMergeNode in="blur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-    <g filter="url(#revenueGlow)">
-      {/* Upward trending chart */}
-      <path d="M14 54L26 42L38 48L58 22" stroke="url(#revenueGradient)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      {/* Arrow head */}
-      <path d="M52 22H58V28" stroke="url(#revenueGradient)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Chart bars */}
-      <rect x="18" y="48" width="8" height="10" rx="2" fill="url(#revenueGradient)" opacity="0.3" />
-      <rect x="32" y="44" width="8" height="14" rx="2" fill="url(#revenueGradient)" opacity="0.5" />
-      <rect x="46" y="36" width="8" height="22" rx="2" fill="url(#revenueGradient)" opacity="0.7" />
-      {/* Dollar sign */}
-      <text x="36" y="20" textAnchor="middle" fill="url(#revenueGradient)" fontSize="14" fontWeight="700" fontFamily="system-ui">$</text>
-      {/* Percentage badge */}
-      <circle cx="56" cy="16" r="8" fill="url(#revenueGradient)" opacity="0.2" />
-      <text x="56" y="19" textAnchor="middle" fill="url(#revenueGradient)" fontSize="8" fontWeight="700" fontFamily="system-ui">+32</text>
-    </g>
+const CleanChartIcon = () => (
+  <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 44L18 32L28 38L48 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M40 14H48V22" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="12" y="38" width="6" height="8" rx="1" fill="white" opacity="0.4" />
+    <rect x="24" y="34" width="6" height="12" rx="1" fill="white" opacity="0.6" />
+    <rect x="36" y="28" width="6" height="18" rx="1" fill="white" opacity="0.8" />
   </svg>
 );
 
-const PremiumSpeedIcon = () => (
-  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="speedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#f59e0b" />
-        <stop offset="100%" stopColor="#fbbf24" />
-      </linearGradient>
-      <filter id="speedGlow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="3" result="blur" />
-        <feMerge>
-          <feMergeNode in="blur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-    <g filter="url(#speedGlow)">
-      {/* Lightning bolt - premium design */}
-      <path d="M40 12L24 36H34L30 60L50 32H38L40 12Z"
-        fill="url(#speedGradient)"
-        stroke="url(#speedGradient)"
-        strokeWidth="1"
-        strokeLinejoin="round" />
-      {/* Speed lines */}
-      <path d="M16 28H24" stroke="url(#speedGradient)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-      <path d="M12 36H20" stroke="url(#speedGradient)" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
-      <path d="M16 44H24" stroke="url(#speedGradient)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-      {/* Sparkles */}
-      <circle cx="54" cy="20" r="2" fill="url(#speedGradient)" opacity="0.6" />
-      <circle cx="58" cy="28" r="1.5" fill="url(#speedGradient)" opacity="0.4" />
-      <circle cx="52" cy="50" r="2" fill="url(#speedGradient)" opacity="0.6" />
-    </g>
+const CleanBoltIcon = () => (
+  <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M32 6L14 30H26L22 50L42 24H28L32 6Z" fill="white" />
   </svg>
 );
 
-const PremiumStarIcon = () => (
-  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#667eea" />
-        <stop offset="50%" stopColor="#764ba2" />
-        <stop offset="100%" stopColor="#667eea" />
-      </linearGradient>
-      <filter id="starGlow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="4" result="blur" />
-        <feMerge>
-          <feMergeNode in="blur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </defs>
-    <g filter="url(#starGlow)">
-      {/* Main 4-point star */}
-      <path d="M36 8L40 28L60 32L40 36L36 56L32 36L12 32L32 28L36 8Z"
-        fill="url(#starGradient)" />
-      {/* Inner glow */}
-      <circle cx="36" cy="32" r="8" fill="white" opacity="0.3" />
-      {/* Smaller accent stars */}
-      <path d="M56 16L58 22L64 24L58 26L56 32L54 26L48 24L54 22L56 16Z"
-        fill="url(#starGradient)" opacity="0.6" />
-      <path d="M16 48L18 52L22 54L18 56L16 60L14 56L10 54L14 52L16 48Z"
-        fill="url(#starGradient)" opacity="0.6" />
-    </g>
+const CleanSparkleIcon = () => (
+  <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M28 4L32 22L50 26L32 30L28 48L24 30L6 26L24 22L28 4Z" fill="white" />
+    <path d="M44 10L46 16L52 18L46 20L44 26L42 20L36 18L42 16L44 10Z" fill="white" opacity="0.5" />
+    <path d="M12 36L14 40L18 42L14 44L12 48L10 44L6 42L10 40L12 36Z" fill="white" opacity="0.5" />
   </svg>
 );
 
 /**
- * Step 1: Welcome - Premium Dark Cinematic Design with 4K Quality
+ * Step 1: Welcome - Clean Dark Design
  */
 function WelcomeStep({ onNext }: { onNext: () => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -832,7 +731,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 
   const slides = [
     {
-      icon: 'star',
+      icon: 'sparkle',
       title: 'The World\'s Most Advanced Algorithm.',
       subtitle: 'Now In Your Hands.',
       description: null,
@@ -849,7 +748,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       ],
     },
     {
-      icon: 'revenue',
+      icon: 'chart',
       title: '+32% Average Order Value',
       subtitle: null,
       description: 'Real results from real stores. No gimmicks. Just math.',
@@ -859,7 +758,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       ],
     },
     {
-      icon: 'speed',
+      icon: 'bolt',
       title: 'Set It. Forget It.',
       subtitle: null,
       description: '5 minutes to setup. Then we handle everything.',
@@ -901,63 +800,19 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 
   const renderIcon = () => {
     switch (slide.icon) {
-      case 'brain': return <PremiumBrainIcon />;
-      case 'revenue': return <PremiumRevenueIcon />;
-      case 'speed': return <PremiumSpeedIcon />;
-      default: return <PremiumStarIcon />;
+      case 'brain': return <CleanBrainIcon />;
+      case 'chart': return <CleanChartIcon />;
+      case 'bolt': return <CleanBoltIcon />;
+      default: return <CleanSparkleIcon />;
     }
   };
 
   return (
     <div className="welcome-step-dark">
       <div className="dark-container">
-        {/* Premium gradient mesh background */}
-        <div className="gradient-mesh" />
-
-        {/* Animated grid lines - luxury tech feel */}
-        <div className="grid-lines">
-          {[...Array(10)].map((_, i) => (
-            <div key={`v-${i}`} className="grid-line vertical" style={{ left: `${i * 11}%` }} />
-          ))}
-          {[...Array(8)].map((_, i) => (
-            <div key={`h-${i}`} className="grid-line horizontal" style={{ top: `${i * 14}%` }} />
-          ))}
-        </div>
-
-        {/* Cosmic glow background - enhanced */}
-        <div className="cosmic-glow" />
-        <div className="cosmic-glow-2" />
-        <div className="cosmic-glow-3" />
-
-        {/* Floating particles - enhanced with varying sizes */}
-        <div className="particles">
-          {[...Array(30)].map((_, i) => (
-            <div key={i} className={`particle ${i % 3 === 0 ? 'large' : i % 2 === 0 ? 'medium' : ''}`} style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${4 + Math.random() * 6}s`,
-            }} />
-          ))}
-        </div>
-
-        {/* Orbiting rings - motion graphics */}
-        <div className="orbit-container">
-          <div className="orbit orbit-1">
-            <div className="orbit-dot" />
-          </div>
-          <div className="orbit orbit-2">
-            <div className="orbit-dot" />
-          </div>
-          <div className="orbit orbit-3">
-            <div className="orbit-dot" />
-          </div>
-        </div>
-
         {/* Content */}
         <div className={`slide-content ${isTransitioning ? `transitioning-${slideDirection}` : ''}`} key={currentSlide}>
           <div className="slide-icon-wrapper">
-            <div className="icon-glow" />
             {renderIcon()}
           </div>
 
@@ -971,7 +826,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
             <p className="slide-description">{slide.description}</p>
           )}
 
-          {/* Stats row - visual enhancement */}
+          {/* Stats row */}
           {slide.stats && (
             <div className="stats-row">
               {slide.stats.map((stat, i) => (
@@ -984,12 +839,12 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           )}
         </div>
 
-        {/* Progress bar - premium design */}
+        {/* Progress bar */}
         <div className="progress-track">
           <div className="progress-fill" style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }} />
         </div>
 
-        {/* Slide indicators - enhanced */}
+        {/* Slide indicators */}
         <div className="slide-indicators">
           {slides.map((_, i) => (
             <button
@@ -1002,26 +857,16 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           ))}
         </div>
 
-        {/* CTA Button - premium with gradient border */}
+        {/* CTA Button */}
         <button className="cta-button-dark" onClick={handleNext}>
-          <span className="btn-gradient-border" />
-          <span className="btn-content">
-            {isLastSlide ? 'Let\'s Begin' : 'Continue'}
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </span>
+          {isLastSlide ? 'Let\'s Begin' : 'Continue'}
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
 
         {currentSlide === 0 && (
-          <div className="trust-section">
-            <p className="trust-note">Trusted by 10,000+ Shopify stores worldwide</p>
-            <div className="trust-logos">
-              <div className="trust-logo">Shopify Plus</div>
-              <div className="trust-logo">Built for Scale</div>
-              <div className="trust-logo">Enterprise Ready</div>
-            </div>
-          </div>
+          <p className="trust-note">Trusted by 10,000+ Shopify stores worldwide</p>
         )}
       </div>
 
@@ -1042,468 +887,180 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 40px 24px;
+          padding: 60px 24px;
           position: relative;
-          overflow: hidden;
-          /* 4K Sharp rendering */
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
           text-rendering: optimizeLegibility;
         }
 
-        /* Premium gradient mesh background */
-        .gradient-mesh {
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(ellipse 80% 50% at 20% 40%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
-            radial-gradient(ellipse 60% 40% at 80% 60%, rgba(118, 75, 162, 0.08) 0%, transparent 50%),
-            radial-gradient(ellipse 50% 30% at 50% 90%, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
-          pointer-events: none;
-        }
-
-        /* Grid lines - luxury tech aesthetic */
-        .grid-lines {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          opacity: 0.03;
-        }
-
-        .grid-line {
-          position: absolute;
-          background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
-        }
-
-        .grid-line.vertical {
-          width: 1px;
-          height: 100%;
-        }
-
-        .grid-line.horizontal {
-          height: 1px;
-          width: 100%;
-        }
-
-        /* Enhanced cosmic glow effects */
-        .cosmic-glow {
-          position: absolute;
-          top: 30%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 800px;
-          height: 800px;
-          background: radial-gradient(circle, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.06) 40%, transparent 70%);
-          border-radius: 50%;
-          filter: blur(80px);
-          pointer-events: none;
-          animation: cosmicPulse 8s ease-in-out infinite;
-        }
-
-        .cosmic-glow-2 {
-          position: absolute;
-          bottom: 20%;
-          right: 15%;
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(118, 75, 162, 0.1) 0%, transparent 60%);
-          border-radius: 50%;
-          filter: blur(60px);
-          pointer-events: none;
-          animation: cosmicPulse 10s ease-in-out infinite 2s;
-        }
-
-        .cosmic-glow-3 {
-          position: absolute;
-          top: 60%;
-          left: 10%;
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(102, 126, 234, 0.08) 0%, transparent 60%);
-          border-radius: 50%;
-          filter: blur(50px);
-          pointer-events: none;
-          animation: cosmicPulse 12s ease-in-out infinite 4s;
-        }
-
-        @keyframes cosmicPulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-          50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
-        }
-
-        /* Enhanced floating particles */
-        .particles {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          pointer-events: none;
-        }
-
-        .particle {
-          position: absolute;
-          width: 2px;
-          height: 2px;
-          background: rgba(255, 255, 255, 0.4);
-          border-radius: 50%;
-          animation: floatParticle linear infinite;
-        }
-
-        .particle.medium {
-          width: 3px;
-          height: 3px;
-          background: rgba(102, 126, 234, 0.6);
-        }
-
-        .particle.large {
-          width: 4px;
-          height: 4px;
-          background: rgba(118, 75, 162, 0.5);
-          box-shadow: 0 0 10px rgba(118, 75, 162, 0.5);
-        }
-
-        @keyframes floatParticle {
-          0%, 100% {
-            transform: translateY(0) translateX(0);
-            opacity: 0;
-          }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% {
-            transform: translateY(-150px) translateX(30px);
-            opacity: 0;
-          }
-        }
-
-        /* Orbiting rings - motion graphics */
-        .orbit-container {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 600px;
-          height: 600px;
-          pointer-events: none;
-        }
-
-        .orbit {
-          position: absolute;
-          border: 1px solid rgba(102, 126, 234, 0.1);
-          border-radius: 50%;
-        }
-
-        .orbit-1 {
-          inset: 20%;
-          animation: orbitRotate 20s linear infinite;
-        }
-
-        .orbit-2 {
-          inset: 10%;
-          animation: orbitRotate 30s linear infinite reverse;
-        }
-
-        .orbit-3 {
-          inset: 0;
-          animation: orbitRotate 40s linear infinite;
-        }
-
-        .orbit-dot {
-          position: absolute;
-          top: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 6px;
-          height: 6px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 50%;
-          box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
-        }
-
-        @keyframes orbitRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
         /* Slide content with smooth transitions */
         .slide-content {
           text-align: center;
-          max-width: 700px;
-          z-index: 10;
-          animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          max-width: 600px;
+          width: 100%;
+          padding: 0 20px;
         }
 
         .slide-content.transitioning-next {
-          animation: slideOutLeft 0.3s ease-in forwards;
+          animation: fadeOut 0.2s ease-out forwards;
         }
 
         .slide-content.transitioning-prev {
-          animation: slideOutRight 0.3s ease-in forwards;
+          animation: fadeOut 0.2s ease-out forwards;
         }
 
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateY(30px) scale(0.98);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
-        @keyframes slideOutLeft {
+        @keyframes fadeOut {
           to {
             opacity: 0;
-            transform: translateX(-40px) scale(0.98);
-          }
-        }
-
-        @keyframes slideOutRight {
-          to {
-            opacity: 0;
-            transform: translateX(40px) scale(0.98);
           }
         }
 
         .slide-icon-wrapper {
-          position: relative;
-          width: 120px;
-          height: 120px;
-          margin: 0 auto 40px;
+          width: 80px;
+          height: 80px;
+          margin: 0 auto 48px;
           display: flex;
           align-items: center;
           justify-content: center;
-          animation: iconFloat 3s ease-in-out infinite;
-        }
-
-        .icon-glow {
-          position: absolute;
-          inset: -20px;
-          background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
-          border-radius: 50%;
-          animation: iconGlowPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes iconFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-
-        @keyframes iconGlowPulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.7; transform: scale(1.1); }
         }
 
         .slide-title {
-          font-size: 48px;
-          font-weight: 700;
+          font-size: 40px;
+          font-weight: 600;
           color: #FFFFFF;
           margin: 0 0 16px 0;
-          letter-spacing: -1.5px;
-          line-height: 1.15;
-          background: linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.9) 50%, #FFFFFF 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          text-shadow: 0 0 80px rgba(102, 126, 234, 0.5);
+          letter-spacing: -1px;
+          line-height: 1.2;
         }
 
         .slide-subtitle {
-          font-size: 28px;
-          color: rgba(255, 255, 255, 0.95);
+          font-size: 24px;
+          color: rgba(255, 255, 255, 0.8);
           margin: 0 0 24px 0;
-          font-weight: 500;
-          letter-spacing: -0.5px;
+          font-weight: 400;
         }
 
         .slide-description {
-          font-size: 18px;
-          color: rgba(255, 255, 255, 0.6);
-          margin: 0 auto 32px;
-          line-height: 1.7;
-          max-width: 480px;
-          letter-spacing: 0.2px;
+          font-size: 17px;
+          color: rgba(255, 255, 255, 0.5);
+          margin: 0 auto 40px;
+          line-height: 1.6;
+          max-width: 440px;
         }
 
-        /* Stats row - visual content addition */
+        /* Stats row */
         .stats-row {
           display: flex;
           justify-content: center;
-          gap: 48px;
-          margin-top: 32px;
+          gap: 64px;
+          margin-top: 48px;
         }
 
         .stat-item {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 4px;
+          gap: 8px;
         }
 
         .stat-value {
-          font-size: 32px;
-          font-weight: 700;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          font-size: 28px;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.9);
         }
 
         .stat-label {
-          font-size: 13px;
-          color: rgba(255, 255, 255, 0.5);
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.4);
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 1.5px;
         }
 
-        /* Premium progress bar */
+        /* Progress bar */
         .progress-track {
           width: 200px;
-          height: 3px;
+          height: 2px;
           background: rgba(255, 255, 255, 0.1);
-          border-radius: 2px;
-          margin-top: 48px;
-          z-index: 10;
+          border-radius: 1px;
+          margin-top: 56px;
           overflow: hidden;
         }
 
         .progress-fill {
           height: 100%;
-          background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-          border-radius: 2px;
-          transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          background: rgba(255, 255, 255, 0.6);
+          border-radius: 1px;
+          transition: width 0.3s ease;
         }
 
-        /* Enhanced slide indicators */
+        /* Slide indicators */
         .slide-indicators {
           display: flex;
-          gap: 16px;
+          gap: 12px;
           margin-top: 24px;
-          z-index: 10;
         }
 
         .indicator {
-          width: 12px;
-          height: 12px;
+          width: 8px;
+          height: 8px;
           border-radius: 50%;
-          background: transparent;
-          border: 1.5px solid rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.2s ease;
           padding: 0;
           position: relative;
         }
 
         .indicator-inner {
-          position: absolute;
-          inset: 2px;
-          border-radius: 50%;
-          background: transparent;
-          transition: all 0.3s ease;
+          display: none;
         }
 
         .indicator.active {
-          border-color: #FFFFFF;
-          transform: scale(1.2);
-        }
-
-        .indicator.active .indicator-inner {
           background: #FFFFFF;
         }
 
         .indicator.completed {
-          border-color: rgba(102, 126, 234, 0.6);
-        }
-
-        .indicator.completed .indicator-inner {
-          background: rgba(102, 126, 234, 0.6);
+          background: rgba(255, 255, 255, 0.5);
         }
 
         .indicator:hover {
-          border-color: rgba(255, 255, 255, 0.6);
+          background: rgba(255, 255, 255, 0.4);
         }
 
-        /* Premium CTA Button with gradient border */
+        /* CTA Button */
         .cta-button-dark {
-          position: relative;
-          background: transparent;
-          border: none;
-          padding: 0;
-          margin-top: 40px;
-          z-index: 10;
-          cursor: pointer;
-        }
-
-        .btn-gradient-border {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
-          border-radius: 12px;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .cta-button-dark:hover .btn-gradient-border {
-          opacity: 1;
-        }
-
-        .btn-content {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
           background: #FFFFFF;
           color: #000000;
-          padding: 18px 56px;
-          border-radius: 12px;
-          font-size: 17px;
+          border: none;
+          padding: 16px 48px;
+          border-radius: 8px;
+          font-size: 16px;
           font-weight: 600;
-          transition: all 0.3s ease;
-          letter-spacing: -0.3px;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 40px;
+          transition: opacity 0.2s ease;
         }
 
-        .cta-button-dark:hover .btn-content {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 40px rgba(255, 255, 255, 0.25);
-          background: #FFFFFF;
-          margin: 2px;
+        .cta-button-dark:hover {
+          opacity: 0.9;
         }
 
-        /* Trust section */
-        .trust-section {
-          margin-top: 48px;
-          z-index: 10;
-          text-align: center;
-        }
-
+        /* Trust note */
         .trust-note {
-          font-size: 14px;
-          color: rgba(255, 255, 255, 0.4);
-          margin: 0 0 20px 0;
-          letter-spacing: 0.5px;
-        }
-
-        .trust-logos {
-          display: flex;
-          gap: 32px;
-          justify-content: center;
-        }
-
-        .trust-logo {
-          font-size: 11px;
+          font-size: 13px;
           color: rgba(255, 255, 255, 0.3);
-          text-transform: uppercase;
-          letter-spacing: 1.5px;
-          padding: 8px 16px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 6px;
+          margin-top: 48px;
+          letter-spacing: 0.3px;
         }
 
         @media (max-width: 768px) {
           .slide-title {
             font-size: 32px;
-            letter-spacing: -1px;
           }
 
           .slide-subtitle {
@@ -1511,51 +1068,37 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           }
 
           .slide-description {
-            font-size: 16px;
+            font-size: 15px;
           }
 
           .stats-row {
-            gap: 24px;
+            gap: 40px;
           }
 
           .stat-value {
             font-size: 24px;
           }
-
-          .orbit-container {
-            width: 300px;
-            height: 300px;
-          }
-
-          .cosmic-glow {
-            width: 400px;
-            height: 400px;
-          }
-
-          .trust-logos {
-            flex-wrap: wrap;
-            gap: 12px;
-          }
-
-          .slide-icon-wrapper {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 24px;
-          }
         }
 
         @media (max-width: 375px) {
+          .dark-container {
+            padding: 40px 20px;
+          }
+
           .slide-title {
             font-size: 26px;
           }
 
           .stats-row {
-            flex-direction: column;
-            gap: 16px;
+            gap: 32px;
           }
 
-          .btn-content {
-            padding: 16px 40px;
+          .stat-value {
+            font-size: 20px;
+          }
+
+          .cta-button-dark {
+            padding: 14px 36px;
             font-size: 15px;
           }
         }
