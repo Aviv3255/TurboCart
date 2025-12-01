@@ -4,6 +4,13 @@ import { rateLimit } from '@/lib/shopify/middleware';
 import { MLOptimizationEngine } from '@/lib/ml/optimization-engine';
 import { trackEvent } from '@/lib/db/queries';
 
+// CORS headers for storefront requests
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 /**
  * Get upsell recommendations for a cart
  * POST /api/storefront/upsells
@@ -18,29 +25,39 @@ export async function POST(request: NextRequest) {
     if (!rateLimit(clientIp, 60, 60000)) { // 60 requests per minute
       return NextResponse.json(
         { error: 'Rate limit exceeded' },
-        { status: 429 }
+        { status: 429, headers: corsHeaders }
       );
     }
 
     // Get shop from request (shop parameter or domain)
     const { searchParams } = new URL(request.url);
-    const shop = searchParams.get('shop');
+    let shop = searchParams.get('shop');
+
+    // Also try to get shop from request body
+    let body;
+    try {
+      body = await request.json();
+      if (!shop && body.shop) {
+        shop = body.shop;
+      }
+    } catch {
+      body = {};
+    }
 
     if (!shop) {
       return NextResponse.json(
         { error: 'Missing shop parameter' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
     // Parse request body
-    const body = await request.json();
     const { cart_items, session_id = `session_${Date.now()}`, customer_id } = body;
 
     if (!cart_items || !Array.isArray(cart_items)) {
       return NextResponse.json(
         { error: 'Invalid cart_items' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -79,7 +96,7 @@ export async function POST(request: NextRequest) {
     if (shopResult.rows.length === 0) {
       return NextResponse.json(
         { error: 'Shop not found' },
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
 
@@ -136,13 +153,13 @@ export async function POST(request: NextRequest) {
       decision_type: decision.decisionType,
       ml_powered: true,
       timestamp: new Date().toISOString(),
-    });
+    }, { headers: corsHeaders });
 
   } catch (error) {
     console.error('Error getting ML upsells:', error);
     return NextResponse.json(
       { error: 'Failed to get recommendations' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -153,10 +170,6 @@ export async function POST(request: NextRequest) {
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+    headers: corsHeaders,
   });
 }

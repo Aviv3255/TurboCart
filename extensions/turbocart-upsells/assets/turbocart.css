@@ -82,6 +82,113 @@
 }
 
 /* =============================================== */
+/* MINIMAL STRIP STYLES */
+/* =============================================== */
+
+.turbocart-minimal-strip {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--tc-background);
+  border: 1px solid var(--tc-border);
+  border-radius: var(--tc-radius);
+}
+
+.turbocart-minimal-strip__header {
+  margin-bottom: 12px;
+}
+
+.turbocart-minimal-strip__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tc-text);
+  margin: 0;
+}
+
+.turbocart-minimal-strip__container {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.turbocart-minimal-strip__container::-webkit-scrollbar {
+  display: none;
+}
+
+.turbocart-minimal-strip__items {
+  display: flex;
+  gap: 12px;
+}
+
+.turbocart-minimal-strip__item {
+  flex: 0 0 auto;
+  min-width: 160px;
+  max-width: 180px;
+  background: var(--tc-background);
+  border: 1px solid var(--tc-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: var(--tc-transition);
+}
+
+.turbocart-minimal-strip__item:hover {
+  border-color: var(--tc-accent-purple);
+  box-shadow: var(--tc-shadow-cosmic);
+  transform: translateY(-2px);
+}
+
+.turbocart-minimal-strip__item-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.turbocart-minimal-strip__item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.turbocart-minimal-strip__item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tc-text);
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
+}
+
+.turbocart-minimal-strip__item-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tc-text);
+  margin-bottom: 8px;
+}
+
+.turbocart-minimal-strip__item-btn {
+  width: 100%;
+  padding: 8px 12px;
+}
+
+.turbocart-minimal-strip__loading {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* =============================================== */
 /* CAROUSEL STYLES */
 /* =============================================== */
 

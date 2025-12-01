@@ -671,26 +671,12 @@ export default function DashboardPage() {
 
         .badge.ml-badge {
           background: #000;
-          color: transparent;
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          position: relative;
+          color: #a78bfa;
           padding: 6px 12px;
           border-radius: 8px;
           font-weight: 700;
           font-size: 12px;
           letter-spacing: 0.3px;
-        }
-
-        .badge.ml-badge::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: #000;
-          border-radius: 8px;
-          z-index: -1;
         }
 
         .status-badge {

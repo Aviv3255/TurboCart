@@ -3,6 +3,13 @@ import { trackEvent } from '@/lib/db/queries';
 import { rateLimit } from '@/lib/shopify/middleware';
 import { learnFromEvent } from '@/lib/ml/learning-engine';
 
+// CORS headers for storefront requests
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 /**
  * Track upsell events (impressions, clicks, adds, purchases)
  * POST /api/storefront/track
@@ -17,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (!rateLimit(clientIp, 120, 60000)) { // 120 requests per minute
       return NextResponse.json(
         { error: 'Rate limit exceeded' },
-        { status: 429 }
+        { status: 429, headers: corsHeaders }
       );
     }
 
@@ -28,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (!shop) {
       return NextResponse.json(
         { error: 'Missing shop parameter' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -53,7 +60,7 @@ export async function POST(request: NextRequest) {
     if (!event_type || (!product_id && !product_ids)) {
       return NextResponse.json(
         { error: 'Missing required parameters' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -62,7 +69,7 @@ export async function POST(request: NextRequest) {
     if (!validEventTypes.includes(event_type)) {
       return NextResponse.json(
         { error: 'Invalid event type' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -76,7 +83,7 @@ export async function POST(request: NextRequest) {
     if (shopResult.rows.length === 0) {
       return NextResponse.json(
         { error: 'Shop not found' },
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
 
@@ -153,13 +160,13 @@ export async function POST(request: NextRequest) {
       event_type,
       ml_learning: display_style ? 'enabled' : 'disabled',
       tracked_at: new Date().toISOString(),
-    });
+    }, { headers: corsHeaders });
 
   } catch (error) {
     console.error('Error tracking event:', error);
     return NextResponse.json(
       { error: 'Failed to track event' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -170,10 +177,6 @@ export async function POST(request: NextRequest) {
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+    headers: corsHeaders,
   });
 }

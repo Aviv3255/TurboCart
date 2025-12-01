@@ -77,6 +77,9 @@
       log(`Initializing ${type} block`);
 
       switch(type) {
+        case 'minimal-strip':
+          initMinimalStrip(block);
+          break;
         case 'carousel':
           initCarousel(block);
           break;
@@ -145,11 +148,18 @@
   async function loadUpsells() {
     if (!currentCart || !currentCart.items.length) {
       log('Cart is empty, no upsells to show');
+      hideAllBlocks();
+      return;
+    }
+
+    const shopDomain = window.Shopify?.shop || window.TurboCartConfig?.shopDomain;
+    if (!shopDomain) {
+      log('No shop domain available');
       return;
     }
 
     try {
-      const response = await fetch(`${CONFIG.apiUrl}/api/storefront/upsells`, {
+      const response = await fetch(`${CONFIG.apiUrl}/api/storefront/upsells?shop=${encodeURIComponent(shopDomain)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,6 +167,7 @@
         body: JSON.stringify({
           cart_items: currentCart.items,
           session_id: sessionId,
+          shop: shopDomain,
         }),
       });
 
@@ -181,15 +192,47 @@
   }
 
   /**
+   * Hide all upsell blocks when cart is empty
+   */
+  function hideAllBlocks() {
+    const containers = document.querySelectorAll('[data-turbocart-upsells]');
+    containers.forEach(container => {
+      const block = container.closest('[data-turbocart-block]');
+      if (block) {
+        block.style.display = 'none';
+      }
+    });
+  }
+
+  /**
+   * Show all upsell blocks
+   */
+  function showAllBlocks() {
+    const containers = document.querySelectorAll('[data-turbocart-upsells]');
+    containers.forEach(container => {
+      const block = container.closest('[data-turbocart-block]');
+      if (block) {
+        block.style.display = '';
+      }
+    });
+  }
+
+  /**
    * Render upsells in all blocks
    */
   function renderAllBlocks() {
+    // Show blocks first (they might have been hidden when cart was empty)
+    showAllBlocks();
+
     const containers = document.querySelectorAll('[data-turbocart-upsells]');
     containers.forEach(container => {
       const block = container.closest('[data-turbocart-block]');
       const type = block?.dataset.turbocartBlock;
 
       switch(type) {
+        case 'minimal-strip':
+          renderMinimalStrip(container);
+          break;
         case 'carousel':
           renderCarousel(container);
           break;
@@ -236,6 +279,54 @@
           renderComparisonTable(container);
           break;
       }
+    });
+  }
+
+  /* ============================================ */
+  /* MINIMAL STRIP IMPLEMENTATION */
+  /* ============================================ */
+
+  function initMinimalStrip(block) {
+    // Minimal strip doesn't require special initialization
+    log('Minimal strip block initialized');
+  }
+
+  function renderMinimalStrip(container) {
+    if (!upsellProducts.length) {
+      container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">No recommendations available</p>';
+      return;
+    }
+
+    const html = upsellProducts.slice(0, 4).map(product => `
+      <div class="turbocart-minimal-strip__item" data-product-id="${product.id}">
+        <img
+          src="${product.image}"
+          alt="${escapeHtml(product.title)}"
+          class="turbocart-minimal-strip__item-image"
+          loading="lazy"
+        />
+        <div class="turbocart-minimal-strip__item-info">
+          <h4 class="turbocart-minimal-strip__item-title">${escapeHtml(product.title)}</h4>
+          <div class="turbocart-minimal-strip__item-price">${formatMoney(product.price)}</div>
+        </div>
+        <button
+          class="turbocart-btn turbocart-btn--primary turbocart-minimal-strip__item-btn"
+          data-turbocart-add="${product.variant_id}"
+        >
+          Add
+        </button>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Attach add to cart listeners
+    container.querySelectorAll('[data-turbocart-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const variantId = e.target.dataset.turbocartAdd;
+        const productId = e.target.closest('[data-product-id]').dataset.productId;
+        addToCart(variantId, productId);
+      });
     });
   }
 
@@ -666,7 +757,13 @@
   function trackEvent(eventType, productId) {
     if (!CONFIG.apiUrl) return;
 
-    fetch(`${CONFIG.apiUrl}/api/storefront/track`, {
+    const shopDomain = window.Shopify?.shop || window.TurboCartConfig?.shopDomain;
+    if (!shopDomain) {
+      log('No shop domain available for tracking');
+      return;
+    }
+
+    fetch(`${CONFIG.apiUrl}/api/storefront/track?shop=${encodeURIComponent(shopDomain)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -676,6 +773,9 @@
         product_id: productId,
         session_id: sessionId,
         cart_token: currentCart?.token,
+        shop: shopDomain,
+        cart_value: currentCart?.total_price || 0,
+        cart_item_count: currentCart?.item_count || 0,
       }),
     }).catch(error => {
       log('Error tracking event:', error);
