@@ -86,11 +86,10 @@ export async function POST(request: NextRequest) {
 
       if (settings.max_upsells !== undefined) {
         const maxUpsells = parseInt(settings.max_upsells);
-        // Allow up to 25 products for cards slider, up to 10 for other styles
-        const maxAllowed = settings.display_style === 'cards' ? 25 : 10;
-        if (isNaN(maxUpsells) || maxUpsells < 1 || maxUpsells > maxAllowed) {
+        // Allow up to 25 products for all display styles
+        if (isNaN(maxUpsells) || maxUpsells < 1 || maxUpsells > 25) {
           return NextResponse.json(
-            { error: `max_upsells must be between 1 and ${maxAllowed}` },
+            { error: 'max_upsells must be between 1 and 25' },
             { status: 400 }
           );
         }
