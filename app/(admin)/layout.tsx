@@ -164,13 +164,11 @@ function AdminLayoutContent({
 
       if (freshInstallCookie) {
         console.log('[TurboCart] Fresh install detected - clearing ALL localStorage');
-        // Clear ALL TurboCart localStorage items
         Object.keys(localStorage).forEach(key => {
           if (key.startsWith('turbocart_')) {
             localStorage.removeItem(key);
           }
         });
-        // Delete the cookie so this only runs once
         document.cookie = 'turbocart_fresh_install=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       }
 
@@ -180,14 +178,23 @@ function AdminLayoutContent({
         return;
       }
 
+      // Safety timeout - show content after 8 seconds even if API hangs
+      const timeoutId = setTimeout(() => {
+        console.warn('[TurboCart] Onboarding check timeout - showing content anyway');
+        setOnboardingChecked(true);
+      }, 8000);
+
       try {
+        console.log('[TurboCart] Checking onboarding status...');
         const response = await authenticatedFetch('/api/admin/shop/onboarding-status');
+        console.log('[TurboCart] Response status:', response.status);
+
         if (response.ok) {
           const data = await response.json();
+          console.log('[TurboCart] Onboarding data:', data);
 
-          // If app was reinstalled (detected by API), also clear localStorage
           if (data.wasReinstalled) {
-            console.log('[TurboCart] App reinstalled (API) - clearing localStorage for fresh start');
+            console.log('[TurboCart] App reinstalled - clearing localStorage');
             Object.keys(localStorage).forEach(key => {
               if (key.startsWith('turbocart_')) {
                 localStorage.removeItem(key);
@@ -199,20 +206,22 @@ function AdminLayoutContent({
             setIsNewUser(true);
             router.push('/onboarding');
           }
-          // Check theme enabled status
           setThemeEnabled(data.themeEnabled !== false);
 
-          // Get shop domain for embed status polling
           const urlParams = new URLSearchParams(window.location.search);
           const shop = urlParams.get('shop') || (window as { shopify?: { config?: { shop?: string } } }).shopify?.config?.shop;
           if (shop) {
             setShopDomain(shop);
           }
+        } else {
+          console.error('[TurboCart] Onboarding check failed with status:', response.status);
         }
       } catch (error) {
-        console.error('Error checking onboarding status:', error);
+        console.error('[TurboCart] Error checking onboarding:', error);
+      } finally {
+        clearTimeout(timeoutId);
+        setOnboardingChecked(true);
       }
-      setOnboardingChecked(true);
     };
 
     checkOnboarding();

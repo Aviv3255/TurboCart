@@ -15,17 +15,17 @@ export const dynamic = 'force-dynamic';
  * GET /api/admin/shop/onboarding-status
  */
 export async function GET(request: NextRequest) {
+  console.log('[Onboarding GET] Request received');
   return withAuth(request, async (req) => {
     try {
       if (!req.shop) {
+        console.log('[Onboarding GET] No shop');
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
-      // Check if shop has completed onboarding by checking:
-      // 1) Has at least one upsell product selected
-      // 2) Has settings configured (enabled_display_styles)
-      // 3) Has theme enabled
-      // Also check if shop was previously uninstalled (reinstall scenario)
+      console.log('[Onboarding GET] Shop:', req.shop.id);
+
+      // Check onboarding status
       const result = await query<{
         has_products: boolean;
         settings: { enabled_display_styles?: string[]; theme_enabled?: boolean } | null;
@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
         [req.shop.id]
       );
 
+      console.log('[Onboarding GET] Query result:', result.rows[0]);
+
       const data = result.rows[0];
 
       // Check if this is a reinstall (uninstalled_at is set)
@@ -50,33 +52,37 @@ export async function GET(request: NextRequest) {
       // If this is a reinstall, clear the uninstalled_at flag
       if (wasReinstalled) {
         await query(
-          `UPDATE shops SET uninstalled_at = NULL WHERE id = $1`,
+          `UPDATE shops SET uninstalled_at = NULL, onboarding_completed_at = NULL WHERE id = $1`,
           [req.shop.id]
         );
-        console.log('[Onboarding Status] Detected reinstall, cleared uninstalled_at for shop:', req.shop.id);
+        console.log('[Onboarding GET] Reinstall detected, cleared flags');
       }
 
       const hasProducts = data?.has_products || false;
-      const hasSettings = data?.settings?.enabled_display_styles &&
-                          data.settings.enabled_display_styles.length > 0;
       const themeEnabled = data?.settings?.theme_enabled === true;
 
-      // Onboarding is complete if they have products selected
-      // BUT if this is a reinstall, onboarding should start fresh
-      const onboardingComplete = wasReinstalled ? false : hasProducts;
+      // Onboarding is complete if:
+      // 1) onboarding_completed_at is set (user clicked through onboarding), OR
+      // 2) has products selected (legacy check)
+      // BUT if reinstall, always start fresh
+      const onboardingComplete = wasReinstalled
+        ? false
+        : (data?.onboarding_completed_at !== null || hasProducts);
+
+      console.log('[Onboarding GET] Returning:', { onboardingComplete, wasReinstalled });
 
       return NextResponse.json({
         onboardingComplete,
         themeEnabled,
-        wasReinstalled, // Frontend should clear localStorage if true
+        wasReinstalled,
         status: {
           hasProducts: wasReinstalled ? false : hasProducts,
-          hasSettings: wasReinstalled ? false : !!hasSettings,
+          hasSettings: false,
           themeEnabled: wasReinstalled ? false : themeEnabled,
         },
       });
     } catch (error) {
-      console.error('Error checking onboarding status:', error);
+      console.error('[Onboarding GET] Error:', error);
       // Default to complete to avoid blocking users on error
       return NextResponse.json({
         onboardingComplete: true,
