@@ -2604,6 +2604,8 @@ function LiveStep({
         }
 
         .success-icon {
+          display: flex;
+          justify-content: center;
           margin: 0 auto 32px;
         }
 
