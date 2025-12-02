@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
 interface RewardTier {
   id?: string;
@@ -66,7 +67,7 @@ export default function CartFeaturesPage() {
 
   async function fetchData() {
     try {
-      const res = await fetch('/api/admin/cart-features');
+      const res = await authenticatedFetch('/api/admin/cart-features');
       if (res.ok) {
         const data = await res.json();
         setSettings(data.settings);
@@ -83,7 +84,7 @@ export default function CartFeaturesPage() {
   async function saveChanges() {
     setSaving(true);
     try {
-      const res = await fetch('/api/admin/cart-features', {
+      const res = await authenticatedFetch('/api/admin/cart-features', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings, rewards, addons }),
