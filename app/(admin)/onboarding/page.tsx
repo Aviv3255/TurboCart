@@ -2500,7 +2500,7 @@ function ThemeEnableStep({
 }
 
 /**
- * Step 6: Live! - Premium Success Celebration with Confetti
+ * Step 6: Live! - Clean Success Screen
  */
 function LiveStep({
   data,
@@ -2513,127 +2513,49 @@ function LiveStep({
 }) {
   const selectedStyleCount = data.displayStyles.length;
   const selectedProductCount = data.selectedProducts.length;
-  const [showConfetti, setShowConfetti] = useState(true);
-  const [animatedValues, setAnimatedValues] = useState({ styles: 0, products: 0 });
-
-  // Animated counting effect
-  useEffect(() => {
-    const duration = 1500;
-    const steps = 30;
-    const interval = duration / steps;
-
-    let step = 0;
-    const timer = setInterval(() => {
-      step++;
-      const progress = step / steps;
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-
-      setAnimatedValues({
-        styles: Math.round(selectedStyleCount * easeOut),
-        products: Math.round(selectedProductCount * easeOut),
-      });
-
-      if (step >= steps) {
-        clearInterval(timer);
-      }
-    }, interval);
-
-    // Hide confetti after 5 seconds
-    const confettiTimer = setTimeout(() => setShowConfetti(false), 5000);
-
-    return () => {
-      clearInterval(timer);
-      clearTimeout(confettiTimer);
-    };
-  }, [selectedStyleCount, selectedProductCount]);
-
-  // Generate confetti pieces
-  const confettiPieces = [...Array(50)].map((_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 2}s`,
-    duration: `${2 + Math.random() * 3}s`,
-    color: ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'][Math.floor(Math.random() * 6)],
-    size: 6 + Math.random() * 8,
-    rotation: Math.random() * 360,
-  }));
 
   return (
     <div className="live-step">
-      {/* Confetti celebration */}
-      {showConfetti && (
-        <div className="confetti-container">
-          {confettiPieces.map((piece) => (
-            <div
-              key={piece.id}
-              className="confetti"
-              style={{
-                left: piece.left,
-                animationDelay: piece.delay,
-                animationDuration: piece.duration,
-                backgroundColor: piece.color,
-                width: `${piece.size}px`,
-                height: `${piece.size}px`,
-                transform: `rotate(${piece.rotation}deg)`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Premium success animation */}
-      <div className="success-animation">
-        <div className="success-glow" />
-        <div className="success-circle">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="check-icon">
-            <path
-              d="M16 32L28 44L48 20"
-              stroke="currentColor"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <div className="success-rings">
-          <div className="ring ring-1" />
-          <div className="ring ring-2" />
-          <div className="ring ring-3" />
-        </div>
-        {/* Floating sparkles */}
-        <div className="sparkles">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="sparkle" style={{
-              '--angle': `${i * 45}deg`,
-              '--delay': `${i * 0.1}s`,
-            } as React.CSSProperties} />
-          ))}
-        </div>
+      {/* Clean success icon - black circle with gradient checkmark */}
+      <div className="success-icon">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+          <circle cx="40" cy="40" r="40" fill="#000000" />
+          <defs>
+            <linearGradient id="checkGradient" x1="20" y1="40" x2="60" y2="40">
+              <stop offset="0%" stopColor="#667eea" />
+              <stop offset="100%" stopColor="#764ba2" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M24 40L35 51L56 28"
+            stroke="url(#checkGradient)"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </svg>
       </div>
 
-      <h2 className="live-title">
-        <span className="title-gradient">You&apos;re All Set!</span>
-      </h2>
+      <h2 className="live-title">You&apos;re All Set!</h2>
       <p className="live-subtitle">
         TurboCart is now configured and ready to boost your revenue.
       </p>
 
       <div className="summary-card">
         <div className="summary-header">
-          <span className="summary-icon">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 2L12 8L18 10L12 12L10 18L8 12L2 10L8 8L10 2Z" fill="currentColor" />
-            </svg>
-          </span>
-          <h3>Your Setup Summary</h3>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1L9.5 6L14.5 7L9.5 8L8 13L6.5 8L1.5 7L6.5 6L8 1Z" fill="#667eea" />
+          </svg>
+          <span>Your Setup Summary</span>
         </div>
         <div className="summary-grid">
           <div className="summary-item">
-            <span className="summary-value">{animatedValues.styles}</span>
+            <span className="summary-value">{selectedStyleCount}</span>
             <span className="summary-label">Display Styles</span>
           </div>
           <div className="summary-item">
-            <span className="summary-value">{animatedValues.products}</span>
+            <span className="summary-value">{selectedProductCount}</span>
             <span className="summary-label">Upsell Products</span>
           </div>
           <div className="summary-item">
@@ -2648,31 +2570,17 @@ function LiveStep({
       <div className="whats-next">
         <h3>What Happens Now?</h3>
         <ul>
-          <li className="animate-item" style={{ animationDelay: '0.2s' }}>
-            <span className="bullet">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M7 4V7L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </span>
-            Machine Learning engine starts learning from customer behavior immediately
+          <li>
+            <span className="bullet">1</span>
+            <span>Machine Learning starts learning from customer behavior</span>
           </li>
-          <li className="animate-item" style={{ animationDelay: '0.4s' }}>
-            <span className="bullet">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M2 7H12M5 4L2 7L5 10M9 4L12 7L9 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            Display styles are A/B tested to find the best performer
+          <li>
+            <span className="bullet">2</span>
+            <span>Display styles are A/B tested to find the best performer</span>
           </li>
-          <li className="animate-item" style={{ animationDelay: '0.6s' }}>
-            <span className="bullet">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M2 10L5 7L8 9L12 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M9 4H12V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            Revenue analytics update in real-time on your dashboard
+          <li>
+            <span className="bullet">3</span>
+            <span>Revenue analytics update in real-time on your dashboard</span>
           </li>
         </ul>
       </div>
@@ -2682,228 +2590,42 @@ function LiveStep({
         onClick={onComplete}
         disabled={saving}
       >
-        {saving ? (
-          <>
-            <span className="spinner-small" />
-            Setting up...
-          </>
-        ) : (
-          <>
-            <span className="btn-text">Go to Dashboard</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </>
-        )}
+        {saving ? 'Setting up...' : 'Go to Dashboard'}
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+          <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
       </button>
 
       <style jsx>{`
         .live-step {
           text-align: center;
-          position: relative;
-          overflow: visible;
+          max-width: 500px;
+          margin: 0 auto;
         }
 
-        /* Confetti celebration */
-        .confetti-container {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          pointer-events: none;
-          z-index: 1000;
-          overflow: hidden;
-        }
-
-        .confetti {
-          position: absolute;
-          top: -20px;
-          border-radius: 2px;
-          animation: confettiFall linear forwards;
-        }
-
-        @keyframes confettiFall {
-          0% {
-            transform: translateY(0) rotate(0deg);
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh) rotate(720deg);
-            opacity: 0;
-          }
-        }
-
-        .success-animation {
-          position: relative;
-          width: 140px;
-          height: 140px;
-          margin: 0 auto 40px;
-        }
-
-        .success-glow {
-          position: absolute;
-          inset: -20px;
-          background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
-          border-radius: 50%;
-          animation: glowPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes glowPulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.1); }
-        }
-
-        .success-circle {
-          width: 100px;
-          height: 100px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #fff;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 2;
-          animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-          box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        .success-circle :global(.check-icon) {
-          animation: drawCheck 0.5s ease-out 0.3s both;
-        }
-
-        @keyframes drawCheck {
-          from { stroke-dasharray: 100; stroke-dashoffset: 100; }
-          to { stroke-dashoffset: 0; }
-        }
-
-        @keyframes scaleIn {
-          from {
-            transform: translate(-50%, -50%) scale(0);
-          }
-          to {
-            transform: translate(-50%, -50%) scale(1);
-          }
-        }
-
-        .success-rings {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-
-        .ring {
-          position: absolute;
-          border: 2px solid rgba(102, 126, 234, 0.4);
-          border-radius: 50%;
-          animation: ripple 2s ease-out infinite;
-        }
-
-        .ring-1 {
-          width: 100px;
-          height: 100px;
-          top: -50px;
-          left: -50px;
-        }
-
-        .ring-2 {
-          width: 140px;
-          height: 140px;
-          top: -70px;
-          left: -70px;
-          animation-delay: 0.4s;
-        }
-
-        .ring-3 {
-          width: 180px;
-          height: 180px;
-          top: -90px;
-          left: -90px;
-          animation-delay: 0.8s;
-        }
-
-        @keyframes ripple {
-          0% {
-            transform: scale(0.8);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1.6);
-            opacity: 0;
-          }
-        }
-
-        /* Sparkles */
-        .sparkles {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 0;
-          height: 0;
-        }
-
-        .sparkle {
-          position: absolute;
-          width: 6px;
-          height: 6px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 50%;
-          animation: sparkleFloat 1.5s ease-out var(--delay, 0s) infinite;
-          transform: rotate(var(--angle, 0deg)) translateY(-80px);
-        }
-
-        @keyframes sparkleFloat {
-          0% { opacity: 0; transform: rotate(var(--angle)) translateY(-60px) scale(0); }
-          50% { opacity: 1; transform: rotate(var(--angle)) translateY(-90px) scale(1); }
-          100% { opacity: 0; transform: rotate(var(--angle)) translateY(-120px) scale(0); }
+        .success-icon {
+          margin: 0 auto 32px;
         }
 
         .live-title {
-          font-size: 36px;
-          font-weight: 700;
-          margin: 0 0 12px 0;
-          animation: fadeSlideUp 0.6s ease-out 0.3s both;
-        }
-
-        .title-gradient {
-          background: linear-gradient(135deg, #1d1d1f 0%, #667eea 50%, #1d1d1f 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: gradientShift 3s ease-in-out infinite;
-        }
-
-        @keyframes gradientShift {
-          0%, 100% { background-position: 0% center; }
-          50% { background-position: 100% center; }
-        }
-
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          font-size: 28px;
+          font-weight: 600;
+          color: #1d1d1f;
+          margin: 0 0 8px 0;
         }
 
         .live-subtitle {
-          font-size: 17px;
+          font-size: 16px;
           color: #86868b;
-          margin: 0 0 40px 0;
-          animation: fadeSlideUp 0.6s ease-out 0.4s both;
+          margin: 0 0 32px 0;
         }
 
         .summary-card {
           background: #fff;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          border-radius: 20px;
-          padding: 28px;
-          margin-bottom: 32px;
-          animation: fadeSlideUp 0.6s ease-out 0.5s both;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          border-radius: 16px;
+          padding: 24px;
+          margin-bottom: 24px;
         }
 
         .summary-header {
@@ -2911,24 +2633,10 @@ function LiveStep({
           align-items: center;
           justify-content: center;
           gap: 8px;
-          margin-bottom: 24px;
-        }
-
-        .summary-icon {
-          color: #667eea;
-          animation: starSpin 3s linear infinite;
-        }
-
-        @keyframes starSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        .summary-card h3 {
-          font-size: 13px;
+          margin-bottom: 20px;
+          font-size: 12px;
           font-weight: 600;
           color: #86868b;
-          margin: 0;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
@@ -2936,62 +2644,51 @@ function LiveStep({
         .summary-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
+          gap: 16px;
         }
 
         .summary-item {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 6px;
-          padding: 16px;
-          background: rgba(102, 126, 234, 0.04);
+          gap: 8px;
+          padding: 16px 8px;
+          background: #f8f8fa;
           border-radius: 12px;
-          transition: all 0.3s ease;
-        }
-
-        .summary-item:hover {
-          background: rgba(102, 126, 234, 0.08);
-          transform: translateY(-2px);
         }
 
         .summary-value {
-          font-size: 32px;
-          font-weight: 700;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          font-size: 24px;
+          font-weight: 600;
+          color: #667eea;
         }
 
         .summary-value.enabled {
-          background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: #10b981;
         }
 
         .summary-label {
-          font-size: 12px;
+          font-size: 11px;
           color: #86868b;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          text-align: center;
+          line-height: 1.3;
         }
 
         .whats-next {
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, rgba(118, 75, 162, 0.06) 100%);
-          border-radius: 20px;
-          padding: 28px;
-          margin-bottom: 40px;
+          background: #f8f8fa;
+          border-radius: 16px;
+          padding: 24px;
+          margin-bottom: 32px;
           text-align: left;
-          animation: fadeSlideUp 0.6s ease-out 0.6s both;
         }
 
         .whats-next h3 {
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 600;
           color: #1d1d1f;
-          margin: 0 0 20px 0;
+          margin: 0 0 16px 0;
         }
 
         .whats-next ul {
@@ -3003,90 +2700,52 @@ function LiveStep({
         .whats-next li {
           display: flex;
           align-items: flex-start;
-          gap: 14px;
-          padding: 12px 0;
-          font-size: 15px;
+          gap: 12px;
+          padding: 8px 0;
+          font-size: 14px;
           color: #1d1d1f;
-          line-height: 1.5;
-        }
-
-        .whats-next li.animate-item {
-          animation: fadeSlideUp 0.5s ease-out backwards;
+          line-height: 1.4;
         }
 
         .bullet {
-          width: 28px;
-          height: 28px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          width: 22px;
+          height: 22px;
+          background: #000;
           color: #fff;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
+          font-size: 11px;
+          font-weight: 600;
           flex-shrink: 0;
         }
 
         .complete-button {
-          background: linear-gradient(135deg, #000 0%, #1d1d1f 100%);
+          background: #000;
           color: #fff;
           border: none;
-          padding: 18px 48px;
-          border-radius: 16px;
-          font-size: 17px;
+          padding: 14px 32px;
+          border-radius: 12px;
+          font-size: 16px;
           font-weight: 600;
           cursor: pointer;
           display: inline-flex;
           align-items: center;
-          gap: 12px;
-          transition: all 0.3s ease;
-          animation: fadeSlideUp 0.6s ease-out 0.7s both;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .complete-button::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .complete-button:hover::before {
-          opacity: 1;
-        }
-
-        .complete-button .btn-text,
-        .complete-button svg {
-          position: relative;
-          z-index: 1;
+          gap: 10px;
+          transition: opacity 0.2s ease;
         }
 
         .complete-button:hover:not(:disabled) {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+          opacity: 0.9;
         }
 
         .complete-button:disabled {
-          opacity: 0.8;
-          cursor: wait;
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
-        .spinner-small {
-          width: 20px;
-          height: 20px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top-color: #fff;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 640px) {
+        @media (max-width: 480px) {
           .summary-grid {
             grid-template-columns: 1fr;
             gap: 12px;
@@ -3099,11 +2758,7 @@ function LiveStep({
           }
 
           .summary-value {
-            font-size: 24px;
-          }
-
-          .live-title {
-            font-size: 28px;
+            font-size: 20px;
           }
         }
       `}</style>
