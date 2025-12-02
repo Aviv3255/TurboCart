@@ -302,13 +302,15 @@ export async function POST(request: NextRequest) {
         decisionType = decision.decisionType;
       }
     } catch (mlError) {
-      console.log('ML engine not available, using simple fallback:', (mlError as Error).message);
+      console.log('ML decision failed, falling back:', (mlError as Error).message);
     }
 
     // If ML didn't return products, use simple fallback
     if (upsells.length === 0) {
+      console.log('[Upsells] ML returned 0 products, using simple fallback for shop:', shopId);
       try {
         const simpleProducts = await getSimpleUpsells(shopId, maxUpsells);
+        console.log('[Upsells] Simple fallback returned', simpleProducts.length, 'products');
         upsells = simpleProducts.map((p, index) => ({
           id: p.shopify_product_id,
           variant_id: p.shopify_variant_id,
@@ -320,9 +322,11 @@ export async function POST(request: NextRequest) {
           position: index + 1,
         }));
       } catch (dbError) {
-        console.error('Error fetching upsell products:', dbError);
+        console.error('[Upsells] Error fetching upsell products:', dbError);
       }
     }
+
+    console.log('[Upsells] Returning', upsells.length, 'products for shop:', shop);
 
     return NextResponse.json({
       display_style: displayStyle,

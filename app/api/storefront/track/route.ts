@@ -30,17 +30,36 @@ export async function POST(request: NextRequest) {
 
     // Get shop from request
     const { searchParams } = new URL(request.url);
-    const shop = searchParams.get('shop');
+    let shop = searchParams.get('shop');
 
-    if (!shop) {
+    // Parse request body
+    const body = await request.json();
+
+    // Helper to check if shop is valid
+    const isValidShop = (s: string | null | undefined): s is string => {
+      return !!s && s !== 'null' && s !== 'undefined' && s !== '' && s.includes('.myshopify.com');
+    };
+
+    // Try to get shop from body if URL param is invalid
+    if (!isValidShop(shop) && body.shop) {
+      shop = String(body.shop);
+    }
+
+    // Try to extract shop from Referer header as fallback
+    if (!isValidShop(shop)) {
+      const referer = request.headers.get('referer') || '';
+      const refererMatch = referer.match(/https?:\/\/([^\/]+\.myshopify\.com)/);
+      if (refererMatch && refererMatch[1]) {
+        shop = refererMatch[1];
+      }
+    }
+
+    if (!isValidShop(shop)) {
       return NextResponse.json(
         { error: 'Missing shop parameter' },
         { status: 400, headers: corsHeaders }
       );
     }
-
-    // Parse request body
-    const body = await request.json();
     const {
       event_type,
       product_id,
