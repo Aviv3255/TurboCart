@@ -5,7 +5,7 @@ import { rateLimit } from '@/lib/shopify/middleware';
 // CORS headers for storefront requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
@@ -41,6 +41,84 @@ async function getSimpleUpsells(shopId: string, maxProducts: number = 3): Promis
 }
 
 /**
+ * GET endpoint for debugging - check if shop exists and has products
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const shop = searchParams.get('shop');
+
+    if (!shop) {
+      return NextResponse.json({
+        status: 'error',
+        error: 'Missing shop parameter',
+        help: 'Add ?shop=your-store.myshopify.com to the URL',
+        received_params: Object.fromEntries(searchParams.entries()),
+      }, { status: 400, headers: corsHeaders });
+    }
+
+    // Try to connect to database
+    let dbConnected = false;
+    let shopExists = false;
+    let productCount = 0;
+
+    try {
+      const { query: dbQuery } = await import('@/lib/db');
+
+      // Test connection
+      await dbQuery('SELECT 1');
+      dbConnected = true;
+
+      // Check if shop exists
+      const shopResult = await dbQuery<{ id: string }>(
+        'SELECT id FROM shops WHERE shop_domain = $1 AND uninstalled_at IS NULL',
+        [shop]
+      );
+
+      if (shopResult.rows.length > 0) {
+        shopExists = true;
+        const shopId = shopResult.rows[0]!.id;
+
+        // Count products
+        const productResult = await dbQuery<{ count: string }>(
+          'SELECT COUNT(*) as count FROM upsell_products WHERE shop_id = $1 AND is_active = true',
+          [shopId]
+        );
+        productCount = parseInt(productResult.rows[0]?.count || '0');
+      }
+    } catch (dbError) {
+      return NextResponse.json({
+        status: 'error',
+        error: 'Database connection failed',
+        details: (dbError as Error).message,
+        shop,
+      }, { status: 503, headers: corsHeaders });
+    }
+
+    return NextResponse.json({
+      status: 'ok',
+      shop,
+      database_connected: dbConnected,
+      shop_exists: shopExists,
+      active_products: productCount,
+      ready: shopExists && productCount > 0,
+      message: shopExists
+        ? (productCount > 0
+          ? `Shop configured with ${productCount} upsell products`
+          : 'Shop exists but no upsell products configured')
+        : 'Shop not found in database - complete onboarding first',
+    }, { headers: corsHeaders });
+
+  } catch (error) {
+    return NextResponse.json({
+      status: 'error',
+      error: 'Unexpected error',
+      details: (error as Error).message,
+    }, { status: 500, headers: corsHeaders });
+  }
+}
+
+/**
  * Get upsell recommendations for a cart
  * POST /api/storefront/upsells
  *
@@ -57,47 +135,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get shop from request (shop parameter or domain)
+    // Get shop from URL query params first
     const { searchParams } = new URL(request.url);
     let shop = searchParams.get('shop');
 
-    // Also try to get shop from request body
-    let body;
+    // Parse request body
+    let body: Record<string, unknown> = {};
     try {
-      body = await request.json();
-      if (!shop && body.shop) {
-        shop = body.shop;
+      const text = await request.text();
+      if (text) {
+        body = JSON.parse(text);
       }
     } catch {
-      body = {};
+      // Body parsing failed, continue with empty body
     }
 
-    if (!shop) {
-      return NextResponse.json(
-        { error: 'Missing shop parameter' },
-        { status: 400, headers: corsHeaders }
-      );
+    // Try to get shop from body if not in URL
+    if (!shop && body.shop) {
+      shop = String(body.shop);
     }
 
-    // Parse request body
-    const { session_id = `session_${Date.now()}` } = body;
+    // Validate shop parameter
+    if (!shop || shop === 'null' || shop === 'undefined') {
+      return NextResponse.json({
+        error: 'Missing shop parameter',
+        received_url_shop: searchParams.get('shop'),
+        received_body_shop: body.shop || null,
+        help: 'Ensure TurboCart App Embed is enabled in Theme Editor',
+      }, { status: 400, headers: corsHeaders });
+    }
+
+    // Get session_id from body
+    const session_id = String(body.session_id || `session_${Date.now()}`);
 
     // Get shop ID from database
-    const { query: dbQuery } = await import('@/lib/db');
-    const shopResult = await dbQuery<{ id: string; settings: { max_upsells?: number; display_style?: string } | null }>(
-      'SELECT id, settings FROM shops WHERE shop_domain = $1 AND uninstalled_at IS NULL',
-      [shop]
-    );
+    let shopId: string;
+    let settings: { max_upsells?: number; display_style?: string } = {};
 
-    if (shopResult.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Shop not found' },
-        { status: 404, headers: corsHeaders }
+    try {
+      const { query: dbQuery } = await import('@/lib/db');
+      const shopResult = await dbQuery<{ id: string; settings: { max_upsells?: number; display_style?: string } | null }>(
+        'SELECT id, settings FROM shops WHERE shop_domain = $1 AND uninstalled_at IS NULL',
+        [shop]
       );
+
+      if (shopResult.rows.length === 0) {
+        return NextResponse.json({
+          error: 'Shop not found',
+          shop,
+          help: 'Complete the onboarding process first',
+        }, { status: 404, headers: corsHeaders });
+      }
+
+      shopId = shopResult.rows[0]!.id;
+      settings = shopResult.rows[0]!.settings || {};
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      return NextResponse.json({
+        error: 'Database unavailable',
+        details: (dbError as Error).message,
+      }, { status: 503, headers: corsHeaders });
     }
 
-    const shopId = shopResult.rows[0]!.id;
-    const settings = shopResult.rows[0]!.settings || {};
     const maxUpsells = settings.max_upsells || 3;
     const displayStyle = settings.display_style || 'minimal-strip';
 
@@ -121,7 +220,8 @@ export async function POST(request: NextRequest) {
       // Try to use ML engine
       const { MLOptimizationEngine } = await import('@/lib/ml/optimization-engine');
 
-      const formattedCartItems: CartItem[] = (body.cart_items || []).map((item: {
+      const cartItems = Array.isArray(body.cart_items) ? body.cart_items : [];
+      const formattedCartItems: CartItem[] = cartItems.map((item: {
         id?: number;
         key?: string;
         product_id: number;
@@ -171,17 +271,21 @@ export async function POST(request: NextRequest) {
 
     // If ML didn't return products, use simple fallback
     if (upsells.length === 0) {
-      const simpleProducts = await getSimpleUpsells(shopId, maxUpsells);
-      upsells = simpleProducts.map((p, index) => ({
-        id: p.shopify_product_id,
-        variant_id: p.shopify_variant_id,
-        title: p.title,
-        handle: p.handle,
-        price: p.price,
-        compare_at_price: p.compare_at_price,
-        image: p.image_url,
-        position: index + 1,
-      }));
+      try {
+        const simpleProducts = await getSimpleUpsells(shopId, maxUpsells);
+        upsells = simpleProducts.map((p, index) => ({
+          id: p.shopify_product_id,
+          variant_id: p.shopify_variant_id,
+          title: p.title,
+          handle: p.handle,
+          price: p.price,
+          compare_at_price: p.compare_at_price,
+          image: p.image_url,
+          position: index + 1,
+        }));
+      } catch (dbError) {
+        console.error('Error fetching upsell products:', dbError);
+      }
     }
 
     return NextResponse.json({
@@ -198,7 +302,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error getting upsells:', error);
     return NextResponse.json(
-      { error: 'Failed to get recommendations' },
+      { error: 'Failed to get recommendations', details: (error as Error).message },
       { status: 500, headers: corsHeaders }
     );
   }
