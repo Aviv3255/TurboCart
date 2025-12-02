@@ -4,6 +4,24 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
+// SVG Icon Components
+const IconSvgs: Record<string, JSX.Element> = {
+  shield: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  gift: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>,
+  truck: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
+  clock: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  heart: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+  star: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  check: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+  fire: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
+  sparkles: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>,
+  package: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.89 1.45l8 4A2 2 0 0 1 22 7.24v9.53a2 2 0 0 1-1.11 1.79l-8 4a2 2 0 0 1-1.79 0l-8-4a2 2 0 0 1-1.1-1.8V7.24a2 2 0 0 1 1.11-1.79l8-4a2 2 0 0 1 1.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>,
+  leaf: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>,
+  recycle: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843"/><path d="m13.378 9.633 4.096 1.098 1.097-4.096"/></svg>,
+  settings: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  layers: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+};
+
 interface AddonSettings {
   enabled: boolean;
   position: string;
@@ -39,18 +57,18 @@ interface AddonItem {
 }
 
 const ICONS = [
-  { value: 'shield', emoji: '🛡️', label: 'Shield' },
-  { value: 'gift', emoji: '🎁', label: 'Gift' },
-  { value: 'truck', emoji: '🚚', label: 'Truck' },
-  { value: 'clock', emoji: '⏰', label: 'Clock' },
-  { value: 'heart', emoji: '❤️', label: 'Heart' },
-  { value: 'star', emoji: '⭐', label: 'Star' },
-  { value: 'check', emoji: '✅', label: 'Check' },
-  { value: 'fire', emoji: '🔥', label: 'Fire' },
-  { value: 'sparkles', emoji: '✨', label: 'Sparkles' },
-  { value: 'package', emoji: '📦', label: 'Package' },
-  { value: 'leaf', emoji: '🌿', label: 'Leaf' },
-  { value: 'recycle', emoji: '♻️', label: 'Recycle' },
+  { value: 'shield', label: 'Shield' },
+  { value: 'gift', label: 'Gift' },
+  { value: 'truck', label: 'Truck' },
+  { value: 'clock', label: 'Clock' },
+  { value: 'heart', label: 'Heart' },
+  { value: 'star', label: 'Star' },
+  { value: 'check', label: 'Check' },
+  { value: 'fire', label: 'Fire' },
+  { value: 'sparkles', label: 'Sparkles' },
+  { value: 'package', label: 'Package' },
+  { value: 'leaf', label: 'Leaf' },
+  { value: 'recycle', label: 'Recycle' },
 ];
 
 const ADDON_TEMPLATES = [
@@ -176,7 +194,7 @@ export default function AddonsPage() {
     setItems(newItems);
   }
 
-  const getIconEmoji = (iconValue: string) => ICONS.find(i => i.value === iconValue)?.emoji || '🛡️';
+  const getIcon = (iconValue: string) => IconSvgs[iconValue] || IconSvgs.shield;
 
   if (loading) {
     return (
@@ -237,7 +255,7 @@ export default function AddonsPage() {
                   borderRadius: `${settings.item_border_radius}px`,
                   padding: `${settings.item_padding}px`,
                 }}>
-                  <div className="item-icon">{getIconEmoji(item.icon)}</div>
+                  <div className="item-icon">{getIcon(item.icon)}</div>
                   <div className="item-content">
                     <strong>{item.name}</strong>
                     <span className="item-price">${item.price.toFixed(2)}</span>
@@ -262,10 +280,10 @@ export default function AddonsPage() {
       {/* Tabs */}
       <div className="tabs-container">
         <button className={`tab ${activeTab === 'items' ? 'active' : ''}`} onClick={() => setActiveTab('items')}>
-          <span>➕</span> Add-On Items
+          {IconSvgs.layers} Add-On Items
         </button>
         <button className={`tab ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-          <span>⚙️</span> Display Settings
+          {IconSvgs.settings} Display Settings
         </button>
       </div>
 
@@ -279,7 +297,7 @@ export default function AddonsPage() {
               <div className="templates-grid">
                 {ADDON_TEMPLATES.map((template, i) => (
                   <button key={i} className="template-card" onClick={() => addItem(template)}>
-                    <span className="template-icon">{getIconEmoji(template.icon)}</span>
+                    <span className="template-icon">{getIcon(template.icon)}</span>
                     <span className="template-name">{template.name}</span>
                     <span className="template-price">${template.price.toFixed(2)}</span>
                   </button>
@@ -307,7 +325,7 @@ export default function AddonsPage() {
                           <button onClick={() => moveItem(index, 'down')} disabled={index === items.length - 1}>↓</button>
                         </div>
                         <div className="item-preview-icon" style={{ background: item.is_active ? settings.toggle_active_color : '#e5e7eb' }}>
-                          <span>{getIconEmoji(item.icon)}</span>
+                          <span>{getIcon(item.icon)}</span>
                         </div>
                         <div className="item-info">
                           <strong>{item.name}</strong>
@@ -348,7 +366,7 @@ export default function AddonsPage() {
                           <div className="icon-picker">
                             {ICONS.map((icon) => (
                               <button key={icon.value} type="button" className={`icon-option ${item.icon === icon.value ? 'selected' : ''}`} onClick={() => updateItem(index, 'icon', icon.value)} title={icon.label}>
-                                {icon.emoji}
+                                {IconSvgs[icon.value]}
                               </button>
                             ))}
                           </div>

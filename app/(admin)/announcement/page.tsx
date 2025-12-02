@@ -4,6 +4,22 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
+// SVG Icon Components
+const IconSvgs: Record<string, JSX.Element> = {
+  truck: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
+  gift: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>,
+  fire: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
+  star: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  tag: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+  clock: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  megaphone: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>,
+  sparkles: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>,
+  party: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5.8 11.3L2 22l10.7-3.8"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01M22 2l-2.2 9.8"/><path d="M9 3l-.4 2"/><path d="M19 13l2-.4"/></svg>,
+  heart: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+  percent: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>,
+  info: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+};
+
 interface AnnouncementSettings {
   enabled: boolean;
   position: string;
@@ -34,18 +50,18 @@ interface AnnouncementSettings {
 }
 
 const ICONS = [
-  { value: 'truck', emoji: '🚚', label: 'Truck' },
-  { value: 'gift', emoji: '🎁', label: 'Gift' },
-  { value: 'fire', emoji: '🔥', label: 'Fire' },
-  { value: 'star', emoji: '⭐', label: 'Star' },
-  { value: 'tag', emoji: '🏷️', label: 'Tag' },
-  { value: 'clock', emoji: '⏰', label: 'Clock' },
-  { value: 'megaphone', emoji: '📢', label: 'Megaphone' },
-  { value: 'sparkles', emoji: '✨', label: 'Sparkles' },
-  { value: 'party', emoji: '🎉', label: 'Party' },
-  { value: 'heart', emoji: '❤️', label: 'Heart' },
-  { value: 'percent', emoji: '💯', label: 'Percent' },
-  { value: 'info', emoji: 'ℹ️', label: 'Info' },
+  { value: 'truck', label: 'Truck' },
+  { value: 'gift', label: 'Gift' },
+  { value: 'fire', label: 'Fire' },
+  { value: 'star', label: 'Star' },
+  { value: 'tag', label: 'Tag' },
+  { value: 'clock', label: 'Clock' },
+  { value: 'megaphone', label: 'Megaphone' },
+  { value: 'sparkles', label: 'Sparkles' },
+  { value: 'party', label: 'Party' },
+  { value: 'heart', label: 'Heart' },
+  { value: 'percent', label: 'Percent' },
+  { value: 'info', label: 'Info' },
 ];
 
 const QUICK_TEMPLATES = [
@@ -144,7 +160,7 @@ export default function AnnouncementPage() {
     }
   }
 
-  const getIconEmoji = (iconValue: string) => ICONS.find(i => i.value === iconValue)?.emoji || '📢';
+  const getIcon = (iconValue: string) => IconSvgs[iconValue] || IconSvgs.megaphone;
 
   const getBackground = () => {
     if (settings.style === 'gradient' || settings.style === 'custom') {
@@ -236,7 +252,7 @@ export default function AnnouncementPage() {
               padding: `${settings.padding}px`,
               borderRadius: `${settings.border_radius}px`,
             }}>
-              <span className="announcement-icon">{getIconEmoji(settings.icon)}</span>
+              <span className="announcement-icon">{getIcon(settings.icon)}</span>
               <span className="announcement-text">{settings.message}</span>
               {settings.link_enabled && settings.link_text && (
                 <span className="announcement-link">{settings.link_text} →</span>
@@ -257,7 +273,7 @@ export default function AnnouncementPage() {
             <div className="templates-list">
               {QUICK_TEMPLATES.map((template, i) => (
                 <button key={i} className="template-item" onClick={() => applyTemplate(template)}>
-                  <span className="template-icon">{getIconEmoji(template.icon)}</span>
+                  <span className="template-icon">{getIcon(template.icon)}</span>
                   <span className="template-text">{template.message}</span>
                 </button>
               ))}
@@ -286,7 +302,7 @@ export default function AnnouncementPage() {
                 <div className="icon-picker">
                   {ICONS.map((icon) => (
                     <button key={icon.value} type="button" className={`icon-option ${settings.icon === icon.value ? 'selected' : ''}`} onClick={() => setSettings({ ...settings, icon: icon.value })} title={icon.label}>
-                      {icon.emoji}
+                      {IconSvgs[icon.value]}
                     </button>
                   ))}
                 </div>

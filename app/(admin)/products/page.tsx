@@ -48,13 +48,25 @@ interface Product {
   collections: Array<{ id: string; title: string }>;
 }
 
+// SVG Icons for display styles
+const StyleIcons = {
+  carousel: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="6" width="6" height="12" rx="1"/><rect x="9" y="4" width="6" height="16" rx="1"/><rect x="16" y="6" width="6" height="12" rx="1"/></svg>,
+  cards: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="9" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>,
+  list: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><rect x="3" y="4" width="4" height="4" rx="1"/><rect x="3" y="10" width="4" height="4" rx="1"/><rect x="3" y="16" width="4" height="4" rx="1"/></svg>,
+  strip: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="8" width="20" height="8" rx="2"/><circle cx="6" cy="12" r="2"/><line x1="10" y1="10" x2="18" y2="10"/><line x1="10" y1="14" x2="15" y2="14"/></svg>,
+  banner: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="4" y="6" width="8" height="8" rx="1"/><line x1="14" y1="8" x2="18" y2="8"/><line x1="14" y1="12" x2="17" y2="12"/><rect x="14" y="15" width="4" height="3" rx="1"/></svg>,
+  bundle: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="8" width="5" height="8" rx="1"/><rect x="9.5" y="8" width="5" height="8" rx="1"/><rect x="17" y="8" width="5" height="8" rx="1"/><line x1="7.5" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="16.5" y2="12"/></svg>,
+  compare: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>,
+  masonry: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="10" rx="1"/><rect x="14" y="3" width="7" height="6" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/></svg>,
+  scroll: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="4" y="2" width="16" height="8" rx="1"/><rect x="4" y="12" width="16" height="8" rx="1"/><line x1="12" y1="22" x2="12" y2="24"/><path d="M9 22l3 2 3-2"/></svg>,
+};
+
 interface DisplayStyle {
   id: string;
   name: string;
   description: string;
   maxProducts: number;
-  icon: string;
-  preview: string;
+  icon: JSX.Element;
 }
 
 const DISPLAY_STYLES: DisplayStyle[] = [
@@ -63,74 +75,218 @@ const DISPLAY_STYLES: DisplayStyle[] = [
     name: 'Carousel Slider',
     description: 'Horizontal scrolling carousel with product cards',
     maxProducts: 25,
-    icon: '🎠',
-    preview: 'Products slide horizontally with navigation arrows',
+    icon: StyleIcons.carousel,
   },
   {
     id: 'cards',
     name: 'Product Cards Grid',
     description: 'Grid layout with product cards',
     maxProducts: 25,
-    icon: '🃏',
-    preview: '2-3 column grid of product cards',
+    icon: StyleIcons.cards,
   },
   {
     id: 'list',
     name: 'Compact List',
     description: 'Vertical list with small thumbnails',
     maxProducts: 25,
-    icon: '📋',
-    preview: 'Space-efficient vertical list view',
+    icon: StyleIcons.list,
   },
   {
     id: 'minimal-strip',
     name: 'Minimal Strip',
     description: 'Sleek horizontal strip with minimal design',
     maxProducts: 25,
-    icon: '➖',
-    preview: 'Clean, modern horizontal strip',
+    icon: StyleIcons.strip,
   },
   {
     id: 'banner',
     name: 'Featured Banner',
     description: 'Large banner highlighting a single product',
     maxProducts: 1,
-    icon: '🏷️',
-    preview: 'Full-width banner with call-to-action',
+    icon: StyleIcons.banner,
   },
   {
     id: 'frequently-bought',
     name: 'Frequently Bought Together',
     description: 'Amazon-style product bundle suggestion',
     maxProducts: 3,
-    icon: '🛒',
-    preview: 'Product + Product + Product = Bundle',
+    icon: StyleIcons.bundle,
   },
   {
     id: 'comparison-table',
     name: 'Comparison Table',
     description: 'Side-by-side product comparison',
     maxProducts: 5,
-    icon: '📊',
-    preview: 'Table comparing product features',
+    icon: StyleIcons.compare,
   },
   {
     id: 'masonry-grid',
     name: 'Masonry Grid',
     description: 'Pinterest-style dynamic grid layout',
     maxProducts: 25,
-    icon: '🧱',
-    preview: 'Dynamic, flowing grid arrangement',
+    icon: StyleIcons.masonry,
   },
   {
     id: 'vertical-scroll',
     name: 'Vertical Scroll',
     description: 'Scrollable vertical product feed',
     maxProducts: 25,
-    icon: '📜',
-    preview: 'Smooth scrolling product feed',
+    icon: StyleIcons.scroll,
   },
 ];
+
+// Cart Drawer Mockup Preview Component for each display style
+const StylePreviewMockup = ({ styleId }: { styleId: string }) => {
+  const mockupStyles: React.CSSProperties = {
+    background: '#fff',
+    borderRadius: '6px',
+    padding: '8px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+    fontSize: '8px',
+  };
+
+  const productBox: React.CSSProperties = {
+    width: '28px',
+    height: '28px',
+    background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
+    borderRadius: '3px',
+  };
+
+  switch (styleId) {
+    case 'carousel':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ fontSize: '7px', color: '#6b7280', marginBottom: '4px' }}>You may also like</div>
+          <div style={{ display: 'flex', gap: '4px', overflow: 'hidden' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ textAlign: 'center', minWidth: '32px' }}>
+                <div style={productBox}></div>
+                <div style={{ marginTop: '2px', color: '#374151' }}>$29</div>
+              </div>
+            ))}
+            <div style={{ display: 'flex', alignItems: 'center', color: '#9ca3af' }}>›</div>
+          </div>
+        </div>
+      );
+
+    case 'cards':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ fontSize: '7px', color: '#6b7280', marginBottom: '4px' }}>Recommended</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} style={{ background: '#f9fafb', padding: '4px', borderRadius: '3px', textAlign: 'center' }}>
+                <div style={{ ...productBox, width: '100%', height: '20px' }}></div>
+                <div style={{ marginTop: '2px', color: '#374151' }}>$19</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'list':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ fontSize: '7px', color: '#6b7280', marginBottom: '4px' }}>Add to your order</div>
+          {[1, 2, 3].map(i => (
+            <div key={i} style={{ display: 'flex', gap: '4px', alignItems: 'center', marginBottom: '3px', padding: '3px', background: '#f9fafb', borderRadius: '3px' }}>
+              <div style={{ ...productBox, width: '18px', height: '18px' }}></div>
+              <div style={{ flex: 1, color: '#374151' }}>Product</div>
+              <div style={{ color: '#059669', fontWeight: 600 }}>+</div>
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'minimal-strip':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ display: 'flex', gap: '3px', alignItems: 'center', background: '#f9fafb', padding: '4px', borderRadius: '3px' }}>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} style={{ ...productBox, width: '20px', height: '20px' }}></div>
+            ))}
+            <div style={{ marginLeft: 'auto', fontSize: '6px', color: '#6366f1' }}>View all</div>
+          </div>
+        </div>
+      );
+
+    case 'banner':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%)', padding: '6px', borderRadius: '4px' }}>
+            <div style={{ ...productBox, width: '36px', height: '36px' }}></div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, color: '#374151' }}>Featured Item</div>
+              <div style={{ color: '#059669', fontWeight: 600, marginTop: '2px' }}>$49</div>
+            </div>
+            <div style={{ background: '#10b981', color: 'white', padding: '3px 6px', borderRadius: '3px', fontSize: '7px' }}>Add</div>
+          </div>
+        </div>
+      );
+
+    case 'frequently-bought':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ fontSize: '7px', color: '#6b7280', marginBottom: '4px' }}>Frequently bought together</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+            <div style={productBox}></div>
+            <span style={{ color: '#9ca3af' }}>+</span>
+            <div style={productBox}></div>
+            <span style={{ color: '#9ca3af' }}>+</span>
+            <div style={productBox}></div>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '4px', color: '#059669', fontWeight: 600 }}>Bundle: $89</div>
+        </div>
+      );
+
+    case 'comparison-table':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ fontSize: '7px', color: '#6b7280', marginBottom: '4px' }}>Compare options</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ textAlign: 'center', padding: '3px', background: '#f9fafb', borderRadius: '2px' }}>
+                <div style={{ ...productBox, width: '100%', height: '16px', marginBottom: '2px' }}></div>
+                <div style={{ color: '#374151' }}>${20 + i * 10}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'masonry-grid':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px' }}>
+            <div style={{ ...productBox, width: '100%', height: '32px' }}></div>
+            <div style={{ ...productBox, width: '100%', height: '20px' }}></div>
+            <div style={{ ...productBox, width: '100%', height: '20px' }}></div>
+            <div style={{ ...productBox, width: '100%', height: '32px' }}></div>
+          </div>
+        </div>
+      );
+
+    case 'vertical-scroll':
+      return (
+        <div style={mockupStyles}>
+          <div style={{ fontSize: '7px', color: '#6b7280', marginBottom: '4px' }}>Scroll for more</div>
+          <div style={{ maxHeight: '50px', overflow: 'hidden' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ display: 'flex', gap: '4px', alignItems: 'center', marginBottom: '3px', padding: '3px', background: '#f9fafb', borderRadius: '3px' }}>
+                <div style={{ ...productBox, width: '20px', height: '20px' }}></div>
+                <div style={{ flex: 1, color: '#374151' }}>Product {i}</div>
+                <div style={{ color: '#6b7280' }}>$29</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', color: '#9ca3af', marginTop: '2px' }}>↓</div>
+        </div>
+      );
+
+    default:
+      return <div style={mockupStyles}>Preview</div>;
+  }
+};
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -345,11 +501,17 @@ export default function ProductsPage() {
                 className={`display-style-card ${selectedStyle === style.id ? 'selected' : ''}`}
                 onClick={() => handleStyleSelect(style.id)}
               >
-                <div className="style-icon">{style.icon}</div>
-                <div className="style-name">{style.name}</div>
-                <div className="style-description">{style.description}</div>
-                <div className="style-preview">{style.preview}</div>
-                <div className="style-max">
+                <div className="style-header">
+                  <div className="style-icon">{style.icon}</div>
+                  <div className="style-info">
+                    <div className="style-name">{style.name}</div>
+                    <div className="style-description">{style.description}</div>
+                  </div>
+                </div>
+                <div className="style-preview">
+                  <StylePreviewMockup styleId={style.id} />
+                </div>
+                <div className="style-footer">
                   <Badge tone={style.maxProducts === 1 ? 'attention' : 'success'}>
                     {`Max ${style.maxProducts} product${style.maxProducts > 1 ? 's' : ''}`}
                   </Badge>
@@ -369,7 +531,7 @@ export default function ProductsPage() {
           <style jsx>{`
             .display-styles-grid {
               display: grid;
-              grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+              grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
               gap: 16px;
               margin-top: 20px;
             }
@@ -377,10 +539,12 @@ export default function ProductsPage() {
               background: #fff;
               border: 2px solid #e1e3e5;
               border-radius: 12px;
-              padding: 20px;
+              padding: 16px;
               cursor: pointer;
               transition: all 0.2s ease;
               position: relative;
+              display: flex;
+              flex-direction: column;
             }
             .display-style-card:hover {
               border-color: #008060;
@@ -391,31 +555,50 @@ export default function ProductsPage() {
               border-color: #008060;
               background: #f0fdf4;
             }
-            .style-icon {
-              font-size: 32px;
+            .style-header {
+              display: flex;
+              gap: 12px;
+              align-items: flex-start;
               margin-bottom: 12px;
+            }
+            .style-icon {
+              width: 48px;
+              height: 48px;
+              background: #f3f4f6;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #6366f1;
+              flex-shrink: 0;
+            }
+            .display-style-card.selected .style-icon {
+              background: rgba(0, 128, 96, 0.1);
+              color: #008060;
+            }
+            .style-info {
+              flex: 1;
+              min-width: 0;
             }
             .style-name {
-              font-size: 16px;
+              font-size: 15px;
               font-weight: 600;
               color: #202223;
-              margin-bottom: 4px;
+              margin-bottom: 2px;
             }
             .style-description {
-              font-size: 13px;
+              font-size: 12px;
               color: #6d7175;
-              margin-bottom: 8px;
+              line-height: 1.3;
             }
             .style-preview {
-              font-size: 12px;
-              color: #8c9196;
-              font-style: italic;
-              margin-bottom: 12px;
-              padding: 8px;
               background: #f6f6f7;
-              border-radius: 6px;
+              border-radius: 8px;
+              padding: 10px;
+              margin-bottom: 12px;
+              flex: 1;
             }
-            .style-max {
+            .style-footer {
               margin-top: auto;
             }
             .selected-indicator {

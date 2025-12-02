@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
+// SVG Icons
+const Icons = {
+  clock: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  fire: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
+  alert: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  back: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+};
+
 interface TimerSettings {
   enabled: boolean;
   position: string;
@@ -133,8 +141,8 @@ export default function TimerPage() {
       {/* Header */}
       <div className="page-header">
         <div className="header-left">
-          <button className="back-button" onClick={() => router.push('/cart-features')}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <button className="back-button" onClick={() => router.push('/dashboard')}>
+            {Icons.back}
           </button>
           <div className="header-content">
             <h1>Urgency Timer</h1>
@@ -165,7 +173,7 @@ export default function TimerPage() {
               padding: `${settings.padding}px`,
               borderRadius: `${settings.border_radius}px`,
             }}>
-              <span className="timer-icon">⏱️</span>
+              <span className="timer-icon">{Icons.clock}</span>
               <span className="timer-message" dangerouslySetInnerHTML={{ __html: getPreviewMessage() }} />
               {settings.show_progress_bar && (
                 <div className="progress-bar">
@@ -188,7 +196,7 @@ export default function TimerPage() {
               padding: `${settings.padding}px`,
               borderRadius: `${settings.border_radius}px`,
             }}>
-              <span className="timer-icon">🔥</span>
+              <span className="timer-icon">{Icons.fire}</span>
               <span className="timer-message">{settings.urgency_message?.replace('{time}', '00:45') || 'Hurry! Only 00:45 left!'}</span>
             </div>
           </div>
@@ -202,7 +210,7 @@ export default function TimerPage() {
               padding: `${settings.padding}px`,
               borderRadius: `${settings.border_radius}px`,
             }}>
-              <span className="timer-icon">⚠️</span>
+              <span className="timer-icon">{Icons.alert}</span>
               <span className="timer-message">{settings.expired_message}</span>
             </div>
           </div>
@@ -278,14 +286,13 @@ export default function TimerPage() {
                 <label>Timer Style</label>
                 <div className="style-options">
                   {[
-                    { value: 'bar', label: 'Full Bar', desc: 'Spans full width', icon: '▬' },
-                    { value: 'floating', label: 'Floating Badge', desc: 'Compact floating badge', icon: '◉' },
-                    { value: 'inline', label: 'Inline Text', desc: 'Simple text', icon: '—' },
-                    { value: 'countdown-only', label: 'Countdown Only', desc: 'Just the timer', icon: '⏰' },
+                    { value: 'bar', label: 'Full Bar', desc: 'Spans full width' },
+                    { value: 'floating', label: 'Floating Badge', desc: 'Compact floating badge' },
+                    { value: 'inline', label: 'Inline Text', desc: 'Simple text' },
+                    { value: 'countdown-only', label: 'Countdown Only', desc: 'Just the timer' },
                   ].map((style) => (
                     <label key={style.value} className={`style-option ${settings.style === style.value ? 'selected' : ''}`}>
                       <input type="radio" name="timerStyle" value={style.value} checked={settings.style === style.value} onChange={(e) => setSettings({ ...settings, style: e.target.value })} />
-                      <span className="style-icon">{style.icon}</span>
                       <span className="style-label">{style.label}</span>
                       <span className="style-desc">{style.desc}</span>
                     </label>
