@@ -1,6 +1,6 @@
 /**
  * TurboCart Dashboard
- * Main overview with analytics blocks and quick configuration
+ * Feature-block based dashboard with quick stats and configuration cards
  */
 
 'use client';
@@ -8,75 +8,91 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
-import DisplayStylePreview from '@/components/DisplayStylePreview';
 
-interface DashboardData {
-  summary: {
-    totalRevenue: number;
-    revenuePerOrder: number;
-    acceptanceRate: number;
-    totalOrders: number;
-    totalImpressions: number;
-    totalAdds: number;
-    aovImpact: number;
-  };
-  previousPeriod: {
-    totalRevenue: number;
-    revenuePerOrder: number;
-    acceptanceRate: number;
-  };
-  topStyles: Array<{
-    style: string;
-    revenue: number;
-    acceptanceRate: number;
-    impressions: number;
-  }>;
-  topProducts: Array<{
-    id: string;
-    title: string;
-    image: string | null;
-    revenue: number;
-    adds: number;
-  }>;
-  recentTrend: Array<{
-    date: string;
-    revenue: number;
-  }>;
+interface DashboardStats {
+  totalRevenue: number;
+  totalOrders: number;
+  conversionRate: number;
+  avgOrderIncrease: number;
 }
 
-interface ShopSettings {
-  enabled_display_styles: string[];
-  cart_type: 'page' | 'drawer';
-  max_upsells: number;
-  theme_enabled: boolean;
+interface FeatureStatus {
+  upsells: boolean;
+  rewards: boolean;
+  addons: boolean;
+  timer: boolean;
+  announcement: boolean;
 }
 
-interface SelectedProduct {
-  id: string;
-  title: string;
-  image: string | null;
-  price: number;
+interface FeatureCardData {
+  id: keyof FeatureStatus;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  href: string;
 }
 
-const STYLE_LABELS: Record<string, string> = {
-  'minimal-strip': 'Minimal Strip',
-  'cards': 'Product Cards',
-  'banner': 'Urgency Banner',
-  'list': 'Simple List',
-  'frequently-bought': 'Frequently Bought',
-  'masonry-grid': 'Masonry Grid',
-  'vertical-scroll': 'Vertical Scroll',
-  'sticky-tabs': 'Category Tabs',
-  'comparison-table': 'Comparison Table',
-};
+const FEATURE_CARDS: FeatureCardData[] = [
+  {
+    id: 'upsells',
+    name: 'Cart Upsells',
+    description: 'Product recommendations to increase order value',
+    icon: '🛒',
+    color: '#6366f1',
+    href: '/products',
+  },
+  {
+    id: 'rewards',
+    name: 'Rewards Progress',
+    description: 'Free shipping & discount progress bars',
+    icon: '🎁',
+    color: '#10b981',
+    href: '/cart-features',
+  },
+  {
+    id: 'addons',
+    name: 'Quick Add-Ons',
+    description: 'One-click extras like shipping protection',
+    icon: '⚡',
+    color: '#f59e0b',
+    href: '/cart-features',
+  },
+  {
+    id: 'timer',
+    name: 'Urgency Timer',
+    description: 'Countdown timer to encourage checkout',
+    icon: '⏱️',
+    color: '#ef4444',
+    href: '/cart-features',
+  },
+  {
+    id: 'announcement',
+    name: 'Announcement Bar',
+    description: 'Custom messages and promotions',
+    icon: '📢',
+    color: '#8b5cf6',
+    href: '/cart-features',
+  },
+];
 
 export default function DashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [settings, setSettings] = useState<ShopSettings | null>(null);
-  const [products, setProducts] = useState<SelectedProduct[]>([]);
-  const [configExpanded, setConfigExpanded] = useState(false);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalRevenue: 0,
+    totalOrders: 0,
+    conversionRate: 0,
+    avgOrderIncrease: 0,
+  });
+  const [features, setFeatures] = useState<FeatureStatus>({
+    upsells: true,
+    rewards: false,
+    addons: false,
+    timer: false,
+    announcement: false,
+  });
+  const [productsCount, setProductsCount] = useState(0);
 
   useEffect(() => {
     fetchDashboardData();
@@ -85,47 +101,32 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const endDate = new Date();
-      const startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-      const [analyticsRes, settingsRes, productsRes] = await Promise.all([
-        authenticatedFetch(`/api/admin/analytics/comprehensive?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`),
-        authenticatedFetch('/api/admin/settings'),
+      // Fetch settings and products in parallel
+      const [settingsRes, productsRes] = await Promise.all([
+        authenticatedFetch('/api/admin/cart-features'),
         authenticatedFetch('/api/admin/products/selected'),
       ]);
 
-      if (analyticsRes.ok) {
-        const analyticsData = await analyticsRes.json();
-        setData({
-          summary: analyticsData.summary || {
-            totalRevenue: 0,
-            revenuePerOrder: 0,
-            acceptanceRate: 0,
-            totalOrders: 0,
-            totalImpressions: 0,
-            totalAdds: 0,
-            aovImpact: 0,
-          },
-          previousPeriod: analyticsData.summary?.previousPeriod || {
-            totalRevenue: 0,
-            revenuePerOrder: 0,
-            acceptanceRate: 0,
-          },
-          topStyles: analyticsData.displayStyles?.slice(0, 3) || [],
-          topProducts: analyticsData.products?.slice(0, 5) || [],
-          recentTrend: analyticsData.trends?.slice(-7) || [],
-        });
-      }
-
       if (settingsRes.ok) {
-        const settingsData = await settingsRes.json();
-        setSettings(settingsData.settings);
+        const data = await settingsRes.json();
+        if (data.settings?.features) {
+          setFeatures(data.settings.features);
+        }
       }
 
       if (productsRes.ok) {
-        const productsData = await productsRes.json();
-        setProducts(productsData.products || []);
+        const data = await productsRes.json();
+        setProductsCount(data.products?.length || 0);
       }
+
+      // For now, set placeholder stats (can be connected to real analytics later)
+      setStats({
+        totalRevenue: 0,
+        totalOrders: 0,
+        conversionRate: 0,
+        avgOrderIncrease: 0,
+      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -133,26 +134,35 @@ export default function DashboardPage() {
     }
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+  const toggleFeature = async (featureId: keyof FeatureStatus) => {
+    const newValue = !features[featureId];
+    setFeatures(prev => ({ ...prev, [featureId]: newValue }));
+
+    try {
+      await authenticatedFetch('/api/admin/cart-features', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            features: { [featureId]: newValue },
+          },
+        }),
+      });
+    } catch (error) {
+      console.error('Error updating feature:', error);
+      // Revert on error
+      setFeatures(prev => ({ ...prev, [featureId]: !newValue }));
+    }
   };
 
-  const formatPercent = (value: number) => `${value.toFixed(1)}%`;
-
-  const getChangePercent = (current: number, previous: number) => {
-    if (previous === 0) return 0;
-    return ((current - previous) / previous) * 100;
+  const navigateTo = (href: string) => {
+    router.push(href);
   };
 
   if (loading) {
     return (
       <div className="dashboard-loading">
-        <div className="spinner" />
+        <div className="loading-spinner" />
         <p>Loading dashboard...</p>
         <style jsx>{`
           .dashboard-loading {
@@ -160,24 +170,27 @@ export default function DashboardPage() {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 60vh;
+            min-height: 400px;
           }
-          .spinner {
+          .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid #e5e5ea;
-            border-top-color: #000;
+            border: 3px solid #e5e7eb;
+            border-top-color: #6366f1;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
           }
-          @keyframes spin { to { transform: rotate(360deg); } }
-          p { margin-top: 16px; color: #86868b; }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          p {
+            margin-top: 16px;
+            color: #6b7280;
+          }
         `}</style>
       </div>
     );
   }
-
-  const revenueChange = getChangePercent(data?.summary.totalRevenue || 0, data?.previousPeriod.totalRevenue || 0);
 
   return (
     <div className="dashboard">
@@ -185,310 +198,144 @@ export default function DashboardPage() {
       <div className="dashboard-header">
         <div>
           <h1>Dashboard</h1>
-          <p>Last 30 days performance</p>
+          <p>Manage your cart features and track performance</p>
         </div>
-        <button className="view-analytics-btn" onClick={() => router.push('/analytics')}>
-          View Full Analytics
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+        <button className="btn-primary" onClick={() => navigateTo('/products')}>
+          Manage Products
         </button>
       </div>
 
-      {/* Main KPIs */}
-      <div className="kpi-grid">
-        <div className="kpi-card primary">
-          <div className="kpi-label">Total Upsell Revenue</div>
-          <div className="kpi-value">{formatCurrency(data?.summary.totalRevenue || 0)}</div>
-          <div className={`kpi-change ${revenueChange >= 0 ? 'positive' : 'negative'}`}>
-            {revenueChange >= 0 ? '+' : ''}{revenueChange.toFixed(1)}% vs previous
+      {/* Quick Stats */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon purple">📈</div>
+          <div className="stat-content">
+            <span className="stat-label">Active Features</span>
+            <span className="stat-value">{Object.values(features).filter(Boolean).length}</span>
           </div>
         </div>
-
-        <div className="kpi-card">
-          <div className="kpi-label">Revenue Per Order</div>
-          <div className="kpi-value">{formatCurrency(data?.summary.revenuePerOrder || 0)}</div>
-          <div className="kpi-subtext">from upsells</div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-label">Acceptance Rate</div>
-          <div className="kpi-value">{formatPercent(data?.summary.acceptanceRate || 0)}</div>
-          <div className="kpi-subtext">of impressions</div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-label">AOV Impact</div>
-          <div className="kpi-value highlight">{data?.summary.aovImpact && data.summary.aovImpact > 0 ? '+' : ''}{formatPercent(data?.summary.aovImpact || 0)}</div>
-          <div className="kpi-subtext">increase</div>
-        </div>
-      </div>
-
-      {/* Quick Stats Row */}
-      <div className="stats-row">
-        <div className="stat-item">
-          <div className="stat-icon">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M9 5V9L12 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </div>
-          <div>
-            <span className="stat-value">{(data?.summary.totalImpressions || 0).toLocaleString()}</span>
-            <span className="stat-label">Impressions</span>
+        <div className="stat-card">
+          <div className="stat-icon blue">🛒</div>
+          <div className="stat-content">
+            <span className="stat-label">Upsell Products</span>
+            <span className="stat-value">{productsCount}</span>
           </div>
         </div>
-        <div className="stat-item">
-          <div className="stat-icon">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M5 9L8 12L13 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
-          </div>
-          <div>
-            <span className="stat-value">{(data?.summary.totalAdds || 0).toLocaleString()}</span>
-            <span className="stat-label">Cart Adds</span>
+        <div className="stat-card">
+          <div className="stat-icon green">💰</div>
+          <div className="stat-content">
+            <span className="stat-label">Revenue Generated</span>
+            <span className="stat-value">${stats.totalRevenue.toFixed(0)}</span>
           </div>
         </div>
-        <div className="stat-item">
-          <div className="stat-icon">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <rect x="3" y="5" width="12" height="10" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M6 5V3C6 2.45 6.45 2 7 2H11C11.55 2 12 2.45 12 3V5" stroke="currentColor" strokeWidth="1.5"/>
-            </svg>
-          </div>
-          <div>
-            <span className="stat-value">{(data?.summary.totalOrders || 0).toLocaleString()}</span>
-            <span className="stat-label">Orders</span>
-          </div>
-        </div>
-        <div className="stat-item">
-          <div className="stat-icon">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M3 15L8 10L11 13L15 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <div>
-            <span className="stat-value">{products.length}</span>
-            <span className="stat-label">Active Products</span>
+        <div className="stat-card">
+          <div className="stat-icon orange">📊</div>
+          <div className="stat-content">
+            <span className="stat-label">Conversion Rate</span>
+            <span className="stat-value">{stats.conversionRate.toFixed(1)}%</span>
           </div>
         </div>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="content-grid">
-        {/* Left Column - Performance */}
-        <div className="content-column">
-          {/* Top Performing Styles */}
-          <div className="card">
-            <div className="card-header">
-              <h3>Top Performing Styles</h3>
-              <span className="badge ml-badge">Machine Learning</span>
-            </div>
-            {data?.topStyles && data.topStyles.length > 0 ? (
-              <div className="styles-list">
-                {data.topStyles.map((style, index) => (
-                  <div key={style.style} className="style-item">
-                    <div className="style-rank">{index + 1}</div>
-                    <div className="style-preview-small">
-                      <DisplayStylePreview style={style.style as 'minimal-strip' | 'cards' | 'banner' | 'list' | 'frequently-bought'} />
-                    </div>
-                    <div className="style-info">
-                      <span className="style-name">{STYLE_LABELS[style.style] || style.style}</span>
-                      <span className="style-stats">{formatCurrency(style.revenue)} revenue</span>
-                    </div>
-                    <div className="style-rate">{formatPercent(style.acceptanceRate)}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>No data yet. Start collecting impressions to see style performance.</p>
-              </div>
-            )}
-          </div>
-
-          {/* Top Products */}
-          <div className="card">
-            <div className="card-header">
-              <h3>Top Upsell Products</h3>
-            </div>
-            {data?.topProducts && data.topProducts.length > 0 ? (
-              <div className="products-list">
-                {data.topProducts.map((product, index) => (
-                  <div key={product.id} className="product-item">
-                    <div className="product-rank">{index + 1}</div>
-                    <div className="product-image">
-                      {product.image ? (
-                        <img src={product.image} alt={product.title} />
-                      ) : (
-                        <div className="no-image">No Image</div>
-                      )}
-                    </div>
-                    <div className="product-info">
-                      <span className="product-title">{product.title}</span>
-                      <span className="product-stats">{product.adds} adds</span>
-                    </div>
-                    <div className="product-revenue">{formatCurrency(product.revenue)}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>No product data yet.</p>
-              </div>
-            )}
-          </div>
+      {/* Feature Cards */}
+      <div className="section">
+        <div className="section-header">
+          <h2>Cart Features</h2>
+          <p>Toggle features on/off or click to configure</p>
         </div>
 
-        {/* Right Column - Configuration */}
-        <div className="content-column">
-          {/* Configure Settings Card */}
-          <div className="card config-card">
-            <div className="card-header">
-              <h3>Configure Settings</h3>
+        <div className="features-grid">
+          {FEATURE_CARDS.map(feature => (
+            <div
+              key={feature.id}
+              className={`feature-card ${features[feature.id] ? 'enabled' : 'disabled'}`}
+              style={{ '--feature-color': feature.color } as React.CSSProperties}
+            >
+              <div className="feature-header">
+                <span className="feature-icon">{feature.icon}</span>
+                <label className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={features[feature.id]}
+                    onChange={() => toggleFeature(feature.id)}
+                  />
+                  <span className="toggle-slider" />
+                </label>
+              </div>
+              <h3>{feature.name}</h3>
+              <p>{feature.description}</p>
               <button
-                className="expand-btn"
-                onClick={() => setConfigExpanded(!configExpanded)}
+                className="feature-config-btn"
+                onClick={() => navigateTo(feature.href)}
               >
-                {configExpanded ? 'Collapse' : 'Expand'}
+                Configure →
               </button>
             </div>
+          ))}
+        </div>
+      </div>
 
-            {/* Warning Banner */}
-            <div className="config-warning">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M8 5V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="8" cy="11" r="1" fill="currentColor"/>
-              </svg>
-              <span>Frequent changes may impact Machine Learning optimization. Let the system learn for best results.</span>
-            </div>
+      {/* Quick Actions */}
+      <div className="section">
+        <div className="section-header">
+          <h2>Quick Actions</h2>
+        </div>
 
-            {/* Quick View */}
-            <div className="config-summary">
-              <div className="config-item">
-                <span className="config-label">Display Styles</span>
-                <span className="config-value">{settings?.enabled_display_styles?.length || 0} active</span>
-              </div>
-              <div className="config-item">
-                <span className="config-label">Cart Type</span>
-                <span className="config-value">{settings?.cart_type === 'page' ? 'Cart Page' : 'Cart Drawer'}</span>
-              </div>
-              <div className="config-item">
-                <span className="config-label">Max Products</span>
-                <span className="config-value">{settings?.max_upsells || 3} shown</span>
-              </div>
-              <div className="config-item">
-                <span className="config-label">Upsell Products</span>
-                <span className="config-value">{products.length} selected</span>
-              </div>
-            </div>
-
-            {/* Expanded Configuration */}
-            {configExpanded && (
-              <div className="config-expanded">
-                <div className="config-section">
-                  <h4>Active Display Styles</h4>
-                  <div className="mini-styles-grid">
-                    {settings?.enabled_display_styles?.map((style) => (
-                      <div key={style} className="mini-style">
-                        <div className="mini-preview">
-                          <DisplayStylePreview style={style as 'minimal-strip' | 'cards' | 'banner' | 'list' | 'frequently-bought'} />
-                        </div>
-                        <span>{STYLE_LABELS[style] || style}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="config-section">
-                  <h4>Selected Products ({products.length})</h4>
-                  <div className="mini-products-grid">
-                    {products.slice(0, 8).map((product) => (
-                      <div key={product.id} className="mini-product">
-                        {product.image ? (
-                          <img src={product.image} alt={product.title} />
-                        ) : (
-                          <div className="no-img">No Image</div>
-                        )}
-                      </div>
-                    ))}
-                    {products.length > 8 && (
-                      <div className="mini-product more">+{products.length - 8}</div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="config-actions">
-                  <button onClick={() => router.push('/settings')} className="config-btn">
-                    Edit Display Styles
-                  </button>
-                  <button onClick={() => router.push('/products')} className="config-btn">
-                    Edit Products
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Machine Learning Status */}
-          <div className="card ml-card">
-            <div className="card-header">
-              <h3>Machine Learning Optimization</h3>
-              <span className="status-badge active">Active</span>
-            </div>
-            <div className="ml-info">
-              <p>Thompson Sampling algorithm is continuously learning which display styles and products perform best for different cart contexts.</p>
-              <div className="ml-stats">
-                <div className="ml-stat">
-                  <span className="ml-stat-value">{(data?.summary.totalImpressions || 0).toLocaleString()}</span>
-                  <span className="ml-stat-label">Training samples</span>
-                </div>
-                <div className="ml-stat">
-                  <span className="ml-stat-value">{settings?.enabled_display_styles?.length || 0}</span>
-                  <span className="ml-stat-label">Active arms</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="actions-grid">
+          <button className="action-card" onClick={() => navigateTo('/products')}>
+            <span className="action-icon">🛍️</span>
+            <span className="action-text">Add Products</span>
+            <span className="action-arrow">→</span>
+          </button>
+          <button className="action-card" onClick={() => navigateTo('/cart-features')}>
+            <span className="action-icon">⚙️</span>
+            <span className="action-text">Cart Settings</span>
+            <span className="action-arrow">→</span>
+          </button>
+          <button className="action-card" onClick={() => navigateTo('/analytics')}>
+            <span className="action-icon">📊</span>
+            <span className="action-text">View Analytics</span>
+            <span className="action-arrow">→</span>
+          </button>
+          <button className="action-card" onClick={() => navigateTo('/settings')}>
+            <span className="action-icon">🎨</span>
+            <span className="action-text">Display Settings</span>
+            <span className="action-arrow">→</span>
+          </button>
         </div>
       </div>
 
       <style jsx>{`
         .dashboard {
           padding: 24px;
-          max-width: 1400px;
+          max-width: 1200px;
           margin: 0 auto;
         }
 
         .dashboard-header {
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
+          align-items: flex-start;
+          margin-bottom: 32px;
         }
 
         .dashboard-header h1 {
           font-size: 28px;
           font-weight: 700;
-          color: #1d1d1f;
-          margin: 0;
+          color: #111827;
+          margin: 0 0 4px;
         }
 
         .dashboard-header p {
           font-size: 14px;
-          color: #86868b;
-          margin: 4px 0 0;
+          color: #6b7280;
+          margin: 0;
         }
 
-        .view-analytics-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 10px 20px;
-          background: #000;
-          color: #fff;
+        .btn-primary {
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          color: white;
+          padding: 12px 24px;
           border: none;
           border-radius: 10px;
           font-size: 14px;
@@ -497,566 +344,263 @@ export default function DashboardPage() {
           transition: all 0.2s ease;
         }
 
-        .view-analytics-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
 
-        /* KPI Grid */
-        .kpi-grid {
+        /* Stats Grid */
+        .stats-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 16px;
-          margin-bottom: 16px;
+          margin-bottom: 40px;
         }
 
-        @media (max-width: 1024px) {
-          .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .kpi-card {
-          background: #fff;
-          border-radius: 12px;
+        .stat-card {
+          background: white;
+          border-radius: 16px;
           padding: 20px;
-          border: 1px solid #e5e5e5;
-        }
-
-        .kpi-card.primary {
-          background: #000;
-          color: #fff;
-          border: none;
-        }
-
-        .kpi-label {
-          font-size: 13px;
-          color: #86868b;
-          margin-bottom: 8px;
-        }
-
-        .kpi-card.primary .kpi-label {
-          color: rgba(255, 255, 255, 0.7);
-        }
-
-        .kpi-value {
-          font-size: 28px;
-          font-weight: 700;
-          color: #1d1d1f;
-          line-height: 1.2;
-        }
-
-        .kpi-card.primary .kpi-value {
-          color: #fff;
-        }
-
-        .kpi-value.highlight {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        .kpi-change {
-          font-size: 12px;
-          font-weight: 600;
-          margin-top: 4px;
-        }
-
-        .kpi-change.positive { color: #34c759; }
-        .kpi-change.negative { color: #ff3b30; }
-
-        .kpi-card.primary .kpi-change {
-          color: rgba(255, 255, 255, 0.7);
-        }
-
-        .kpi-subtext {
-          font-size: 12px;
-          color: #86868b;
-          margin-top: 4px;
-        }
-
-        /* Stats Row */
-        .stats-row {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 12px;
-          margin-bottom: 24px;
-        }
-
-        @media (max-width: 768px) {
-          .stats-row { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .stat-item {
           display: flex;
           align-items: center;
-          gap: 12px;
-          background: #fff;
-          padding: 16px;
-          border-radius: 10px;
-          border: 1px solid #e5e5e5;
+          gap: 16px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+          border: 1px solid #f3f4f6;
         }
 
         .stat-icon {
-          width: 36px;
-          height: 36px;
-          background: #f5f5f7;
-          border-radius: 8px;
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #86868b;
+          font-size: 24px;
         }
 
-        .stat-value {
-          display: block;
-          font-size: 18px;
-          font-weight: 700;
-          color: #1d1d1f;
+        .stat-icon.purple { background: rgba(99, 102, 241, 0.1); }
+        .stat-icon.blue { background: rgba(59, 130, 246, 0.1); }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.1); }
+        .stat-icon.orange { background: rgba(245, 158, 11, 0.1); }
+
+        .stat-content {
+          display: flex;
+          flex-direction: column;
         }
 
         .stat-label {
-          display: block;
           font-size: 12px;
-          color: #86868b;
+          color: #6b7280;
+          margin-bottom: 2px;
         }
 
-        /* Content Grid */
-        .content-grid {
-          display: grid;
-          grid-template-columns: 1fr 400px;
-          gap: 24px;
-        }
-
-        @media (max-width: 1024px) {
-          .content-grid { grid-template-columns: 1fr; }
-        }
-
-        .content-column {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        /* Cards */
-        .card {
-          background: #fff;
-          border-radius: 12px;
-          border: 1px solid #e5e5e5;
-          overflow: hidden;
-        }
-
-        .card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 16px 20px;
-          border-bottom: 1px solid #f0f0f0;
-        }
-
-        .card-header h3 {
-          font-size: 16px;
-          font-weight: 600;
-          color: #1d1d1f;
-          margin: 0;
-        }
-
-        .badge {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: #fff;
-          font-size: 11px;
-          font-weight: 600;
-          padding: 4px 10px;
-          border-radius: 10px;
-        }
-
-        .badge.ml-badge {
-          background: #000;
-          color: #a78bfa;
-          padding: 6px 12px;
-          border-radius: 8px;
+        .stat-value {
+          font-size: 24px;
           font-weight: 700;
-          font-size: 12px;
-          letter-spacing: 0.3px;
+          color: #111827;
         }
 
-        .status-badge {
-          font-size: 11px;
-          font-weight: 600;
-          padding: 4px 10px;
-          border-radius: 10px;
+        /* Sections */
+        .section {
+          margin-bottom: 40px;
         }
 
-        .status-badge.active {
-          background: rgba(52, 199, 89, 0.15);
-          color: #34c759;
-        }
-
-        .expand-btn {
-          background: #f5f5f7;
-          border: none;
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #1d1d1f;
-          cursor: pointer;
-        }
-
-        .expand-btn:hover {
-          background: #e5e5e5;
-        }
-
-        /* Styles List */
-        .styles-list {
-          padding: 12px;
-        }
-
-        .style-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px;
-          border-radius: 8px;
-          transition: background 0.2s ease;
-        }
-
-        .style-item:hover {
-          background: #f5f5f7;
-        }
-
-        .style-rank {
-          width: 24px;
-          height: 24px;
-          background: #000;
-          color: #fff;
-          font-size: 12px;
-          font-weight: 700;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .style-preview-small {
-          width: 60px;
-          height: 44px;
-          border-radius: 6px;
-          overflow: hidden;
-          background: #f5f5f7;
-          border: 1px solid #e5e5e5;
-        }
-
-        .style-preview-small :global(.preview-wrapper) {
-          transform: scale(0.15);
-          transform-origin: top left;
-          width: 400px;
-        }
-
-        .style-info {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .style-name {
-          display: block;
-          font-size: 14px;
-          font-weight: 600;
-          color: #1d1d1f;
-        }
-
-        .style-stats {
-          display: block;
-          font-size: 12px;
-          color: #86868b;
-        }
-
-        .style-rate {
-          font-size: 14px;
-          font-weight: 600;
-          color: #34c759;
-        }
-
-        /* Products List */
-        .products-list {
-          padding: 12px;
-        }
-
-        .product-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px;
-          border-radius: 8px;
-        }
-
-        .product-item:hover {
-          background: #f5f5f7;
-        }
-
-        .product-rank {
-          width: 20px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #86868b;
-          text-align: center;
-        }
-
-        .product-image {
-          width: 40px;
-          height: 40px;
-          border-radius: 6px;
-          overflow: hidden;
-          background: #f5f5f7;
-        }
-
-        .product-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .no-image {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 8px;
-          color: #86868b;
-        }
-
-        .product-info {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .product-title {
-          display: block;
-          font-size: 13px;
-          font-weight: 500;
-          color: #1d1d1f;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .product-stats {
-          display: block;
-          font-size: 11px;
-          color: #86868b;
-        }
-
-        .product-revenue {
-          font-size: 13px;
-          font-weight: 600;
-          color: #667eea;
-        }
-
-        /* Config Card */
-        .config-warning {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          padding: 12px 16px;
-          background: #fff7ed;
-          color: #c2410c;
-          font-size: 12px;
-          line-height: 1.5;
-          border-bottom: 1px solid #f0f0f0;
-        }
-
-        .config-warning svg {
-          flex-shrink: 0;
-          margin-top: 1px;
-        }
-
-        .config-summary {
-          padding: 16px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-        }
-
-        .config-item {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .config-label {
-          font-size: 11px;
-          color: #86868b;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .config-value {
-          font-size: 14px;
-          font-weight: 600;
-          color: #1d1d1f;
-        }
-
-        .config-expanded {
-          border-top: 1px solid #f0f0f0;
-          padding: 16px;
-        }
-
-        .config-section {
+        .section-header {
           margin-bottom: 20px;
         }
 
-        .config-section h4 {
-          font-size: 12px;
+        .section-header h2 {
+          font-size: 18px;
           font-weight: 600;
-          color: #86868b;
-          margin: 0 0 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          color: #111827;
+          margin: 0 0 4px;
         }
 
-        .mini-styles-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
+        .section-header p {
+          font-size: 14px;
+          color: #6b7280;
+          margin: 0;
         }
 
-        .mini-style {
+        /* Feature Cards */
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 16px;
+        }
+
+        .feature-card {
+          background: white;
+          border-radius: 16px;
+          padding: 24px;
+          border: 2px solid #f3f4f6;
+          transition: all 0.2s ease;
+        }
+
+        .feature-card.enabled {
+          border-color: var(--feature-color);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card.disabled {
+          opacity: 0.7;
+        }
+
+        .feature-header {
           display: flex;
-          flex-direction: column;
+          justify-content: space-between;
           align-items: center;
-          gap: 6px;
+          margin-bottom: 16px;
         }
 
-        .mini-preview {
-          width: 80px;
-          height: 56px;
-          border-radius: 6px;
-          overflow: hidden;
-          background: #f5f5f7;
-          border: 1px solid #e5e5e5;
+        .feature-icon {
+          font-size: 32px;
         }
 
-        .mini-preview :global(.preview-wrapper) {
-          transform: scale(0.2);
-          transform-origin: top left;
-          width: 400px;
-        }
-
-        .mini-style span {
-          font-size: 10px;
-          color: #86868b;
-          text-align: center;
-        }
-
-        .mini-products-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
-
-        .mini-product {
+        /* Toggle Switch */
+        .toggle-switch {
+          position: relative;
+          display: inline-block;
           width: 48px;
-          height: 48px;
-          border-radius: 6px;
-          overflow: hidden;
-          background: #f5f5f7;
+          height: 26px;
         }
 
-        .mini-product img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+        .toggle-switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
         }
 
-        .mini-product.more {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
+        .toggle-slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #e5e7eb;
+          transition: 0.3s;
+          border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+          position: absolute;
+          content: "";
+          height: 20px;
+          width: 20px;
+          left: 3px;
+          bottom: 3px;
+          background-color: white;
+          transition: 0.3s;
+          border-radius: 50%;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+          transform: translateX(22px);
+        }
+
+        .feature-card h3 {
+          font-size: 16px;
           font-weight: 600;
-          color: #86868b;
+          color: #111827;
+          margin: 0 0 6px;
         }
 
-        .no-img {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 8px;
-          color: #86868b;
+        .feature-card p {
+          font-size: 13px;
+          color: #6b7280;
+          margin: 0 0 16px;
+          line-height: 1.4;
         }
 
-        .config-actions {
-          display: flex;
-          gap: 8px;
-        }
-
-        .config-btn {
-          flex: 1;
-          padding: 10px;
-          background: #f5f5f7;
-          border: none;
+        .feature-config-btn {
+          background: transparent;
+          border: 1px solid #e5e7eb;
+          padding: 8px 16px;
           border-radius: 8px;
           font-size: 13px;
-          font-weight: 600;
-          color: #1d1d1f;
+          font-weight: 500;
+          color: #374151;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          width: 100%;
+        }
+
+        .feature-config-btn:hover {
+          background: #f9fafb;
+          border-color: #d1d5db;
+        }
+
+        /* Actions Grid */
+        .actions-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+        }
+
+        .action-card {
+          background: white;
+          border: 1px solid #f3f4f6;
+          border-radius: 12px;
+          padding: 20px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
-        .config-btn:hover {
-          background: #e5e5e5;
+        .action-card:hover {
+          border-color: #6366f1;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
         }
 
-        /* Machine Learning Card */
-        .ml-info {
-          padding: 16px;
+        .action-icon {
+          font-size: 24px;
         }
 
-        .ml-info p {
-          font-size: 13px;
-          color: #86868b;
-          line-height: 1.5;
-          margin: 0 0 16px;
+        .action-text {
+          flex: 1;
+          font-size: 14px;
+          font-weight: 500;
+          color: #374151;
         }
 
-        .ml-stats {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
+        .action-arrow {
+          font-size: 16px;
+          color: #9ca3af;
         }
 
-        .ml-stat {
-          background: #f5f5f7;
-          padding: 12px;
-          border-radius: 8px;
-          text-align: center;
+        /* Responsive */
+        @media (max-width: 1024px) {
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
 
-        .ml-stat-value {
-          display: block;
-          font-size: 20px;
-          font-weight: 700;
-          color: #1d1d1f;
-        }
-
-        .ml-stat-label {
-          display: block;
-          font-size: 11px;
-          color: #86868b;
-          margin-top: 2px;
-        }
-
-        .empty-state {
-          padding: 32px;
-          text-align: center;
-        }
-
-        .empty-state p {
-          font-size: 13px;
-          color: #86868b;
-          margin: 0;
+        @media (max-width: 640px) {
+          .dashboard-header {
+            flex-direction: column;
+            gap: 16px;
+          }
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+          .features-grid {
+            grid-template-columns: 1fr;
+          }
+          .actions-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </div>
