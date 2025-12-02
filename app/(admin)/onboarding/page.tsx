@@ -88,6 +88,8 @@ const FEATURES = [
   },
 ];
 
+const LOGO_URL = 'https://cdn.shopify.com/s/files/applications/503551d546d64a1e3526a3f216534a45.png?1763995799';
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('intro');
@@ -130,7 +132,7 @@ export default function OnboardingPage() {
           clearInterval(typingInterval);
           setTimeout(() => setShowSubtext(true), 300);
         }
-      }, 60);
+      }, 50);
       return () => clearInterval(typingInterval);
     }
   }, [step]);
@@ -145,7 +147,7 @@ export default function OnboardingPage() {
             newState[index] = true;
             return newState;
           });
-        }, index * 150);
+        }, index * 120);
       });
     }
   }, [step]);
@@ -162,7 +164,8 @@ export default function OnboardingPage() {
 
   const completeOnboarding = async () => {
     try {
-      await authenticatedFetch('/api/admin/shop/complete-onboarding', {
+      // Use POST to /api/admin/shop/onboarding-status to complete
+      await authenticatedFetch('/api/admin/shop/onboarding-status', {
         method: 'POST',
       });
       router.push('/dashboard');
@@ -174,13 +177,18 @@ export default function OnboardingPage() {
 
   return (
     <div className="onboarding">
+      {/* Background gradient effects */}
+      <div className="bg-glow bg-glow-1" />
+      <div className="bg-glow bg-glow-2" />
+
       <div className={`content ${visible ? 'visible' : ''}`}>
 
         {/* Step 1: Intro */}
         {step === 'intro' && (
           <div className="step-intro">
-            <div className="logo">
-              <span>TC</span>
+            <div className="logo-container">
+              <img src={LOGO_URL} alt="TurboCart" className="logo-img" />
+              <div className="logo-glow" />
             </div>
 
             <h1 className="typed-title">
@@ -194,15 +202,15 @@ export default function OnboardingPage() {
 
             <div className={`intro-features ${showSubtext ? 'visible' : ''}`}>
               <div className="intro-feature">
-                <span className="icon">{Icons.check}</span>
+                <span className="check-icon">{Icons.check}</span>
                 <span>Increase average order value</span>
               </div>
               <div className="intro-feature">
-                <span className="icon">{Icons.check}</span>
+                <span className="check-icon">{Icons.check}</span>
                 <span>Reduce cart abandonment</span>
               </div>
               <div className="intro-feature">
-                <span className="icon">{Icons.check}</span>
+                <span className="check-icon">{Icons.check}</span>
                 <span>Professional cart experience</span>
               </div>
             </div>
@@ -279,19 +287,47 @@ export default function OnboardingPage() {
       <style jsx>{`
         .onboarding {
           min-height: 100vh;
-          background: linear-gradient(145deg, #0a0a0f 0%, #111118 50%, #0d0d12 100%);
+          background: #050508;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 40px 24px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .bg-glow {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(120px);
+          opacity: 0.4;
+          pointer-events: none;
+        }
+
+        .bg-glow-1 {
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+          top: -200px;
+          right: -100px;
+        }
+
+        .bg-glow-2 {
+          width: 500px;
+          height: 500px;
+          background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+          bottom: -150px;
+          left: -100px;
         }
 
         .content {
-          max-width: 680px;
+          max-width: 700px;
           width: 100%;
           opacity: 0;
           transform: translateY(20px);
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          z-index: 1;
         }
 
         .content.visible {
@@ -304,37 +340,53 @@ export default function OnboardingPage() {
           text-align: center;
         }
 
-        .logo {
-          width: 72px;
-          height: 72px;
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-          border-radius: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 40px;
-          box-shadow: 0 20px 50px rgba(99, 102, 241, 0.25);
+        .logo-container {
+          position: relative;
+          width: 88px;
+          height: 88px;
+          margin: 0 auto 48px;
         }
 
-        .logo span {
-          font-size: 28px;
-          font-weight: 700;
-          color: white;
-          letter-spacing: -1px;
+        .logo-img {
+          width: 88px;
+          height: 88px;
+          border-radius: 22px;
+          position: relative;
+          z-index: 2;
+          box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+        }
+
+        .logo-glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 120px;
+          height: 120px;
+          background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
+          border-radius: 50%;
+          z-index: 1;
+          animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+          50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
         }
 
         .typed-title {
-          font-size: 48px;
+          font-size: 52px;
           font-weight: 700;
           color: white;
           margin: 0 0 16px;
-          letter-spacing: -1px;
-          min-height: 60px;
+          letter-spacing: -1.5px;
+          min-height: 64px;
         }
 
         .cursor {
           animation: blink 1s infinite;
           color: #6366f1;
+          font-weight: 300;
         }
 
         @keyframes blink {
@@ -345,10 +397,10 @@ export default function OnboardingPage() {
         .subtitle {
           font-size: 18px;
           color: rgba(255, 255, 255, 0.5);
-          margin: 0 0 48px;
+          margin: 0 0 56px;
           opacity: 0;
           transform: translateY(10px);
-          transition: all 0.5s ease;
+          transition: all 0.6s ease;
         }
 
         .subtitle.visible {
@@ -359,11 +411,11 @@ export default function OnboardingPage() {
         .intro-features {
           display: flex;
           flex-direction: column;
-          gap: 16px;
-          margin-bottom: 48px;
+          gap: 18px;
+          margin-bottom: 56px;
           opacity: 0;
           transform: translateY(10px);
-          transition: all 0.5s ease 0.2s;
+          transition: all 0.6s ease 0.2s;
         }
 
         .intro-features.visible {
@@ -375,12 +427,12 @@ export default function OnboardingPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 12px;
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 15px;
+          gap: 14px;
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 16px;
         }
 
-        .intro-feature .icon {
+        .check-icon {
           color: #10b981;
           display: flex;
         }
@@ -388,18 +440,19 @@ export default function OnboardingPage() {
         .btn-primary {
           display: inline-flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
           background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
           color: white;
-          padding: 16px 32px;
+          padding: 18px 36px;
           border: none;
-          border-radius: 12px;
+          border-radius: 14px;
           font-size: 16px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
           opacity: 0;
           transform: translateY(10px);
+          box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
         }
 
         .btn-primary.visible, .step-features .btn-primary, .step-ready .btn-primary {
@@ -408,12 +461,12 @@ export default function OnboardingPage() {
         }
 
         .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 35px rgba(99, 102, 241, 0.35);
+          transform: translateY(-3px);
+          box-shadow: 0 15px 50px rgba(99, 102, 241, 0.4);
         }
 
         .btn-primary.large {
-          padding: 18px 40px;
+          padding: 20px 44px;
           font-size: 17px;
         }
 
@@ -423,19 +476,19 @@ export default function OnboardingPage() {
         }
 
         .step-header {
-          margin-bottom: 40px;
+          margin-bottom: 44px;
         }
 
         .step-header h1 {
-          font-size: 36px;
+          font-size: 40px;
           font-weight: 700;
           color: white;
-          margin: 0 0 8px;
-          letter-spacing: -0.5px;
+          margin: 0 0 10px;
+          letter-spacing: -1px;
         }
 
         .step-header p {
-          font-size: 16px;
+          font-size: 17px;
           color: rgba(255, 255, 255, 0.5);
           margin: 0;
         }
@@ -443,22 +496,22 @@ export default function OnboardingPage() {
         .features-list {
           display: flex;
           flex-direction: column;
-          gap: 16px;
-          margin-bottom: 40px;
+          gap: 14px;
+          margin-bottom: 44px;
         }
 
         .feature-item {
           display: flex;
           align-items: flex-start;
           gap: 20px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.05);
           border-radius: 16px;
-          padding: 24px;
+          padding: 22px 24px;
           text-align: left;
           opacity: 0;
-          transform: translateX(-20px);
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          transform: translateX(-30px);
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .feature-item.visible {
@@ -466,15 +519,20 @@ export default function OnboardingPage() {
           transform: translateX(0);
         }
 
+        .feature-item:hover {
+          background: rgba(255, 255, 255, 0.04);
+          border-color: rgba(99, 102, 241, 0.2);
+        }
+
         .feature-icon {
-          width: 56px;
-          height: 56px;
-          background: rgba(99, 102, 241, 0.1);
+          width: 52px;
+          height: 52px;
+          background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
           border-radius: 14px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #8b5cf6;
+          color: #a5b4fc;
           flex-shrink: 0;
         }
 
@@ -498,52 +556,56 @@ export default function OnboardingPage() {
         }
 
         .ready-icon {
-          width: 80px;
-          height: 80px;
+          width: 88px;
+          height: 88px;
           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin: 0 auto 32px;
+          margin: 0 auto 36px;
           color: white;
-          box-shadow: 0 20px 50px rgba(16, 185, 129, 0.25);
+          box-shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
+          animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes scaleIn {
+          0% { transform: scale(0); }
+          100% { transform: scale(1); }
         }
 
         .ready-icon :global(svg) {
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
         }
 
         .step-ready h1 {
-          font-size: 36px;
+          font-size: 40px;
           font-weight: 700;
           color: white;
-          margin: 0 0 12px;
+          margin: 0 0 14px;
         }
 
         .step-ready > p {
-          font-size: 16px;
+          font-size: 17px;
           color: rgba(255, 255, 255, 0.5);
-          margin: 0 0 40px;
+          margin: 0 auto 44px;
           max-width: 480px;
-          margin-left: auto;
-          margin-right: auto;
           line-height: 1.6;
         }
 
         .ready-info {
           display: flex;
           flex-direction: column;
-          gap: 16px;
-          margin-bottom: 40px;
+          gap: 14px;
+          margin-bottom: 44px;
         }
 
         .info-item {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          border-radius: 12px;
-          padding: 20px 24px;
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 14px;
+          padding: 20px 28px;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -563,11 +625,11 @@ export default function OnboardingPage() {
         /* Responsive */
         @media (max-width: 640px) {
           .typed-title {
-            font-size: 32px;
+            font-size: 36px;
           }
 
           .step-header h1, .step-ready h1 {
-            font-size: 28px;
+            font-size: 30px;
           }
 
           .feature-item {
@@ -581,7 +643,7 @@ export default function OnboardingPage() {
 
           .info-item {
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
             text-align: center;
           }
         }
