@@ -5,8 +5,8 @@ import './globals.css';
 const fontClass = 'font-sans';
 
 export const metadata: Metadata = {
-  title: 'TurboCart - AI Cart Upsells',
-  description: 'AI-Powered Upsells That Convert',
+  title: 'TurboCart - Cart Upsells',
+  description: 'Premium Cart Upsells for Shopify',
 };
 
 export default function RootLayout({
@@ -36,8 +36,8 @@ export default function RootLayout({
           <a href="/" rel="home">TurboCart</a>
           <a href="/dashboard">Dashboard</a>
           <a href="/products">Products</a>
+          <a href="/cart-features">Cart Features</a>
           <a href="/analytics">Analytics</a>
-          <a href="/ml-config">ML Config</a>
           <a href="/billing">Billing</a>
           <a href="/settings">Settings</a>
         </ui-nav-menu>
