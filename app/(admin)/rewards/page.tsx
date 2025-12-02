@@ -86,6 +86,28 @@ const ICONS = [
   { value: 'diamond', label: 'Diamond' },
 ];
 
+const DEFAULT_TIERS: RewardTier[] = [
+  {
+    threshold: 50,
+    reward_type: 'free_shipping',
+    reward_value: '',
+    label: 'Free Shipping',
+    description: 'Free standard shipping on your order',
+    icon: 'truck',
+    discount_code: 'FREESHIP50',
+    auto_apply: true,
+    celebration_message: 'You unlocked free shipping!',
+    is_active: true,
+  },
+];
+
+const TIER_TEMPLATES = [
+  { threshold: 50, reward_type: 'free_shipping', label: 'Free Shipping', icon: 'truck', desc: 'Waive shipping costs' },
+  { threshold: 75, reward_type: 'discount_percent', reward_value: '10', label: '10% Off', icon: 'percent', desc: 'Percentage discount' },
+  { threshold: 100, reward_type: 'gift', label: 'Free Gift', icon: 'gift', desc: 'Free product with order' },
+  { threshold: 150, reward_type: 'discount_fixed', reward_value: '20', label: '$20 Off', icon: 'tag', desc: 'Fixed amount discount' },
+];
+
 export default function RewardsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -121,7 +143,7 @@ export default function RewardsPage() {
     celebration_animation: true,
   });
 
-  const [tiers, setTiers] = useState<RewardTier[]>([]);
+  const [tiers, setTiers] = useState<RewardTier[]>(DEFAULT_TIERS);
 
   useEffect(() => {
     fetchData();
@@ -133,7 +155,7 @@ export default function RewardsPage() {
       if (res.ok) {
         const data = await res.json();
         if (data.settings) setSettings(data.settings);
-        if (data.tiers) setTiers(data.tiers);
+        if (data.tiers && data.tiers.length > 0) setTiers(data.tiers);
       }
     } catch (error) {
       console.error('Failed to fetch rewards settings:', error);
@@ -220,7 +242,7 @@ export default function RewardsPage() {
         <p>Loading rewards settings...</p>
         <style jsx>{`
           .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; background: #f6f6f7; }
-          .loading-spinner { width: 40px; height: 40px; border: 3px solid #e4e5e7; border-top-color: #10b981; border-radius: 50%; animation: spin 0.8s linear infinite; }
+          .loading-spinner { width: 40px; height: 40px; border: 3px solid #e4e5e7; border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
           @keyframes spin { to { transform: rotate(360deg); } }
           p { margin-top: 16px; color: #6d7175; }
         `}</style>
@@ -233,7 +255,7 @@ export default function RewardsPage() {
       {/* Header */}
       <div className="page-header">
         <div className="header-left">
-          <button className="back-button" onClick={() => router.push('/cart-features')}>
+          <button className="back-button" onClick={() => router.push('/dashboard')}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           <div className="header-content">
@@ -317,6 +339,38 @@ export default function RewardsPage() {
       <div className="tab-content">
         {activeTab === 'tiers' && (
           <div className="tiers-tab">
+            {/* Quick Templates */}
+            <div className="templates-section">
+              <h3>Quick Add Templates</h3>
+              <div className="template-grid">
+                {TIER_TEMPLATES.map((template, i) => (
+                  <button
+                    key={i}
+                    className="template-card"
+                    onClick={() => {
+                      const lastThreshold = tiers.length > 0 ? Math.max(...tiers.map(t => t.threshold)) : 0;
+                      setTiers([...tiers, {
+                        threshold: Math.max(template.threshold, lastThreshold + 25),
+                        reward_type: template.reward_type,
+                        reward_value: template.reward_value || '',
+                        label: template.label,
+                        description: template.desc,
+                        icon: template.icon,
+                        discount_code: '',
+                        auto_apply: false,
+                        celebration_message: `You unlocked ${template.label}!`,
+                        is_active: true,
+                      }]);
+                    }}
+                  >
+                    <span className="template-icon">{IconSvgs[template.icon]}</span>
+                    <span className="template-label">{template.label}</span>
+                    <span className="template-desc">{template.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {tiers.length === 0 ? (
               <div className="empty-state">
                 <span className="empty-icon">{IconSvgs.target}</span>
@@ -599,12 +653,12 @@ export default function RewardsPage() {
         .master-toggle input { display: none; }
         .master-toggle .toggle-slider { position: relative; width: 48px; height: 28px; background: #d1d5db; border-radius: 14px; transition: 0.2s; }
         .master-toggle .toggle-slider::before { content: ''; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
-        .master-toggle input:checked + .toggle-slider { background: #10b981; }
+        .master-toggle input:checked + .toggle-slider { background: #000; }
         .master-toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
         .save-button { padding: 12px 24px; background: #000; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
         .save-button:disabled { opacity: 0.6; }
-        .save-button.success { background: #10b981; }
+        .save-button.success { background: #000; }
 
         .preview-section { margin-bottom: 24px; }
         .preview-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
@@ -619,7 +673,7 @@ export default function RewardsPage() {
         .milestone.achieved .milestone-icon { transform: scale(1.1); }
         .milestone-label { font-size: 11px; font-weight: 500; color: #6b7280; white-space: nowrap; }
         .milestone-amount { font-size: 10px; color: #9ca3af; }
-        .milestone.achieved .milestone-label { color: #059669; }
+        .milestone.achieved .milestone-label { color: #374151; font-weight: 600; }
         .preview-controls { display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 16px; border-top: 1px solid #e5e7eb; margin-top: 16px; }
         .preview-controls label { font-size: 12px; color: #6d7175; }
         .preview-controls input[type="range"] { width: 200px; }
@@ -628,7 +682,7 @@ export default function RewardsPage() {
         .tabs-container { display: flex; gap: 4px; background: #fff; border-radius: 12px; padding: 4px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         .tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #6d7175; cursor: pointer; }
         .tab:hover { background: #f6f6f7; color: #202223; }
-        .tab.active { background: #10b981; color: #fff; }
+        .tab.active { background: #000; color: #fff; }
 
         .tab-content { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 
@@ -652,17 +706,26 @@ export default function RewardsPage() {
         .field-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .field-group label { font-size: 13px; font-weight: 500; color: #374151; }
         .field-input, .field-select { padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; }
-        .field-input:focus, .field-select:focus { outline: none; border-color: #10b981; }
+        .field-input:focus, .field-select:focus { outline: none; border-color: #000; }
         .field-hint { font-size: 12px; color: #9ca3af; }
 
         .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }
         .icon-option { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border: 2px solid transparent; border-radius: 8px; font-size: 18px; cursor: pointer; }
         .icon-option:hover { background: #e5e7eb; }
-        .icon-option.selected { border-color: #10b981; background: #d1fae5; }
+        .icon-option.selected { border-color: #000; background: #f3f4f6; }
 
         .add-button { width: 100%; padding: 14px; background: transparent; border: 2px dashed #d1d5db; border-radius: 8px; font-size: 14px; font-weight: 500; color: #6d7175; cursor: pointer; }
-        .add-button:hover { border-color: #10b981; color: #059669; }
-        .add-button.primary { background: #10b981; border: none; color: #fff; }
+        .add-button:hover { border-color: #000; color: #000; }
+        .add-button.primary { background: #000; border: none; color: #fff; }
+
+        .templates-section { margin-bottom: 24px; }
+        .templates-section h3 { font-size: 14px; font-weight: 600; color: #6d7175; margin: 0 0 12px 0; }
+        .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .template-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+        .template-card:hover { background: #f3f4f6; border-color: #000; transform: translateY(-2px); }
+        .template-icon { color: #374151; }
+        .template-label { font-size: 13px; font-weight: 600; color: #374151; }
+        .template-desc { font-size: 11px; color: #9ca3af; text-align: center; }
 
         .empty-state { text-align: center; padding: 40px 20px; }
         .empty-icon { display: flex; justify-content: center; margin-bottom: 16px; color: #9ca3af; }
@@ -679,7 +742,7 @@ export default function RewardsPage() {
         .color-input { width: 44px; height: 40px; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; padding: 2px; }
         .color-text { flex: 1; min-width: 0; }
         .range-input { width: 100%; height: 6px; -webkit-appearance: none; background: #e5e7eb; border-radius: 3px; }
-        .range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #10b981; border-radius: 50%; cursor: pointer; }
+        .range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #000; border-radius: 50%; cursor: pointer; }
 
         .checkbox-row { display: flex; gap: 24px; flex-wrap: wrap; }
         .checkbox-group { flex-direction: row !important; }

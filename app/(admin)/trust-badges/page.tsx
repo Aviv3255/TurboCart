@@ -46,6 +46,17 @@ const IconSvgs: Record<string, JSX.Element> = {
   headphones: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>,
   gift: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>,
   percent: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>,
+  award: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>,
+  globe: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>,
+  package: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
+  thumbsUp: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>,
+  zap: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  tag: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+  users: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
+  leaf: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3v18"/><path d="M18 9a6 6 0 00-12 0c0 7 6 9 6 9s6-2 6-9z"/></svg>,
+  badgeCheck: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3.85 8.62a4 4 0 014.78-4.77 4 4 0 016.74 0 4 4 0 014.78 4.78 4 4 0 010 6.74 4 4 0 01-4.77 4.78 4 4 0 01-6.75 0 4 4 0 01-4.78-4.77 4 4 0 010-6.76z"/><path d="M9 12l2 2 4-4"/></svg>,
+  phone: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>,
+  mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
   back: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>,
 };
@@ -54,24 +65,38 @@ const BADGE_ICONS = [
   { value: 'shield', label: 'Shield' },
   { value: 'lock', label: 'Lock' },
   { value: 'check', label: 'Check' },
+  { value: 'badgeCheck', label: 'Verified' },
   { value: 'truck', label: 'Truck' },
+  { value: 'package', label: 'Package' },
   { value: 'clock', label: 'Clock' },
   { value: 'heart', label: 'Heart' },
   { value: 'star', label: 'Star' },
+  { value: 'award', label: 'Award' },
   { value: 'credit-card', label: 'Card' },
   { value: 'refresh', label: 'Refresh' },
   { value: 'headphones', label: 'Support' },
+  { value: 'phone', label: 'Phone' },
+  { value: 'mail', label: 'Mail' },
   { value: 'gift', label: 'Gift' },
   { value: 'percent', label: 'Percent' },
+  { value: 'tag', label: 'Tag' },
+  { value: 'globe', label: 'Globe' },
+  { value: 'users', label: 'Users' },
+  { value: 'thumbsUp', label: 'Thumbs Up' },
+  { value: 'zap', label: 'Fast' },
+  { value: 'leaf', label: 'Eco' },
 ];
 
 const BADGE_TEMPLATES = [
-  { type: 'secure_checkout', title: '100% Secure Checkout', subtitle: 'SSL Encrypted', icon: 'lock', bgColor: '#f0fdf4', textColor: '#166534', iconColor: '#22c55e' },
-  { type: 'money_back', title: '30-Day Money Back', subtitle: 'Guaranteed', icon: 'refresh', bgColor: '#eff6ff', textColor: '#1e40af', iconColor: '#3b82f6' },
-  { type: 'free_shipping', title: 'Free Shipping', subtitle: 'On orders over $50', icon: 'truck', bgColor: '#fefce8', textColor: '#854d0e', iconColor: '#eab308' },
-  { type: 'support', title: '24/7 Support', subtitle: 'We are here to help', icon: 'headphones', bgColor: '#fdf4ff', textColor: '#86198f', iconColor: '#d946ef' },
-  { type: 'quality', title: 'Premium Quality', subtitle: 'Satisfaction guaranteed', icon: 'star', bgColor: '#fff7ed', textColor: '#9a3412', iconColor: '#f97316' },
-  { type: 'safe_payment', title: 'Safe Payment', subtitle: 'All major cards accepted', icon: 'credit-card', bgColor: '#f0f9ff', textColor: '#075985', iconColor: '#0ea5e9' },
+  { type: 'secure_checkout', title: '100% Secure Checkout', subtitle: 'SSL Encrypted', icon: 'lock', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
+  { type: 'money_back', title: '30-Day Money Back', subtitle: 'Guaranteed', icon: 'refresh', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
+  { type: 'free_shipping', title: 'Free Shipping', subtitle: 'On orders over $50', icon: 'truck', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
+  { type: 'support', title: '24/7 Support', subtitle: 'We are here to help', icon: 'headphones', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
+  { type: 'quality', title: 'Premium Quality', subtitle: 'Satisfaction guaranteed', icon: 'badgeCheck', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
+  { type: 'safe_payment', title: 'Safe Payment', subtitle: 'All major cards accepted', icon: 'credit-card', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
+  { type: 'fast_delivery', title: 'Fast Delivery', subtitle: '2-3 business days', icon: 'zap', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
+  { type: 'eco_friendly', title: 'Eco-Friendly', subtitle: 'Sustainable packaging', icon: 'leaf', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
+  { type: 'trusted_seller', title: 'Trusted Seller', subtitle: '10,000+ happy customers', icon: 'users', bgColor: '#ffffff', textColor: '#374151', iconColor: '#374151' },
 ];
 
 export default function TrustBadgesPage() {
@@ -197,7 +222,7 @@ export default function TrustBadgesPage() {
         <p>Loading trust badges...</p>
         <style jsx>{`
           .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; background: #f6f6f7; }
-          .loading-spinner { width: 40px; height: 40px; border: 3px solid #e4e5e7; border-top-color: #5c6ac4; border-radius: 50%; animation: spin 0.8s linear infinite; }
+          .loading-spinner { width: 40px; height: 40px; border: 3px solid #e4e5e7; border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
           @keyframes spin { to { transform: rotate(360deg); } }
           p { margin-top: 16px; color: #6d7175; }
         `}</style>
@@ -519,13 +544,13 @@ export default function TrustBadgesPage() {
         .master-toggle input { display: none; }
         .master-toggle .toggle-slider { position: relative; width: 48px; height: 28px; background: #d1d5db; border-radius: 14px; transition: 0.2s; }
         .master-toggle .toggle-slider::before { content: ''; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
-        .master-toggle input:checked + .toggle-slider { background: #10b981; }
+        .master-toggle input:checked + .toggle-slider { background: #000; }
         .master-toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
         .save-button { padding: 12px 24px; background: #000; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .save-button:hover { background: #333; }
         .save-button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .save-button.success { background: #10b981; }
+        .save-button.success { background: #000; }
 
         .tabs-container { display: flex; gap: 4px; background: #fff; border-radius: 12px; padding: 4px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         .tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #6d7175; cursor: pointer; transition: all 0.2s; }
@@ -554,8 +579,8 @@ export default function TrustBadgesPage() {
         .preview-empty { color: #9ca3af; text-align: center; padding: 24px; width: 100%; }
 
         .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-        .template-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; border: 1px solid transparent; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-        .template-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .template-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+        .template-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #000; }
         .template-icon { font-size: 24px; }
         .template-title { font-size: 12px; font-weight: 500; text-align: center; }
 

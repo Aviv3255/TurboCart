@@ -37,12 +37,12 @@ interface TimerSettings {
 }
 
 const MESSAGE_TEMPLATES = [
-  { msg: 'Your cart will expire in {time}!', label: 'Standard' },
-  { msg: 'Items reserved for {time} only!', label: 'Urgency' },
+  { msg: 'Your items are reserved for {time}. Complete checkout to secure your order.', label: 'Standard' },
+  { msg: 'Items reserved for {time} only! Complete checkout now.', label: 'Urgency' },
   { msg: 'Complete order in {time} to lock in prices', label: 'Scarcity' },
-  { msg: 'Cart expires in {time} - checkout now!', label: 'Direct' },
+  { msg: 'Cart reserved for {time} - checkout to secure items', label: 'Direct' },
   { msg: 'Hurry! Only {time} left to secure your items', label: 'FOMO' },
-  { msg: '{time} remaining before cart resets', label: 'Neutral' },
+  { msg: '{time} remaining before reservation expires', label: 'Neutral' },
 ];
 
 export default function TimerPage() {
@@ -57,14 +57,14 @@ export default function TimerPage() {
     position: 'top',
     duration_minutes: 10,
     reset_on_activity: true,
-    message_template: 'Your cart will expire in {time}! Checkout now before items sell out.',
-    expired_message: 'Your cart has expired. Items may no longer be reserved.',
-    urgency_message: 'Hurry! Only {time} left!',
+    message_template: 'Your items are reserved for {time}. Complete checkout to secure your order.',
+    expired_message: 'Your reservation has expired. Items may no longer be available.',
+    urgency_message: 'Hurry! Items only reserved for {time} more!',
     style: 'bar',
-    background_color: '#fef3c7',
-    text_color: '#92400e',
-    accent_color: '#f59e0b',
-    timer_color: '#dc2626',
+    background_color: '#f3f4f6',
+    text_color: '#374151',
+    accent_color: '#6b7280',
+    timer_color: '#111827',
     font_size: 14,
     padding: 12,
     border_radius: 8,
@@ -128,7 +128,7 @@ export default function TimerPage() {
         <p>Loading timer settings...</p>
         <style jsx>{`
           .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; background: #f6f6f7; }
-          .loading-spinner { width: 40px; height: 40px; border: 3px solid #e4e5e7; border-top-color: #f59e0b; border-radius: 50%; animation: spin 0.8s linear infinite; }
+          .loading-spinner { width: 40px; height: 40px; border: 3px solid #e4e5e7; border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite; }
           @keyframes spin { to { transform: rotate(360deg); } }
           p { margin-top: 16px; color: #6d7175; }
         `}</style>
@@ -418,12 +418,12 @@ export default function TimerPage() {
         .master-toggle input { display: none; }
         .master-toggle .toggle-slider { position: relative; width: 48px; height: 28px; background: #d1d5db; border-radius: 14px; transition: 0.2s; }
         .master-toggle .toggle-slider::before { content: ''; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
-        .master-toggle input:checked + .toggle-slider { background: #f59e0b; }
+        .master-toggle input:checked + .toggle-slider { background: #000; }
         .master-toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
         .save-button { padding: 12px 24px; background: #000; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
         .save-button:disabled { opacity: 0.6; }
-        .save-button.success { background: #10b981; }
+        .save-button.success { background: #000; }
 
         .content-grid { display: grid; grid-template-columns: 350px 1fr; gap: 24px; }
 
@@ -462,12 +462,12 @@ export default function TimerPage() {
         .templates-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
         .template-btn { padding: 8px 16px; background: #f3f4f6; border: 1px solid transparent; border-radius: 20px; font-size: 13px; color: #374151; cursor: pointer; transition: all 0.2s; }
         .template-btn:hover { background: #e5e7eb; }
-        .template-btn.active { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+        .template-btn.active { background: #f3f4f6; border-color: #000; color: #000; }
 
         .style-options { display: flex; flex-direction: column; gap: 8px; }
         .style-option { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f9fafb; border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
         .style-option:hover { background: #f3f4f6; }
-        .style-option.selected { border-color: #f59e0b; background: #fffbeb; }
+        .style-option.selected { border-color: #000; background: #f9fafb; }
         .style-option input { display: none; }
         .style-icon { font-size: 18px; width: 24px; text-align: center; }
         .style-label { font-weight: 500; color: #374151; }
@@ -476,7 +476,7 @@ export default function TimerPage() {
         .position-options { display: flex; gap: 8px; }
         .position-option { flex: 1; display: flex; align-items: center; justify-content: center; padding: 12px; background: #f9fafb; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 13px; color: #374151; transition: all 0.2s; }
         .position-option:hover { background: #f3f4f6; }
-        .position-option.selected { border-color: #f59e0b; background: #fffbeb; }
+        .position-option.selected { border-color: #000; background: #f9fafb; }
         .position-option input { display: none; }
 
         .color-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -486,12 +486,12 @@ export default function TimerPage() {
 
         .slider-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
         .range-input { width: 100%; height: 6px; -webkit-appearance: none; background: #e5e7eb; border-radius: 3px; outline: none; }
-        .range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #f59e0b; border-radius: 50%; cursor: pointer; }
+        .range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #000; border-radius: 50%; cursor: pointer; }
 
         .animation-options { display: flex; gap: 8px; flex-wrap: wrap; }
         .animation-option { padding: 10px 16px; background: #f9fafb; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 13px; color: #374151; transition: all 0.2s; }
         .animation-option:hover { background: #f3f4f6; }
-        .animation-option.selected { border-color: #f59e0b; background: #fffbeb; }
+        .animation-option.selected { border-color: #000; background: #f9fafb; }
         .animation-option input { display: none; }
 
         .checkbox-group { flex-direction: row !important; }
