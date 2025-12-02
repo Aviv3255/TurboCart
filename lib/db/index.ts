@@ -46,7 +46,7 @@ export function getPool(): Pool {
       connectionString: process.env.DATABASE_URL,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 10000, // Increased for Render cold starts
     });
 
     pool.on('error', (err) => {
