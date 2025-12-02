@@ -42,10 +42,10 @@ async function setupDatabase() {
     console.log('📄 Reading schema.sql...');
     console.log('🔧 Executing SQL statements...\n');
 
-    // Execute the schema
+    // Execute the main schema
     await client.query(schema);
 
-    console.log('✅ Schema executed successfully!\n');
+    console.log('✅ Main schema executed successfully!\n');
     console.log('📊 Created tables:');
     console.log('   - shops');
     console.log('   - upsell_products');
@@ -55,6 +55,30 @@ async function setupDatabase() {
     console.log('   - analytics_daily');
     console.log('   - sessions');
     console.log('   - webhook_logs');
+
+    // Read and execute ML schema
+    const mlSchemaPath = path.join(__dirname, '..', 'lib', 'db', 'ml-schema.sql');
+    if (fs.existsSync(mlSchemaPath)) {
+      console.log('\n📄 Reading ml-schema.sql...');
+      const mlSchema = fs.readFileSync(mlSchemaPath, 'utf8');
+
+      try {
+        await client.query(mlSchema);
+        console.log('✅ ML schema executed successfully!');
+        console.log('📊 Created ML tables:');
+        console.log('   - ml_display_arms');
+        console.log('   - ml_product_arms');
+        console.log('   - ml_combination_performance');
+        console.log('   - ml_decisions_log');
+        console.log('   - ml_context_patterns');
+        console.log('   - ml_exploration_tracker');
+        console.log('   - ml_model_state');
+      } catch (mlError) {
+        console.log('⚠️  ML schema warning:', mlError.message);
+        console.log('   (This is okay if tables already exist)');
+      }
+    }
+
     console.log('\n✅ Database setup complete! 🎉\n');
 
   } catch (error) {
