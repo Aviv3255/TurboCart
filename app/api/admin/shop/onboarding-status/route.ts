@@ -104,6 +104,65 @@ export async function POST(request: NextRequest) {
         [req.shop.id]
       );
 
+      // Auto-create ScriptTag for backup injection (in case App Embed isn't enabled)
+      const SCRIPT_URL = 'https://turbocart.onrender.com/api/storefront/inject.js';
+
+      try {
+        // Check if script tag already exists
+        const checkResponse = await fetch(
+          `https://${req.shop.shop_domain}/admin/api/2024-01/script_tags.json`,
+          {
+            headers: {
+              'X-Shopify-Access-Token': req.shop.access_token,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        let scriptTagExists = false;
+        if (checkResponse.ok) {
+          const checkData = await checkResponse.json();
+          scriptTagExists = checkData.script_tags?.some(
+            (st: { src: string }) => st.src.includes('turbocart')
+          );
+        }
+
+        // Create script tag if it doesn't exist
+        if (!scriptTagExists) {
+          console.log('[Onboarding] Creating ScriptTag for shop:', req.shop.shop_domain);
+
+          const createResponse = await fetch(
+            `https://${req.shop.shop_domain}/admin/api/2024-01/script_tags.json`,
+            {
+              method: 'POST',
+              headers: {
+                'X-Shopify-Access-Token': req.shop.access_token,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                script_tag: {
+                  event: 'onload',
+                  src: SCRIPT_URL,
+                  display_scope: 'online_store',
+                },
+              }),
+            }
+          );
+
+          if (createResponse.ok) {
+            console.log('[Onboarding] ScriptTag created successfully');
+          } else {
+            const errorText = await createResponse.text();
+            console.error('[Onboarding] ScriptTag creation failed:', errorText);
+          }
+        } else {
+          console.log('[Onboarding] ScriptTag already exists');
+        }
+      } catch (scriptError) {
+        // Don't fail onboarding if ScriptTag creation fails
+        console.error('[Onboarding] ScriptTag error (non-fatal):', scriptError);
+      }
+
       return NextResponse.json({
         success: true,
         onboardingComplete: true,
