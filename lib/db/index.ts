@@ -2,14 +2,12 @@ import { Pool, PoolClient, QueryResult } from 'pg';
 
 // Database connection pool
 let pool: Pool | null = null;
-let migrationsRun = false;
+let migrationsPromise: Promise<void> | null = null;
 
 /**
  * Run automatic migrations to ensure database schema is up to date
  */
 async function runAutoMigrations(pool: Pool): Promise<void> {
-  if (migrationsRun) return;
-
   try {
     console.log('[DB] Running auto-migrations...');
 
@@ -85,7 +83,6 @@ async function runAutoMigrations(pool: Pool): Promise<void> {
       console.log('[DB] Table switch_addons created successfully');
     }
 
-    migrationsRun = true;
     console.log('[DB] Auto-migrations completed');
   } catch (error) {
     console.error('[DB] Auto-migration error:', error);
@@ -96,24 +93,33 @@ async function runAutoMigrations(pool: Pool): Promise<void> {
 /**
  * Get or create database connection pool
  */
-export function getPool(): Pool {
+function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000, // Increased for Render cold starts
+      connectionTimeoutMillis: 10000,
     });
 
     pool.on('error', (err) => {
       console.error('Unexpected database pool error:', err);
     });
 
-    // Run migrations on first connection
-    runAutoMigrations(pool);
+    // Start migrations - store promise so queries can await it
+    migrationsPromise = runAutoMigrations(pool);
   }
 
   return pool;
+}
+
+/**
+ * Ensure migrations have completed before running queries
+ */
+async function ensureMigrations(): Promise<void> {
+  if (migrationsPromise) {
+    await migrationsPromise;
+  }
 }
 
 /**
@@ -124,6 +130,10 @@ export async function query<T extends Record<string, any> = any>(
   params?: unknown[]
 ): Promise<QueryResult<T>> {
   const pool = getPool();
+
+  // Wait for migrations to complete before running any query
+  await ensureMigrations();
+
   const start = Date.now();
 
   try {
@@ -149,6 +159,10 @@ export async function transaction<T>(
   callback: (client: PoolClient) => Promise<T>
 ): Promise<T> {
   const pool = getPool();
+
+  // Wait for migrations to complete
+  await ensureMigrations();
+
   const client = await pool.connect();
 
   try {
@@ -172,6 +186,7 @@ export async function closePool(): Promise<void> {
   if (pool) {
     await pool.end();
     pool = null;
+    migrationsPromise = null;
   }
 }
 
