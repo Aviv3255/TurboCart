@@ -166,15 +166,15 @@ export async function POST(request: NextRequest) {
       const origin = request.headers.get('origin') || '';
 
       // Try referer first
-      let shopMatch = referer.match(/https?:\/\/([^\/]+\.myshopify\.com)/);
-      if (shopMatch) {
-        shop = shopMatch[1];
+      const refererMatch = referer.match(/https?:\/\/([^\/]+\.myshopify\.com)/);
+      if (refererMatch && refererMatch[1]) {
+        shop = refererMatch[1];
         console.log('[Upsells] Extracted shop from referer:', shop);
       } else {
         // Try origin
-        shopMatch = origin.match(/https?:\/\/([^\/]+\.myshopify\.com)/);
-        if (shopMatch) {
-          shop = shopMatch[1];
+        const originMatch = origin.match(/https?:\/\/([^\/]+\.myshopify\.com)/);
+        if (originMatch && originMatch[1]) {
+          shop = originMatch[1];
           console.log('[Upsells] Extracted shop from origin:', shop);
         }
       }
