@@ -17,12 +17,25 @@ CREATE TABLE shops (
     billing_id BIGINT,
     trial_ends_at TIMESTAMP,
     settings JSONB DEFAULT '{
-        "display_style": "cards",
-        "enabled_display_styles": ["cards"],
+        "display_style": "carousel",
         "cart_type": "drawer",
-        "max_upsells": 3,
+        "max_upsells": 10,
         "position": "top",
-        "enable_ab_testing": true
+        "features": {
+            "upsells": true,
+            "rewards": false,
+            "addons": false,
+            "timer": false,
+            "announcement": false
+        },
+        "timer": {
+            "duration": 10,
+            "message": "Your cart will expire in {time}!"
+        },
+        "announcement": {
+            "text": "",
+            "icon": "info"
+        }
     }'::jsonb,
     installed_at TIMESTAMP DEFAULT NOW(),
     uninstalled_at TIMESTAMP,
@@ -65,6 +78,49 @@ CREATE INDEX idx_upsell_products_shop ON upsell_products(shop_id) WHERE is_activ
 CREATE INDEX idx_upsell_products_shopify_id ON upsell_products(shopify_product_id);
 CREATE INDEX idx_upsell_products_collections ON upsell_products USING GIN (collection_ids);
 CREATE INDEX idx_upsell_products_type ON upsell_products(product_type);
+
+-- ============================================
+-- REWARD TIERS TABLE
+-- Progress-based rewards (free shipping, discounts)
+-- ============================================
+CREATE TABLE reward_tiers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+    threshold DECIMAL(10,2) NOT NULL,
+    reward_type VARCHAR(50) NOT NULL, -- 'free_shipping', 'discount_percent', 'discount_fixed', 'gift'
+    reward_value VARCHAR(100), -- e.g., "10" for 10% off, or description for gift
+    label VARCHAR(255), -- Display label like "Free Shipping"
+    icon VARCHAR(50) DEFAULT 'truck', -- 'truck', 'tag', 'gift', 'star'
+    position INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_reward_tiers_shop ON reward_tiers(shop_id) WHERE is_active = true;
+CREATE INDEX idx_reward_tiers_threshold ON reward_tiers(shop_id, threshold ASC);
+
+-- ============================================
+-- SWITCH ADD-ONS TABLE
+-- Toggle products like shipping protection, warranties
+-- ============================================
+CREATE TABLE switch_addons (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+    shopify_product_id BIGINT,
+    shopify_variant_id BIGINT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    icon VARCHAR(50) DEFAULT 'shield', -- 'shield', 'gift', 'truck', 'clock', 'star'
+    default_enabled BOOLEAN DEFAULT false,
+    position INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_switch_addons_shop ON switch_addons(shop_id) WHERE is_active = true;
 
 -- ============================================
 -- UPSELL EVENTS TABLE
@@ -239,6 +295,12 @@ CREATE TRIGGER update_analytics_daily_updated_at BEFORE UPDATE ON analytics_dail
 CREATE TRIGGER update_sessions_updated_at BEFORE UPDATE ON sessions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_reward_tiers_updated_at BEFORE UPDATE ON reward_tiers
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_switch_addons_updated_at BEFORE UPDATE ON switch_addons
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- ============================================
 -- VIEWS FOR COMMON QUERIES
 -- ============================================
@@ -294,9 +356,11 @@ ORDER BY total_revenue DESC;
 
 COMMENT ON TABLE shops IS 'Connected Shopify stores';
 COMMENT ON TABLE upsell_products IS 'Products selected for upselling';
+COMMENT ON TABLE reward_tiers IS 'Progress-based rewards (free shipping, discounts)';
+COMMENT ON TABLE switch_addons IS 'Toggle add-on products (shipping protection, warranties)';
 COMMENT ON TABLE upsell_events IS 'Tracking all upsell interactions';
 COMMENT ON TABLE ab_tests IS 'A/B testing experiments';
-COMMENT ON TABLE product_affinities IS 'ML-learned product relationships';
+COMMENT ON TABLE product_affinities IS 'Product relationships for recommendations';
 COMMENT ON TABLE analytics_daily IS 'Pre-aggregated daily analytics';
 COMMENT ON TABLE sessions IS 'App authentication sessions';
 COMMENT ON TABLE webhook_logs IS 'Webhook processing logs';
