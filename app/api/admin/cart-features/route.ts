@@ -58,19 +58,25 @@ interface SwitchAddon {
  * Get all cart feature settings, rewards, and addons
  */
 export async function GET(request: NextRequest) {
+  console.log('[CartFeatures GET] Request received');
   return withAuth(request, async (req: AuthenticatedRequest) => {
+    console.log('[CartFeatures GET] Inside handler');
     try {
       if (!req.shop) {
+        console.log('[CartFeatures GET] No shop found');
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
       const shopId = req.shop.id;
+      console.log('[CartFeatures GET] Shop ID:', shopId);
 
       // Get shop settings
+      console.log('[CartFeatures GET] Fetching shop settings...');
       const shopResult = await query<{ settings: CartFeatureSettings | null }>(
         'SELECT settings FROM shops WHERE id = $1',
         [shopId]
       );
+      console.log('[CartFeatures GET] Shop settings fetched');
 
       const settings: Partial<CartFeatureSettings> = shopResult.rows[0]?.settings || {};
 
@@ -114,7 +120,8 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      return NextResponse.json({
+      console.log('[CartFeatures GET] Returning response with settings');
+      const response = {
         settings: {
           features: settings.features || {
             upsells: true,
@@ -136,7 +143,9 @@ export async function GET(request: NextRequest) {
         },
         rewards,
         addons,
-      });
+      };
+      console.log('[CartFeatures GET] Response ready, sending...');
+      return NextResponse.json(response);
     } catch (error) {
       console.error('[CartFeatures GET] Error:', error);
       return NextResponse.json(

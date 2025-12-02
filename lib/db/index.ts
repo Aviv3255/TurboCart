@@ -2,91 +2,69 @@ import { Pool, PoolClient, QueryResult } from 'pg';
 
 // Database connection pool
 let pool: Pool | null = null;
-let migrationsPromise: Promise<void> | null = null;
+let migrationsStarted = false;
 
 /**
  * Run automatic migrations to ensure database schema is up to date
+ * This runs in the background and doesn't block queries
  */
 async function runAutoMigrations(pool: Pool): Promise<void> {
+  if (migrationsStarted) return;
+  migrationsStarted = true;
+
   try {
     console.log('[DB] Running auto-migrations...');
 
-    // Check if onboarding_completed_at column exists
-    const columnCheck = await pool.query(`
-      SELECT column_name
-      FROM information_schema.columns
-      WHERE table_name = 'shops' AND column_name = 'onboarding_completed_at'
-    `);
-
-    if (columnCheck.rows.length === 0) {
-      console.log('[DB] Adding missing column: onboarding_completed_at');
-      await pool.query(`
-        ALTER TABLE shops
-        ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP
-      `);
-      console.log('[DB] Column onboarding_completed_at added successfully');
-    }
-
     // Create reward_tiers table if not exists
-    const rewardTiersCheck = await pool.query(`
-      SELECT table_name FROM information_schema.tables
-      WHERE table_schema = 'public' AND table_name = 'reward_tiers'
+    console.log('[DB] Checking reward_tiers table...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS reward_tiers (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+        threshold DECIMAL(10,2) NOT NULL,
+        reward_type VARCHAR(50) NOT NULL,
+        reward_value VARCHAR(100),
+        label VARCHAR(255),
+        icon VARCHAR(50) DEFAULT 'truck',
+        position INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
     `);
-
-    if (rewardTiersCheck.rows.length === 0) {
-      console.log('[DB] Creating missing table: reward_tiers');
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS reward_tiers (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
-          threshold DECIMAL(10,2) NOT NULL,
-          reward_type VARCHAR(50) NOT NULL,
-          reward_value VARCHAR(100),
-          label VARCHAR(255),
-          icon VARCHAR(50) DEFAULT 'truck',
-          position INTEGER DEFAULT 0,
-          is_active BOOLEAN DEFAULT true,
-          created_at TIMESTAMP DEFAULT NOW(),
-          updated_at TIMESTAMP DEFAULT NOW()
-        )
-      `);
-      await pool.query(`CREATE INDEX IF NOT EXISTS idx_reward_tiers_shop ON reward_tiers(shop_id) WHERE is_active = true`);
-      console.log('[DB] Table reward_tiers created successfully');
-    }
+    console.log('[DB] reward_tiers table ready');
 
     // Create switch_addons table if not exists
-    const switchAddonsCheck = await pool.query(`
-      SELECT table_name FROM information_schema.tables
-      WHERE table_schema = 'public' AND table_name = 'switch_addons'
+    console.log('[DB] Checking switch_addons table...');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS switch_addons (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+        shopify_product_id BIGINT,
+        shopify_variant_id BIGINT,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        price DECIMAL(10,2) NOT NULL,
+        icon VARCHAR(50) DEFAULT 'shield',
+        default_enabled BOOLEAN DEFAULT false,
+        position INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
     `);
+    console.log('[DB] switch_addons table ready');
 
-    if (switchAddonsCheck.rows.length === 0) {
-      console.log('[DB] Creating missing table: switch_addons');
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS switch_addons (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
-          shopify_product_id BIGINT,
-          shopify_variant_id BIGINT,
-          name VARCHAR(255) NOT NULL,
-          description TEXT,
-          price DECIMAL(10,2) NOT NULL,
-          icon VARCHAR(50) DEFAULT 'shield',
-          default_enabled BOOLEAN DEFAULT false,
-          position INTEGER DEFAULT 0,
-          is_active BOOLEAN DEFAULT true,
-          created_at TIMESTAMP DEFAULT NOW(),
-          updated_at TIMESTAMP DEFAULT NOW()
-        )
-      `);
-      await pool.query(`CREATE INDEX IF NOT EXISTS idx_switch_addons_shop ON switch_addons(shop_id) WHERE is_active = true`);
-      console.log('[DB] Table switch_addons created successfully');
-    }
+    // Add onboarding_completed_at column if missing
+    await pool.query(`
+      ALTER TABLE shops
+      ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP
+    `).catch(() => {}); // Ignore if column exists
 
-    console.log('[DB] Auto-migrations completed');
+    console.log('[DB] Auto-migrations completed successfully');
   } catch (error) {
     console.error('[DB] Auto-migration error:', error);
-    // Don't throw - allow app to continue even if migration fails
+    // Don't throw - app continues even if migration fails
   }
 }
 
@@ -95,6 +73,7 @@ async function runAutoMigrations(pool: Pool): Promise<void> {
  */
 function getPool(): Pool {
   if (!pool) {
+    console.log('[DB] Creating new connection pool...');
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 20,
@@ -103,23 +82,16 @@ function getPool(): Pool {
     });
 
     pool.on('error', (err) => {
-      console.error('Unexpected database pool error:', err);
+      console.error('[DB] Pool error:', err);
     });
 
-    // Start migrations - store promise so queries can await it
-    migrationsPromise = runAutoMigrations(pool);
+    // Run migrations in background - don't block queries
+    runAutoMigrations(pool).catch(err => {
+      console.error('[DB] Migration background error:', err);
+    });
   }
 
   return pool;
-}
-
-/**
- * Ensure migrations have completed before running queries
- */
-async function ensureMigrations(): Promise<void> {
-  if (migrationsPromise) {
-    await migrationsPromise;
-  }
 }
 
 /**
@@ -130,24 +102,19 @@ export async function query<T extends Record<string, any> = any>(
   params?: unknown[]
 ): Promise<QueryResult<T>> {
   const pool = getPool();
-
-  // Wait for migrations to complete before running any query
-  await ensureMigrations();
-
   const start = Date.now();
 
   try {
     const result = await pool.query<T>(text, params);
     const duration = Date.now() - start;
 
-    // Log slow queries (>100ms)
     if (duration > 100) {
-      console.warn(`Slow query (${duration}ms):`, text.substring(0, 100));
+      console.warn(`[DB] Slow query (${duration}ms):`, text.substring(0, 80));
     }
 
     return result;
   } catch (error) {
-    console.error('Database query error:', error);
+    console.error('[DB] Query error:', error);
     throw error;
   }
 }
@@ -159,10 +126,6 @@ export async function transaction<T>(
   callback: (client: PoolClient) => Promise<T>
 ): Promise<T> {
   const pool = getPool();
-
-  // Wait for migrations to complete
-  await ensureMigrations();
-
   const client = await pool.connect();
 
   try {
@@ -172,7 +135,7 @@ export async function transaction<T>(
     return result;
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Transaction error:', error);
+    console.error('[DB] Transaction error:', error);
     throw error;
   } finally {
     client.release();
@@ -186,7 +149,7 @@ export async function closePool(): Promise<void> {
   if (pool) {
     await pool.end();
     pool = null;
-    migrationsPromise = null;
+    migrationsStarted = false;
   }
 }
 
