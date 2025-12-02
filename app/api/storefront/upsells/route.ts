@@ -150,18 +150,54 @@ export async function POST(request: NextRequest) {
       // Body parsing failed, continue with empty body
     }
 
-    // Try to get shop from body if not in URL
-    if (!shop && body.shop) {
+    // Helper to check if shop is valid
+    const isValidShop = (s: string | null | undefined): s is string => {
+      return !!s && s !== 'null' && s !== 'undefined' && s !== '' && s.includes('.myshopify.com');
+    };
+
+    // Try to get shop from body if URL param is invalid
+    if (!isValidShop(shop) && body.shop) {
       shop = String(body.shop);
     }
 
+    // Try to extract shop from Referer or Origin headers as fallback
+    if (!isValidShop(shop)) {
+      const referer = request.headers.get('referer') || '';
+      const origin = request.headers.get('origin') || '';
+
+      // Try referer first
+      let shopMatch = referer.match(/https?:\/\/([^\/]+\.myshopify\.com)/);
+      if (shopMatch) {
+        shop = shopMatch[1];
+        console.log('[Upsells] Extracted shop from referer:', shop);
+      } else {
+        // Try origin
+        shopMatch = origin.match(/https?:\/\/([^\/]+\.myshopify\.com)/);
+        if (shopMatch) {
+          shop = shopMatch[1];
+          console.log('[Upsells] Extracted shop from origin:', shop);
+        }
+      }
+    }
+
+    // Log what we received for debugging
+    console.log('[Upsells] Request:', {
+      url_shop: searchParams.get('shop'),
+      body_shop: body.shop,
+      final_shop: shop,
+      referer: request.headers.get('referer')?.substring(0, 100),
+    });
+
     // Validate shop parameter
-    if (!shop || shop === 'null' || shop === 'undefined') {
+    if (!isValidShop(shop)) {
       return NextResponse.json({
-        error: 'Missing shop parameter',
-        received_url_shop: searchParams.get('shop'),
-        received_body_shop: body.shop || null,
-        help: 'Ensure TurboCart App Embed is enabled in Theme Editor',
+        error: 'Missing or invalid shop parameter',
+        debug: {
+          received_url_shop: searchParams.get('shop'),
+          received_body_shop: body.shop || null,
+          referer: request.headers.get('referer'),
+        },
+        help: 'Ensure TurboCart App Embed is enabled in Theme Editor, or check that window.Shopify.shop is available',
       }, { status: 400, headers: corsHeaders });
     }
 
