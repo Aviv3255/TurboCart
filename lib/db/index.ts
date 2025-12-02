@@ -29,6 +29,62 @@ async function runAutoMigrations(pool: Pool): Promise<void> {
       console.log('[DB] Column onboarding_completed_at added successfully');
     }
 
+    // Create reward_tiers table if not exists
+    const rewardTiersCheck = await pool.query(`
+      SELECT table_name FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name = 'reward_tiers'
+    `);
+
+    if (rewardTiersCheck.rows.length === 0) {
+      console.log('[DB] Creating missing table: reward_tiers');
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS reward_tiers (
+          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+          threshold DECIMAL(10,2) NOT NULL,
+          reward_type VARCHAR(50) NOT NULL,
+          reward_value VARCHAR(100),
+          label VARCHAR(255),
+          icon VARCHAR(50) DEFAULT 'truck',
+          position INTEGER DEFAULT 0,
+          is_active BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      await pool.query(`CREATE INDEX IF NOT EXISTS idx_reward_tiers_shop ON reward_tiers(shop_id) WHERE is_active = true`);
+      console.log('[DB] Table reward_tiers created successfully');
+    }
+
+    // Create switch_addons table if not exists
+    const switchAddonsCheck = await pool.query(`
+      SELECT table_name FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name = 'switch_addons'
+    `);
+
+    if (switchAddonsCheck.rows.length === 0) {
+      console.log('[DB] Creating missing table: switch_addons');
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS switch_addons (
+          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+          shopify_product_id BIGINT,
+          shopify_variant_id BIGINT,
+          name VARCHAR(255) NOT NULL,
+          description TEXT,
+          price DECIMAL(10,2) NOT NULL,
+          icon VARCHAR(50) DEFAULT 'shield',
+          default_enabled BOOLEAN DEFAULT false,
+          position INTEGER DEFAULT 0,
+          is_active BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      await pool.query(`CREATE INDEX IF NOT EXISTS idx_switch_addons_shop ON switch_addons(shop_id) WHERE is_active = true`);
+      console.log('[DB] Table switch_addons created successfully');
+    }
+
     migrationsRun = true;
     console.log('[DB] Auto-migrations completed');
   } catch (error) {

@@ -74,23 +74,45 @@ export async function GET(request: NextRequest) {
 
       const settings: Partial<CartFeatureSettings> = shopResult.rows[0]?.settings || {};
 
-      // Get reward tiers
-      const rewardsResult = await query<RewardTier>(
-        `SELECT id, threshold::float, reward_type, reward_value, label, icon, is_active
-         FROM reward_tiers
-         WHERE shop_id = $1
-         ORDER BY threshold ASC`,
-        [shopId]
-      );
+      // Get reward tiers (handle missing table gracefully)
+      let rewards: RewardTier[] = [];
+      try {
+        const rewardsResult = await query<RewardTier>(
+          `SELECT id, threshold::float, reward_type, reward_value, label, icon, is_active
+           FROM reward_tiers
+           WHERE shop_id = $1
+           ORDER BY threshold ASC`,
+          [shopId]
+        );
+        rewards = rewardsResult.rows;
+      } catch (err: unknown) {
+        const dbError = err as { code?: string };
+        if (dbError.code === '42P01') {
+          console.log('[CartFeatures] reward_tiers table does not exist yet, returning empty array');
+        } else {
+          throw err;
+        }
+      }
 
-      // Get switch addons
-      const addonsResult = await query<SwitchAddon>(
-        `SELECT id, shopify_product_id, shopify_variant_id, name, description, price::float, icon, default_enabled, is_active
-         FROM switch_addons
-         WHERE shop_id = $1
-         ORDER BY position ASC`,
-        [shopId]
-      );
+      // Get switch addons (handle missing table gracefully)
+      let addons: SwitchAddon[] = [];
+      try {
+        const addonsResult = await query<SwitchAddon>(
+          `SELECT id, shopify_product_id, shopify_variant_id, name, description, price::float, icon, default_enabled, is_active
+           FROM switch_addons
+           WHERE shop_id = $1
+           ORDER BY position ASC`,
+          [shopId]
+        );
+        addons = addonsResult.rows;
+      } catch (err: unknown) {
+        const dbError = err as { code?: string };
+        if (dbError.code === '42P01') {
+          console.log('[CartFeatures] switch_addons table does not exist yet, returning empty array');
+        } else {
+          throw err;
+        }
+      }
 
       return NextResponse.json({
         settings: {
@@ -112,8 +134,8 @@ export async function GET(request: NextRequest) {
           display_style: settings.display_style || 'carousel',
           position: settings.position || 'top',
         },
-        rewards: rewardsResult.rows,
-        addons: addonsResult.rows,
+        rewards,
+        addons,
       });
     } catch (error) {
       console.error('[CartFeatures GET] Error:', error);
