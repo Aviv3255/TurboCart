@@ -10,6 +10,69 @@ import { updateShopSettings, type ShopSettings } from '@/lib/db/queries';
 // Force dynamic rendering for API routes that use authentication
 export const dynamic = 'force-dynamic';
 
+const SCRIPT_URL = 'https://turbocart.onrender.com/api/storefront/inject.js';
+
+/**
+ * Ensure ScriptTag exists (auto-create if missing)
+ */
+async function ensureScriptTag(shopDomain: string, accessToken: string): Promise<void> {
+  try {
+    // Check if script tag exists
+    const checkResponse = await fetch(
+      `https://${shopDomain}/admin/api/2024-01/script_tags.json`,
+      {
+        headers: {
+          'X-Shopify-Access-Token': accessToken,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!checkResponse.ok) {
+      console.log('[Settings] Could not check ScriptTags:', checkResponse.status);
+      return;
+    }
+
+    const checkData = await checkResponse.json();
+    const exists = checkData.script_tags?.some(
+      (st: { src: string }) => st.src.includes('turbocart')
+    );
+
+    if (!exists) {
+      console.log('[Settings] ScriptTag not found, creating for:', shopDomain);
+
+      const createResponse = await fetch(
+        `https://${shopDomain}/admin/api/2024-01/script_tags.json`,
+        {
+          method: 'POST',
+          headers: {
+            'X-Shopify-Access-Token': accessToken,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            script_tag: {
+              event: 'onload',
+              src: SCRIPT_URL,
+              display_scope: 'online_store',
+            },
+          }),
+        }
+      );
+
+      if (createResponse.ok) {
+        console.log('[Settings] ScriptTag created successfully!');
+      } else {
+        const errText = await createResponse.text();
+        console.error('[Settings] ScriptTag creation failed:', errText);
+      }
+    } else {
+      console.log('[Settings] ScriptTag already exists');
+    }
+  } catch (error) {
+    console.error('[Settings] ScriptTag error:', error);
+  }
+}
+
 /**
  * Get current shop settings
  * GET /api/admin/settings
@@ -20,6 +83,9 @@ export async function GET(request: NextRequest) {
       if (!req.shop) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
+
+      // Auto-ensure ScriptTag exists (non-blocking)
+      ensureScriptTag(req.shop.shop_domain, req.shop.access_token).catch(() => {});
 
       // Return current settings from shop
       return NextResponse.json({

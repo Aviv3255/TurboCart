@@ -112,7 +112,7 @@ function HomeContent() {
             <ol className="text-left space-y-3 text-gray-600">
               <li className="flex items-start">
                 <span className="font-bold mr-2">1.</span>
-                <span>Make sure you're installing from your Shopify Partners dashboard</span>
+                <span>Make sure you&apos;re installing from your Shopify Partners dashboard</span>
               </li>
               <li className="flex items-start">
                 <span className="font-bold mr-2">2.</span>
@@ -168,7 +168,7 @@ function HomeContent() {
               </li>
               <li className="flex items-start">
                 <span className="font-bold mr-2">3.</span>
-                <span>Click "Install app" on your development store</span>
+                <span>Click Install App on your development store</span>
               </li>
             </ol>
           </div>

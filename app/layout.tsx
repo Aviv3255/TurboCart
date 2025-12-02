@@ -5,8 +5,8 @@ import './globals.css';
 const fontClass = 'font-sans';
 
 export const metadata: Metadata = {
-  title: 'TurboCart - AI Cart Upsells',
-  description: 'AI-Powered Upsells That Convert',
+  title: 'TurboCart - Cart Upsells',
+  description: 'Premium Cart Upsells for Shopify',
 };
 
 export default function RootLayout({
@@ -21,7 +21,8 @@ export default function RootLayout({
       <head>
         {/* App Bridge v4: Meta tag MUST come before script */}
         <meta name="shopify-api-key" content={apiKey} />
-        {/* App Bridge v4: Synchronous script load - no async/defer */}
+        {/* App Bridge v4: Synchronous script load required - no async/defer */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
       </head>
       <body className={fontClass}>
@@ -35,8 +36,8 @@ export default function RootLayout({
           <a href="/" rel="home">TurboCart</a>
           <a href="/dashboard">Dashboard</a>
           <a href="/products">Products</a>
+          <a href="/cart-features">Cart Features</a>
           <a href="/analytics">Analytics</a>
-          <a href="/ml-config">ML Config</a>
           <a href="/billing">Billing</a>
           <a href="/settings">Settings</a>
         </ui-nav-menu>

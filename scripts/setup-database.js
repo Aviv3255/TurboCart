@@ -50,11 +50,10 @@ async function setupDatabase() {
     console.log('   - shops');
     console.log('   - upsell_products');
     console.log('   - upsell_events');
-    console.log('   - ab_tests');
-    console.log('   - product_affinities');
     console.log('   - analytics_daily');
     console.log('   - sessions');
     console.log('   - webhook_logs');
+
     console.log('\n✅ Database setup complete! 🎉\n');
 
   } catch (error) {

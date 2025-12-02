@@ -1616,7 +1616,7 @@ function QuizMatchPreview() {
           <span className="dot"></span>
         </div>
 
-        <p className="question">What's most important to you?</p>
+        <p className="question">What&apos;s most important to you?</p>
 
         <div className="options">
           <button className="option selected">
