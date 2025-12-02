@@ -10,6 +10,7 @@ import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
   ProductIcon,
+  CartIcon,
   ChartVerticalIcon,
   CreditCardIcon,
   SettingsIcon,
@@ -38,14 +39,14 @@ const NAV_ITEMS: NavItem[] = [
     icon: ProductIcon,
   },
   {
-    label: 'ML Analytics',
-    href: '/analytics',
-    icon: ChartVerticalIcon,
+    label: 'Cart Features',
+    href: '/cart-features',
+    icon: CartIcon,
   },
   {
-    label: 'ML Config',
-    href: '/ml-config',
-    icon: SettingsIcon,
+    label: 'Analytics',
+    href: '/analytics',
+    icon: ChartVerticalIcon,
   },
   {
     label: 'Billing',
@@ -74,7 +75,7 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
             {isOpen && (
               <div className="logo-text">
                 <h1 className="logo-title">TurboCart</h1>
-                <p className="logo-subtitle">AI Cart Upsells</p>
+                <p className="logo-subtitle">Cart Upsells</p>
               </div>
             )}
           </div>
