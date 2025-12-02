@@ -351,7 +351,7 @@ export default function ProductsPage() {
                 <div className="style-preview">{style.preview}</div>
                 <div className="style-max">
                   <Badge tone={style.maxProducts === 1 ? 'attention' : 'success'}>
-                    Max {style.maxProducts} product{style.maxProducts > 1 ? 's' : ''}
+                    {`Max ${style.maxProducts} product${style.maxProducts > 1 ? 's' : ''}`}
                   </Badge>
                 </div>
                 {selectedStyle === style.id && (
@@ -452,7 +452,7 @@ export default function ProductsPage() {
                   <span style={{ fontSize: '24px' }}>{currentStyleConfig?.icon}</span>
                   <BlockStack gap="100">
                     <Text variant="headingSm" as="h3">{currentStyleConfig?.name}</Text>
-                    <Text variant="bodySm" tone="subdued">{currentStyleConfig?.description}</Text>
+                    <Text variant="bodySm" tone="subdued" as="p">{currentStyleConfig?.description}</Text>
                   </BlockStack>
                 </InlineStack>
                 <Button variant="plain" onClick={() => setCurrentStep('style')}>
@@ -571,6 +571,7 @@ export default function ProductsPage() {
                     id={id}
                     media={media}
                     accessibilityLabel={`Select ${title}`}
+                    onClick={() => {}}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div style={{ flex: 1 }}>
