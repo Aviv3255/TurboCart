@@ -364,9 +364,16 @@ export default function ProductsPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.log('[Products] API error:', response.status, errorData);
 
-        if (errorData.code === 'REAUTH_REQUIRED' || response.status === 401) {
-          setToastMessage('Session expired. Please reinstall the app from your Shopify admin.');
+        if (response.status === 401) {
+          if (errorData.code === 'SHOP_NOT_FOUND') {
+            setToastMessage('Shop not found. The app may need to be reinstalled.');
+          } else if (errorData.code === 'REAUTH_REQUIRED') {
+            setToastMessage('Session expired. Please refresh the page.');
+          } else {
+            setToastMessage('Authentication failed. Please refresh or reinstall the app.');
+          }
           setToastError(true);
           setToastActive(true);
           return;
