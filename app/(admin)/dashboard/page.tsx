@@ -66,16 +66,20 @@ interface StoreData {
 }
 
 // Section heights for dynamic annotation positioning (in pixels)
+// These values are carefully measured to match the actual rendered mockup
 const SECTION_HEIGHTS = {
-  header: 34,
-  rewards: 65,
-  timer: 36,
-  cartItems: 108,
-  upsells: 95,
-  addons: 68,
-  checkout: 68,
-  trustBadges: 40,
+  header: 44,      // drawer-header: padding + title
+  rewards: 75,     // rewards progress bar section
+  timer: 44,       // timer display section
+  cartItems: 118,  // 2 cart items
+  upsells: 105,    // upsells display section
+  addons: 78,      // 2 add-on toggles
+  checkout: 72,    // subtotal + checkout button
+  trustBadges: 50, // trust badges row
 };
+
+// Offset from top of phone frame to content start
+const MOCKUP_TOP_OFFSET = 30; // accounts for phone notch and initial padding
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -97,43 +101,44 @@ export default function DashboardPage() {
   const mockupRef = useRef<HTMLDivElement>(null);
 
   // Calculate dynamic annotation positions based on enabled features
+  // Positions are calculated to point to the vertical center of each section
   const getAnnotationPositions = useCallback(() => {
-    let currentTop = SECTION_HEIGHTS.header;
+    let currentTop = MOCKUP_TOP_OFFSET + SECTION_HEIGHTS.header;
     const positions: Record<string, number> = {};
 
-    // Rewards position
+    // Rewards position - at the center of the rewards progress bar
     if (features.rewards) {
-      positions.rewards = currentTop + SECTION_HEIGHTS.rewards / 2 - 10;
+      positions.rewards = currentTop + SECTION_HEIGHTS.rewards / 2;
       currentTop += SECTION_HEIGHTS.rewards;
     }
 
-    // Timer position
+    // Timer position - at the center of the timer display
     if (features.timer) {
-      positions.timer = currentTop + SECTION_HEIGHTS.timer / 2 - 10;
+      positions.timer = currentTop + SECTION_HEIGHTS.timer / 2;
       currentTop += SECTION_HEIGHTS.timer;
     }
 
-    // Cart items (always visible)
+    // Cart items (always visible) - skip, no annotation for cart items
     currentTop += SECTION_HEIGHTS.cartItems;
 
-    // Upsells position
+    // Upsells position - at the center of the upsells section
     if (features.upsells) {
-      positions.upsells = currentTop + SECTION_HEIGHTS.upsells / 2 - 10;
+      positions.upsells = currentTop + SECTION_HEIGHTS.upsells / 2;
       currentTop += SECTION_HEIGHTS.upsells;
     }
 
-    // Addons position
+    // Addons position - at the center of the add-ons section
     if (features.addons) {
-      positions.addons = currentTop + SECTION_HEIGHTS.addons / 2 - 10;
+      positions.addons = currentTop + SECTION_HEIGHTS.addons / 2;
       currentTop += SECTION_HEIGHTS.addons;
     }
 
-    // Checkout (always visible)
+    // Checkout (always visible) - skip, no annotation for checkout
     currentTop += SECTION_HEIGHTS.checkout;
 
-    // Trust badges position
+    // Trust badges position - at the center of the badges row
     if (features.trust_badges) {
-      positions.trust_badges = currentTop + SECTION_HEIGHTS.trustBadges / 2 - 10;
+      positions.trust_badges = currentTop + SECTION_HEIGHTS.trustBadges / 2;
     }
 
     return positions;
@@ -455,28 +460,25 @@ export default function DashboardPage() {
             </div>
             {features.upsells && (
               <div className="feature-preview upsells-preview">
-                {/* Display Style Selector */}
+                {/* Display Style Selector with Live Previews */}
                 <div className="display-styles-section">
                   <span className="styles-label">Display Style</span>
-                  <div className="styles-grid">
+                  <div className="styles-grid-visual">
                     {DISPLAY_STYLES.map((style) => (
                       <button
                         key={style.id}
-                        className={`style-option ${displayStyle === style.id ? 'selected' : ''}`}
+                        className={`style-card ${displayStyle === style.id ? 'selected' : ''}`}
                         onClick={() => updateDisplayStyle(style.id)}
                       >
-                        <span className="style-check">{displayStyle === style.id && Icons.check}</span>
-                        <span className="style-name">{style.name}</span>
+                        <div className="style-preview-mini">
+                          {renderMiniStylePreview(style.id, products)}
+                        </div>
+                        <div className="style-card-footer">
+                          <span className="style-check">{displayStyle === style.id && Icons.check}</span>
+                          <span className="style-name">{style.name}</span>
+                        </div>
                       </button>
                     ))}
-                  </div>
-                </div>
-
-                {/* Live Preview of Selected Style */}
-                <div className="style-preview-container">
-                  <span className="preview-label">Preview</span>
-                  <div className="style-live-preview">
-                    {renderStylePreview(displayStyle, products)}
                   </div>
                 </div>
               </div>
@@ -588,7 +590,7 @@ export default function DashboardPage() {
 
                 {/* 1. Rewards - FIRST in mockup */}
                 {features.rewards && (
-                  <div className="drawer-section">
+                  <div className="drawer-section rewards-section">
                     <div className="mock-rewards">
                       <span className="rewards-msg">{remainingForFreeShipping > 0 ? `Add $${remainingForFreeShipping.toFixed(0)} for FREE SHIPPING` : 'Free shipping unlocked!'}</span>
                       <div className="progress"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
@@ -603,7 +605,7 @@ export default function DashboardPage() {
 
                 {/* 2. Timer */}
                 {features.timer && (
-                  <div className="drawer-section">
+                  <div className="drawer-section timer-section">
                     <div className="mock-timer">{Icons.clock}<span>Reserved for <strong>{String(countdown.minutes).padStart(2, '0')}:{String(countdown.seconds).padStart(2, '0')}</strong></span></div>
                   </div>
                 )}
@@ -630,14 +632,14 @@ export default function DashboardPage() {
 
                 {/* 3. Upsells - Dynamic based on display style */}
                 {features.upsells && (
-                  <div className="drawer-section">
+                  <div className="drawer-section upsells-section">
                     {renderUpsellsPreview()}
                   </div>
                 )}
 
                 {/* 4. Addons */}
                 {features.addons && (
-                  <div className="drawer-section">
+                  <div className="drawer-section addons-section">
                     <div className="mock-addon">
                       <div className="addon-toggle on" />
                       <span className="addon-icon">{Icons.shield}</span>
@@ -661,7 +663,7 @@ export default function DashboardPage() {
 
                 {/* 5. Trust Badges - professional icons */}
                 {features.trust_badges && (
-                  <div className="drawer-section">
+                  <div className="drawer-section badges-section">
                     <div className="mock-badges">
                       <div className="trust-badge">{Icons.lockSecure}<span>SSL Secure</span></div>
                       <div className="trust-badge">{Icons.shieldCheck}<span>Verified</span></div>
@@ -807,36 +809,52 @@ export default function DashboardPage() {
           margin-bottom: 8px;
         }
 
-        .styles-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
+        /* Visual Styles Grid with Live Previews */
+        .styles-grid-visual {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
         }
 
-        .style-option {
+        .style-card {
+          display: flex;
+          flex-direction: column;
+          background: white;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.2s;
+          padding: 0;
+        }
+
+        .style-card:hover {
+          border-color: #93c5fd;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+        }
+
+        .style-card.selected {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .style-preview-mini {
+          background: #f3f4f6;
+          min-height: 60px;
+        }
+
+        .style-card-footer {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 4px;
-          padding: 6px 10px;
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          font-size: 10px;
-          font-weight: 500;
-          color: #374151;
-          cursor: pointer;
-          transition: all 0.15s;
+          padding: 6px 4px;
+          background: #fafafa;
+          border-top: 1px solid #e5e7eb;
         }
 
-        .style-option:hover {
-          border-color: #3b82f6;
-          background: #f0f9ff;
-        }
-
-        .style-option.selected {
-          border-color: #3b82f6;
+        .style-card.selected .style-card-footer {
           background: #eff6ff;
-          color: #1d4ed8;
         }
 
         .style-check {
@@ -849,30 +867,14 @@ export default function DashboardPage() {
         }
 
         .style-name {
+          font-size: 10px;
+          font-weight: 600;
+          color: #374151;
           white-space: nowrap;
         }
 
-        /* Style Preview Container */
-        .style-preview-container {
-          border-top: 1px solid #e5e7eb;
-          padding-top: 10px;
-        }
-
-        .preview-label {
-          display: block;
-          font-size: 10px;
-          font-weight: 600;
-          color: #6b7280;
-          margin-bottom: 8px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .style-live-preview {
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          overflow: hidden;
+        .style-card.selected .style-name {
+          color: #1d4ed8;
         }
 
         .preview-timer {
@@ -962,35 +964,39 @@ export default function DashboardPage() {
         /* Annotations - Black bg with #63F44C text */
         .annotations-left {
           position: relative;
-          width: 100px;
-          height: 500px;
-          margin-right: 10px;
+          width: 110px;
+          height: 600px;
+          margin-right: 8px;
+          flex-shrink: 0;
         }
 
         .annotation {
           position: absolute;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 0;
           transition: top 0.3s ease, opacity 0.3s;
+          transform: translateY(-50%); /* Center vertically on the position */
         }
 
         .annotation.active { opacity: 1; }
 
         .annotation-label {
-          padding: 4px 10px;
-          background: #000;
+          padding: 5px 12px;
+          background: #111;
           color: #63F44C;
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 600;
           border-radius: 4px;
           white-space: nowrap;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .annotation-line {
-          width: 24px;
+          width: 30px;
           height: 2px;
-          background: #000;
+          background: #111;
+          flex-shrink: 0;
         }
 
         /* Phone Frame - wider and shorter */
@@ -1026,9 +1032,11 @@ export default function DashboardPage() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 14px 12px 10px;
+          padding: 12px 12px;
           background: #fff;
           border-bottom: 1px solid #e5e7eb;
+          height: 44px;
+          box-sizing: border-box;
         }
 
         .drawer-title { font-weight: 600; font-size: 13px; color: #111827; }
@@ -1036,6 +1044,36 @@ export default function DashboardPage() {
 
         .drawer-section {
           padding: 8px 10px;
+        }
+
+        .drawer-section.rewards-section {
+          min-height: 75px;
+          box-sizing: border-box;
+        }
+
+        .drawer-section.timer-section {
+          min-height: 44px;
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+        }
+
+        .drawer-section.upsells-section {
+          min-height: 105px;
+          box-sizing: border-box;
+        }
+
+        .drawer-section.addons-section {
+          min-height: 78px;
+          box-sizing: border-box;
+        }
+
+        .drawer-section.badges-section {
+          min-height: 50px;
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         /* Mock Elements */
@@ -1370,6 +1408,91 @@ export default function DashboardPage() {
       `}</style>
     </div>
   );
+}
+
+// Render mini style preview for the style selector cards
+function renderMiniStylePreview(style: DisplayStyle, products: Product[]) {
+  const p = products.slice(0, 2);
+  const productImage = (idx: number) => p[idx]?.image
+    ? { backgroundImage: `url(${p[idx].image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: 'linear-gradient(135deg, #e5e7eb, #d1d5db)' };
+
+  switch (style) {
+    case 'minimal-strip':
+      return (
+        <div style={{ display: 'flex', gap: '4px', padding: '6px' }}>
+          {[0, 1].map(i => (
+            <div key={i} style={{ flex: 1, background: '#fff', borderRadius: '4px', padding: '4px' }}>
+              <div style={{ width: '100%', height: '20px', borderRadius: '2px', marginBottom: '3px', ...productImage(i) }} />
+              <div style={{ width: '70%', height: '3px', background: '#e5e7eb', borderRadius: '1px', marginBottom: '2px' }} />
+              <div style={{ width: '40%', height: '3px', background: '#111', borderRadius: '1px' }} />
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'cards':
+      return (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', padding: '6px' }}>
+          {[0, 1].map(i => (
+            <div key={i} style={{ background: '#fff', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '22px', ...productImage(i) }} />
+              <div style={{ padding: '4px' }}>
+                <div style={{ width: '70%', height: '3px', background: '#e5e7eb', borderRadius: '1px', marginBottom: '2px' }} />
+                <div style={{ width: '50%', height: '6px', background: '#111', borderRadius: '2px' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'list':
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', padding: '6px' }}>
+          {[0, 1].map(i => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px', background: '#fff', borderRadius: '4px' }}>
+              <div style={{ width: '16px', height: '16px', borderRadius: '2px', flexShrink: 0, ...productImage(i) }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ width: '60%', height: '3px', background: '#e5e7eb', borderRadius: '1px', marginBottom: '2px' }} />
+                <div style={{ width: '30%', height: '3px', background: '#111', borderRadius: '1px' }} />
+              </div>
+              <div style={{ width: '16px', height: '10px', background: '#111', borderRadius: '2px' }} />
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'frequently-bought':
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', padding: '6px' }}>
+          {[0, 1].map(i => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px', background: '#fff', borderRadius: '4px' }}>
+              <div style={{ width: '18px', height: '18px', borderRadius: '2px', flexShrink: 0, ...productImage(i) }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ width: '40%', height: '4px', background: 'linear-gradient(90deg, rgba(139,92,246,0.3), rgba(102,126,234,0.3))', borderRadius: '2px', marginBottom: '2px' }} />
+                <div style={{ width: '60%', height: '3px', background: '#e5e7eb', borderRadius: '1px' }} />
+              </div>
+              <div style={{ width: '16px', height: '10px', background: '#111', borderRadius: '2px' }} />
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'banner':
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px', background: '#fff', borderRadius: '4px', margin: '6px' }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '4px', flexShrink: 0, ...productImage(0) }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ width: '50%', height: '4px', background: '#111', borderRadius: '2px', marginBottom: '3px' }} />
+            <div style={{ width: '70%', height: '3px', background: '#e5e7eb', borderRadius: '1px', marginBottom: '2px' }} />
+            <div style={{ width: '40%', height: '4px', background: '#059669', borderRadius: '1px' }} />
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
 }
 
 // Render style preview for the feature card
