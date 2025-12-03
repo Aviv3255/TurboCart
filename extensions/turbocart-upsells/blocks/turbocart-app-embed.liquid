@@ -21,8 +21,8 @@
   console.log('[TurboCart] Config:', window.TurboCartConfig);
 </script>
 
-{{ 'turbocart.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'turbocart.js' | asset_url }}" defer></script>
+<link rel="stylesheet" href="https://turbocart.onrender.com/api/storefront/inject.css">
+<script src="https://turbocart.onrender.com/api/storefront/inject.js" defer></script>
 
 {% schema %}
 {
