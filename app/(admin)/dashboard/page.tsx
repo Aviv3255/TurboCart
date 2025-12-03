@@ -1,11 +1,12 @@
 /**
  * TurboCart Dashboard
  * Feature cards with preview + compact annotated cart mockup
+ * Includes Display Styles for Cart Upsells with live previews
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { authenticatedFetch } from '@/lib/shopify/authenticated-fetch';
 
@@ -22,12 +23,24 @@ const Icons = {
   externalLink: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
   truck: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
   star: <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  check: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
   // Professional Trust Badge Icons
   lockSecure: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>,
   shieldCheck: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
   creditCard: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
   refresh: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
 };
+
+// Display style types
+type DisplayStyle = 'minimal-strip' | 'list' | 'banner' | 'cards' | 'frequently-bought';
+
+const DISPLAY_STYLES: { id: DisplayStyle; name: string; description: string }[] = [
+  { id: 'minimal-strip', name: 'Minimal Strip', description: 'Horizontal scroll cards' },
+  { id: 'cards', name: 'Cards Grid', description: '2-column product cards' },
+  { id: 'list', name: 'List', description: 'Vertical list layout' },
+  { id: 'frequently-bought', name: 'Frequently Bought', description: 'Social proof badges' },
+  { id: 'banner', name: 'Banner', description: 'Featured single product' },
+];
 
 interface FeatureStatus {
   upsells: boolean;
@@ -41,7 +54,9 @@ interface Product {
   id: string;
   title: string;
   price: string;
+  numericPrice: number;
   image?: string;
+  compareAtPrice?: string;
 }
 
 interface StoreData {
@@ -49,6 +64,18 @@ interface StoreData {
   timerMinutes: number;
   rewardThreshold: number;
 }
+
+// Section heights for dynamic annotation positioning (in pixels)
+const SECTION_HEIGHTS = {
+  header: 34,
+  rewards: 65,
+  timer: 36,
+  cartItems: 108,
+  upsells: 95,
+  addons: 68,
+  checkout: 68,
+  trustBadges: 40,
+};
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -60,16 +87,57 @@ export default function DashboardPage() {
     addons: true,
     trust_badges: true,
   });
+  const [displayStyle, setDisplayStyle] = useState<DisplayStyle>('minimal-strip');
   const [storeData, setStoreData] = useState<StoreData>({
-    products: [
-      { id: '1', title: 'Premium Headphones', price: '$89.00' },
-      { id: '2', title: 'Wireless Charger', price: '$29.00' },
-      { id: '3', title: 'Phone Case', price: '$19.00' },
-    ],
+    products: [],
     timerMinutes: 10,
     rewardThreshold: 50,
   });
   const [countdown, setCountdown] = useState({ minutes: 9, seconds: 45 });
+  const mockupRef = useRef<HTMLDivElement>(null);
+
+  // Calculate dynamic annotation positions based on enabled features
+  const getAnnotationPositions = useCallback(() => {
+    let currentTop = SECTION_HEIGHTS.header;
+    const positions: Record<string, number> = {};
+
+    // Rewards position
+    if (features.rewards) {
+      positions.rewards = currentTop + SECTION_HEIGHTS.rewards / 2 - 10;
+      currentTop += SECTION_HEIGHTS.rewards;
+    }
+
+    // Timer position
+    if (features.timer) {
+      positions.timer = currentTop + SECTION_HEIGHTS.timer / 2 - 10;
+      currentTop += SECTION_HEIGHTS.timer;
+    }
+
+    // Cart items (always visible)
+    currentTop += SECTION_HEIGHTS.cartItems;
+
+    // Upsells position
+    if (features.upsells) {
+      positions.upsells = currentTop + SECTION_HEIGHTS.upsells / 2 - 10;
+      currentTop += SECTION_HEIGHTS.upsells;
+    }
+
+    // Addons position
+    if (features.addons) {
+      positions.addons = currentTop + SECTION_HEIGHTS.addons / 2 - 10;
+      currentTop += SECTION_HEIGHTS.addons;
+    }
+
+    // Checkout (always visible)
+    currentTop += SECTION_HEIGHTS.checkout;
+
+    // Trust badges position
+    if (features.trust_badges) {
+      positions.trust_badges = currentTop + SECTION_HEIGHTS.trustBadges / 2 - 10;
+    }
+
+    return positions;
+  }, [features]);
 
   useEffect(() => {
     fetchAllData();
@@ -85,11 +153,12 @@ export default function DashboardPage() {
 
   const fetchAllData = async () => {
     try {
-      const [featuresRes, productsRes, timerRes, rewardsRes] = await Promise.all([
+      const [featuresRes, productsRes, timerRes, rewardsRes, upsellsRes] = await Promise.all([
         authenticatedFetch('/api/admin/cart-features').catch(() => null),
         authenticatedFetch('/api/products').catch(() => null),
         authenticatedFetch('/api/admin/timer').catch(() => null),
         authenticatedFetch('/api/admin/rewards').catch(() => null),
+        authenticatedFetch('/api/admin/upsells').catch(() => null),
       ]);
 
       if (featuresRes?.ok) {
@@ -104,12 +173,18 @@ export default function DashboardPage() {
         if (data.products?.length > 0) {
           setStoreData(prev => ({
             ...prev,
-            products: data.products.slice(0, 4).map((p: any) => ({
-              id: p.id,
-              title: p.title,
-              price: `$${parseFloat(p.variants?.[0]?.price || p.price || '0').toFixed(2)}`,
-              image: p.images?.[0]?.src || p.image?.src || null,
-            })),
+            products: data.products.slice(0, 6).map((p: any) => {
+              const price = parseFloat(p.variants?.[0]?.price || p.price || '0');
+              const compareAt = parseFloat(p.variants?.[0]?.compare_at_price || '0');
+              return {
+                id: p.id,
+                title: p.title,
+                price: `$${price.toFixed(2)}`,
+                numericPrice: price,
+                image: p.images?.[0]?.src || p.image?.src || null,
+                compareAtPrice: compareAt > price ? `$${compareAt.toFixed(2)}` : undefined,
+              };
+            }),
           }));
         }
       }
@@ -126,6 +201,13 @@ export default function DashboardPage() {
         const data = await rewardsRes.json();
         if (data.settings?.tiers?.[0]?.threshold) {
           setStoreData(prev => ({ ...prev, rewardThreshold: data.settings.tiers[0].threshold }));
+        }
+      }
+
+      if (upsellsRes?.ok) {
+        const data = await upsellsRes.json();
+        if (data.settings?.displayStyle) {
+          setDisplayStyle(data.settings.displayStyle);
         }
       }
     } catch (error) {
@@ -151,6 +233,19 @@ export default function DashboardPage() {
     }
   };
 
+  const updateDisplayStyle = async (style: DisplayStyle) => {
+    setDisplayStyle(style);
+    try {
+      await authenticatedFetch('/api/admin/upsells', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: { displayStyle: style } }),
+      });
+    } catch (error) {
+      console.error('Error updating display style:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="loading">
@@ -164,9 +259,115 @@ export default function DashboardPage() {
     );
   }
 
-  const cartSubtotal = 118;
+  // Use real products or fallback
+  const products = storeData.products.length > 0 ? storeData.products : [
+    { id: '1', title: 'Premium Headphones', price: '$89.00', numericPrice: 89, image: '' },
+    { id: '2', title: 'Wireless Charger', price: '$29.00', numericPrice: 29, image: '' },
+    { id: '3', title: 'Phone Case', price: '$19.00', numericPrice: 19, image: '' },
+    { id: '4', title: 'USB Cable', price: '$12.00', numericPrice: 12, image: '' },
+  ];
+
+  const cartSubtotal = products.slice(0, 2).reduce((sum, p) => sum + p.numericPrice, 0);
   const remainingForFreeShipping = Math.max(0, storeData.rewardThreshold - cartSubtotal);
   const progressPercent = Math.min(100, (cartSubtotal / storeData.rewardThreshold) * 100);
+  const annotationPositions = getAnnotationPositions();
+
+  // Render upsells based on display style
+  const renderUpsellsPreview = () => {
+    const upsellProducts = products.slice(2, 4).length > 0 ? products.slice(2, 4) : products.slice(0, 2);
+
+    switch (displayStyle) {
+      case 'minimal-strip':
+        return (
+          <div className="mock-upsells-strip">
+            <span className="upsells-title">You might also like</span>
+            <div className="upsells-row">
+              {upsellProducts.map((p, i) => (
+                <div key={i} className="upsell-item">
+                  <div className="upsell-img" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+                  <span className="upsell-name">{p.title.length > 8 ? p.title.substring(0, 8) + '..' : p.title}</span>
+                  <span className="upsell-price">{p.price}</span>
+                  <div className="upsell-btn">+</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'cards':
+        return (
+          <div className="mock-upsells-cards">
+            <span className="upsells-title">Recommended for you</span>
+            <div className="cards-grid">
+              {upsellProducts.map((p, i) => (
+                <div key={i} className="card-item">
+                  <div className="card-img" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+                  <div className="card-content">
+                    <span className="card-name">{p.title.length > 10 ? p.title.substring(0, 10) + '..' : p.title}</span>
+                    <div className="card-price-row">
+                      {p.compareAtPrice && <span className="card-old">{p.compareAtPrice}</span>}
+                      <span className="card-price">{p.price}</span>
+                    </div>
+                    <div className="card-btn">Add</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'list':
+        return (
+          <div className="mock-upsells-list">
+            <span className="upsells-title">Complete your order</span>
+            {upsellProducts.map((p, i) => (
+              <div key={i} className="list-item">
+                <div className="list-img" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+                <div className="list-info">
+                  <span className="list-name">{p.title.length > 12 ? p.title.substring(0, 12) + '..' : p.title}</span>
+                  <span className="list-price">{p.price}</span>
+                </div>
+                <div className="list-btn">Add</div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'frequently-bought':
+        return (
+          <div className="mock-upsells-fbt">
+            {upsellProducts.map((p, i) => (
+              <div key={i} className="fbt-item">
+                <div className="fbt-img" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+                <div className="fbt-info">
+                  <span className="fbt-badge">{57 - i * 8}% added this</span>
+                  <span className="fbt-name">{p.title.length > 14 ? p.title.substring(0, 14) + '..' : p.title}</span>
+                  <span className="fbt-price">{p.price}</span>
+                </div>
+                <div className="fbt-btn">Add</div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'banner':
+        const bannerProduct = upsellProducts[0];
+        return (
+          <div className="mock-upsells-banner">
+            <div className="banner-img" style={bannerProduct?.image ? { backgroundImage: `url(${bannerProduct.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+            <div className="banner-content">
+              <span className="banner-badge">SELLING FAST</span>
+              <span className="banner-name">{bannerProduct?.title}</span>
+              <span className="banner-price">{bannerProduct?.price}</span>
+            </div>
+            <div className="banner-btn">Add</div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="dashboard">
@@ -203,7 +404,7 @@ export default function DashboardPage() {
             {features.rewards && (
               <div className="feature-preview">
                 <div className="preview-rewards">
-                  <span className="rewards-text">{remainingForFreeShipping > 0 ? `Add $${remainingForFreeShipping} for FREE SHIPPING` : 'Free shipping unlocked!'}</span>
+                  <span className="rewards-text">{remainingForFreeShipping > 0 ? `Add $${remainingForFreeShipping.toFixed(0)} for FREE SHIPPING` : 'Free shipping unlocked!'}</span>
                   <div className="rewards-bar"><div className="rewards-fill" style={{ width: `${progressPercent}%` }} /></div>
                 </div>
               </div>
@@ -236,7 +437,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* 3. Cart Upsells */}
+          {/* 3. Cart Upsells - WITH DISPLAY STYLES */}
           <div className={`feature-card ${features.upsells ? 'enabled' : ''}`}>
             <div className="feature-header">
               <div className="feature-icon" style={{ background: features.upsells ? '#3b82f615' : '#f3f4f6', color: features.upsells ? '#3b82f6' : '#9ca3af' }}>
@@ -253,15 +454,30 @@ export default function DashboardPage() {
               <button className="config-btn" onClick={() => router.push('/products')}>{Icons.settings}</button>
             </div>
             {features.upsells && (
-              <div className="feature-preview">
-                <div className="preview-upsells">
-                  {storeData.products.slice(0, 2).map((product, i) => (
-                    <div key={i} className="upsell-mini">
-                      <div className="upsell-mini-img" style={product.image ? { backgroundImage: `url(${product.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
-                      <span className="upsell-mini-title">{product.title.length > 12 ? product.title.substring(0, 12) + '...' : product.title}</span>
-                      <span className="upsell-mini-price">{product.price}</span>
-                    </div>
-                  ))}
+              <div className="feature-preview upsells-preview">
+                {/* Display Style Selector */}
+                <div className="display-styles-section">
+                  <span className="styles-label">Display Style</span>
+                  <div className="styles-grid">
+                    {DISPLAY_STYLES.map((style) => (
+                      <button
+                        key={style.id}
+                        className={`style-option ${displayStyle === style.id ? 'selected' : ''}`}
+                        onClick={() => updateDisplayStyle(style.id)}
+                      >
+                        <span className="style-check">{displayStyle === style.id && Icons.check}</span>
+                        <span className="style-name">{style.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Live Preview of Selected Style */}
+                <div className="style-preview-container">
+                  <span className="preview-label">Preview</span>
+                  <div className="style-live-preview">
+                    {renderStylePreview(displayStyle, products)}
+                  </div>
                 </div>
               </div>
             )}
@@ -326,32 +542,42 @@ export default function DashboardPage() {
         {/* Cart Mockup - wider and shorter */}
         <div className="mockup-column">
           <div className="mockup-wrapper">
-            {/* Annotations on the left - black bg with #63F44C text */}
+            {/* Dynamic Annotations on the left - black bg with #63F44C text */}
             <div className="annotations-left">
-              <div className={`annotation ${features.rewards ? 'active' : ''}`} style={{ top: '38px' }}>
-                <span className="annotation-label">Rewards</span>
-                <span className="annotation-line" />
-              </div>
-              <div className={`annotation ${features.timer ? 'active' : ''}`} style={{ top: '94px' }}>
-                <span className="annotation-label">Timer</span>
-                <span className="annotation-line" />
-              </div>
-              <div className={`annotation ${features.upsells ? 'active' : ''}`} style={{ top: '218px' }}>
-                <span className="annotation-label">Upsells</span>
-                <span className="annotation-line" />
-              </div>
-              <div className={`annotation ${features.addons ? 'active' : ''}`} style={{ top: '300px' }}>
-                <span className="annotation-label">Add-Ons</span>
-                <span className="annotation-line" />
-              </div>
-              <div className={`annotation ${features.trust_badges ? 'active' : ''}`} style={{ top: '410px' }}>
-                <span className="annotation-label">Trust Badges</span>
-                <span className="annotation-line" />
-              </div>
+              {features.rewards && (
+                <div className="annotation active" style={{ top: `${annotationPositions.rewards}px` }}>
+                  <span className="annotation-label">Rewards</span>
+                  <span className="annotation-line" />
+                </div>
+              )}
+              {features.timer && (
+                <div className="annotation active" style={{ top: `${annotationPositions.timer}px` }}>
+                  <span className="annotation-label">Timer</span>
+                  <span className="annotation-line" />
+                </div>
+              )}
+              {features.upsells && (
+                <div className="annotation active" style={{ top: `${annotationPositions.upsells}px` }}>
+                  <span className="annotation-label">Upsells</span>
+                  <span className="annotation-line" />
+                </div>
+              )}
+              {features.addons && (
+                <div className="annotation active" style={{ top: `${annotationPositions.addons}px` }}>
+                  <span className="annotation-label">Add-Ons</span>
+                  <span className="annotation-line" />
+                </div>
+              )}
+              {features.trust_badges && (
+                <div className="annotation active" style={{ top: `${annotationPositions.trust_badges}px` }}>
+                  <span className="annotation-label">Trust Badges</span>
+                  <span className="annotation-line" />
+                </div>
+              )}
             </div>
 
             {/* Phone Frame - wider, shorter */}
-            <div className="phone-frame">
+            <div className="phone-frame" ref={mockupRef}>
               <div className="phone-notch" />
               <div className="cart-drawer">
                 {/* Header */}
@@ -364,7 +590,7 @@ export default function DashboardPage() {
                 {features.rewards && (
                   <div className="drawer-section">
                     <div className="mock-rewards">
-                      <span className="rewards-msg">{remainingForFreeShipping > 0 ? `Add $${remainingForFreeShipping} for FREE SHIPPING` : 'Free shipping unlocked!'}</span>
+                      <span className="rewards-msg">{remainingForFreeShipping > 0 ? `Add $${remainingForFreeShipping.toFixed(0)} for FREE SHIPPING` : 'Free shipping unlocked!'}</span>
                       <div className="progress"><div className="progress-fill" style={{ width: `${progressPercent}%` }} /></div>
                       <div className="milestones">
                         <div className="ms done">{Icons.truck}</div>
@@ -385,46 +611,27 @@ export default function DashboardPage() {
                 {/* Cart Items - with real product images */}
                 <div className="drawer-section cart-items">
                   <div className="cart-item">
-                    <div className="item-img" style={storeData.products[0]?.image ? { backgroundImage: `url(${storeData.products[0].image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+                    <div className="item-img" style={products[0]?.image ? { backgroundImage: `url(${products[0].image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
                     <div className="item-info">
-                      <span className="item-name">{storeData.products[0]?.title || 'Product'}</span>
+                      <span className="item-name">{products[0]?.title?.substring(0, 16) || 'Product'}...</span>
                       <span className="item-meta">Qty: 1</span>
-                      <span className="item-price">{storeData.products[0]?.price || '$0.00'}</span>
+                      <span className="item-price">{products[0]?.price || '$0.00'}</span>
                     </div>
                   </div>
                   <div className="cart-item">
-                    <div className="item-img" style={storeData.products[1]?.image ? { backgroundImage: `url(${storeData.products[1].image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
+                    <div className="item-img" style={products[1]?.image ? { backgroundImage: `url(${products[1].image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
                     <div className="item-info">
-                      <span className="item-name">{storeData.products[1]?.title || 'Product'}</span>
+                      <span className="item-name">{products[1]?.title?.substring(0, 16) || 'Product'}...</span>
                       <span className="item-meta">Qty: 1</span>
-                      <span className="item-price">{storeData.products[1]?.price || '$0.00'}</span>
+                      <span className="item-price">{products[1]?.price || '$0.00'}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* 3. Upsells - with real product images */}
+                {/* 3. Upsells - Dynamic based on display style */}
                 {features.upsells && (
                   <div className="drawer-section">
-                    <div className="mock-upsells">
-                      <span className="upsells-title">You may also like</span>
-                      <div className="upsells-row">
-                        {storeData.products.slice(2, 4).length > 0 ? storeData.products.slice(2, 4).map((p, i) => (
-                          <div key={i} className="upsell-item">
-                            <div className="upsell-img" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
-                            <span className="upsell-name">{p.title.length > 8 ? p.title.substring(0, 8) + '..' : p.title}</span>
-                            <span className="upsell-price">{p.price}</span>
-                            <div className="upsell-btn">+</div>
-                          </div>
-                        )) : storeData.products.slice(0, 2).map((p, i) => (
-                          <div key={i} className="upsell-item">
-                            <div className="upsell-img" style={p.image ? { backgroundImage: `url(${p.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}} />
-                            <span className="upsell-name">{p.title.length > 8 ? p.title.substring(0, 8) + '..' : p.title}</span>
-                            <span className="upsell-price">{p.price}</span>
-                            <div className="upsell-btn">+</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    {renderUpsellsPreview()}
                   </div>
                 )}
 
@@ -448,7 +655,7 @@ export default function DashboardPage() {
 
                 {/* Checkout */}
                 <div className="drawer-section checkout">
-                  <div className="subtotal"><span>Subtotal</span><span className="total">${cartSubtotal}.00</span></div>
+                  <div className="subtotal"><span>Subtotal</span><span className="total">${cartSubtotal.toFixed(2)}</span></div>
                   <div className="checkout-btn">Checkout</div>
                 </div>
 
@@ -517,7 +724,7 @@ export default function DashboardPage() {
           display: flex;
           flex-direction: column;
           gap: 10px;
-          max-width: 480px;
+          max-width: 500px;
         }
 
         .feature-card {
@@ -583,6 +790,91 @@ export default function DashboardPage() {
           border-top: 1px solid #f3f4f6;
         }
 
+        .upsells-preview {
+          padding: 12px 14px;
+        }
+
+        /* Display Styles Section */
+        .display-styles-section {
+          margin-bottom: 12px;
+        }
+
+        .styles-label {
+          display: block;
+          font-size: 11px;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 8px;
+        }
+
+        .styles-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+
+        .style-option {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 6px 10px;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          font-size: 10px;
+          font-weight: 500;
+          color: #374151;
+          cursor: pointer;
+          transition: all 0.15s;
+        }
+
+        .style-option:hover {
+          border-color: #3b82f6;
+          background: #f0f9ff;
+        }
+
+        .style-option.selected {
+          border-color: #3b82f6;
+          background: #eff6ff;
+          color: #1d4ed8;
+        }
+
+        .style-check {
+          width: 14px;
+          height: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #3b82f6;
+        }
+
+        .style-name {
+          white-space: nowrap;
+        }
+
+        /* Style Preview Container */
+        .style-preview-container {
+          border-top: 1px solid #e5e7eb;
+          padding-top: 10px;
+        }
+
+        .preview-label {
+          display: block;
+          font-size: 10px;
+          font-weight: 600;
+          color: #6b7280;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .style-live-preview {
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
         .preview-timer {
           display: flex;
           align-items: center;
@@ -594,31 +886,6 @@ export default function DashboardPage() {
           color: #374151;
           font-size: 11px;
         }
-
-        .preview-upsells {
-          display: flex;
-          gap: 8px;
-        }
-
-        .upsell-mini {
-          flex: 1;
-          background: white;
-          border-radius: 6px;
-          padding: 8px;
-          text-align: center;
-          border: 1px solid #e5e7eb;
-        }
-
-        .upsell-mini-img {
-          width: 100%;
-          height: 40px;
-          background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-          border-radius: 4px;
-          margin-bottom: 4px;
-        }
-
-        .upsell-mini-title { display: block; font-size: 10px; color: #6b7280; }
-        .upsell-mini-price { display: block; font-size: 11px; font-weight: 600; color: #111827; }
 
         .preview-rewards {
           text-align: center;
@@ -696,7 +963,7 @@ export default function DashboardPage() {
         .annotations-left {
           position: relative;
           width: 100px;
-          height: 450px;
+          height: 500px;
           margin-right: 10px;
         }
 
@@ -705,8 +972,7 @@ export default function DashboardPage() {
           display: flex;
           align-items: center;
           gap: 6px;
-          opacity: 0.4;
-          transition: opacity 0.3s;
+          transition: top 0.3s ease, opacity 0.3s;
         }
 
         .annotation.active { opacity: 1; }
@@ -813,7 +1079,8 @@ export default function DashboardPage() {
         .item-meta { font-size: 9px; color: #9ca3af; }
         .item-price { font-weight: 600; color: #111827; font-size: 11px; }
 
-        .mock-upsells { }
+        /* Upsells Styles - Minimal Strip */
+        .mock-upsells-strip { }
         .upsells-title { font-weight: 600; color: #374151; font-size: 10px; display: block; margin-bottom: 8px; }
         .upsells-row { display: flex; gap: 8px; }
 
@@ -841,6 +1108,153 @@ export default function DashboardPage() {
           background: #111827;
           color: white;
           border-radius: 4px;
+          font-size: 10px;
+          font-weight: 600;
+        }
+
+        /* Upsells Styles - Cards Grid */
+        .mock-upsells-cards { }
+        .cards-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+        }
+        .card-item {
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        .card-img {
+          width: 100%;
+          height: 50px;
+          background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+        }
+        .card-content { padding: 6px; }
+        .card-name { display: block; font-size: 9px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+        .card-price-row { display: flex; gap: 4px; margin-bottom: 4px; }
+        .card-old { font-size: 8px; color: #9ca3af; text-decoration: line-through; }
+        .card-price { font-size: 10px; font-weight: 700; color: #111827; }
+        .card-btn {
+          width: 100%;
+          padding: 4px;
+          background: #111827;
+          color: white;
+          border-radius: 4px;
+          font-size: 9px;
+          font-weight: 600;
+          text-align: center;
+        }
+
+        /* Upsells Styles - List */
+        .mock-upsells-list { }
+        .list-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px;
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          margin-bottom: 6px;
+        }
+        .list-item:last-child { margin-bottom: 0; }
+        .list-img {
+          width: 36px;
+          height: 36px;
+          background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+          border-radius: 4px;
+          flex-shrink: 0;
+        }
+        .list-info { flex: 1; }
+        .list-name { display: block; font-size: 10px; font-weight: 600; color: #111827; }
+        .list-price { display: block; font-size: 10px; font-weight: 700; color: #111827; }
+        .list-btn {
+          padding: 5px 10px;
+          background: #111827;
+          color: white;
+          border-radius: 4px;
+          font-size: 9px;
+          font-weight: 600;
+        }
+
+        /* Upsells Styles - Frequently Bought Together */
+        .mock-upsells-fbt { }
+        .fbt-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px;
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          margin-bottom: 6px;
+        }
+        .fbt-item:last-child { margin-bottom: 0; }
+        .fbt-img {
+          width: 44px;
+          height: 44px;
+          background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+          border-radius: 4px;
+          flex-shrink: 0;
+        }
+        .fbt-info { flex: 1; }
+        .fbt-badge {
+          display: inline-block;
+          padding: 2px 6px;
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(102, 126, 234, 0.15));
+          color: #8b5cf6;
+          font-size: 8px;
+          font-weight: 700;
+          border-radius: 3px;
+          margin-bottom: 2px;
+          text-transform: uppercase;
+        }
+        .fbt-name { display: block; font-size: 10px; font-weight: 600; color: #111827; }
+        .fbt-price { display: block; font-size: 10px; font-weight: 700; color: #111827; }
+        .fbt-btn {
+          padding: 5px 10px;
+          background: #111827;
+          color: white;
+          border-radius: 4px;
+          font-size: 9px;
+          font-weight: 600;
+        }
+
+        /* Upsells Styles - Banner */
+        .mock-upsells-banner {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px;
+          background: #fff;
+          border-radius: 8px;
+        }
+        .banner-img {
+          width: 60px;
+          height: 60px;
+          background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+          border-radius: 6px;
+          flex-shrink: 0;
+        }
+        .banner-content { flex: 1; }
+        .banner-badge {
+          display: inline-block;
+          padding: 2px 6px;
+          background: #111827;
+          color: white;
+          font-size: 7px;
+          font-weight: 700;
+          border-radius: 10px;
+          margin-bottom: 4px;
+        }
+        .banner-name { display: block; font-size: 11px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+        .banner-price { display: block; font-size: 12px; font-weight: 700; color: #111827; }
+        .banner-btn {
+          padding: 8px 14px;
+          background: #111827;
+          color: white;
+          border-radius: 6px;
           font-size: 10px;
           font-weight: 600;
         }
@@ -956,4 +1370,103 @@ export default function DashboardPage() {
       `}</style>
     </div>
   );
+}
+
+// Render style preview for the feature card
+function renderStylePreview(style: DisplayStyle, products: Product[]) {
+  const previewProducts = products.slice(0, 3);
+
+  switch (style) {
+    case 'minimal-strip':
+      return (
+        <div style={{ padding: '12px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>You might also like</div>
+          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
+            {previewProducts.map((p, i) => (
+              <div key={i} style={{ flex: '0 0 90px', background: '#fafafa', borderRadius: '6px', overflow: 'hidden' }}>
+                <div style={{ width: '100%', height: '70px', background: p.image ? `url(${p.image}) center/cover` : 'linear-gradient(135deg, #e5e7eb, #d1d5db)' }} />
+                <div style={{ padding: '8px' }}>
+                  <div style={{ fontSize: '9px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.title}</div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#111827', marginTop: '2px' }}>{p.price}</div>
+                  <div style={{ marginTop: '6px', padding: '4px', background: '#111827', color: 'white', borderRadius: '4px', fontSize: '9px', fontWeight: 600, textAlign: 'center' }}>Add</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'cards':
+      return (
+        <div style={{ padding: '12px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Recommended for you</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+            {previewProducts.slice(0, 2).map((p, i) => (
+              <div key={i} style={{ border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
+                <div style={{ width: '100%', height: '70px', background: p.image ? `url(${p.image}) center/cover` : 'linear-gradient(135deg, #e5e7eb, #d1d5db)' }} />
+                <div style={{ padding: '8px' }}>
+                  <div style={{ fontSize: '9px', fontWeight: 600, color: '#111827', marginBottom: '4px' }}>{p.title.substring(0, 12)}...</div>
+                  <div style={{ display: 'flex', gap: '4px', marginBottom: '6px' }}>
+                    {p.compareAtPrice && <span style={{ fontSize: '8px', color: '#9ca3af', textDecoration: 'line-through' }}>{p.compareAtPrice}</span>}
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#111827' }}>{p.price}</span>
+                  </div>
+                  <div style={{ padding: '4px', background: '#111827', color: 'white', borderRadius: '4px', fontSize: '9px', fontWeight: 600, textAlign: 'center' }}>Add</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'list':
+      return (
+        <div style={{ padding: '12px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Complete your order</div>
+          {previewProducts.slice(0, 2).map((p, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '6px', marginBottom: '6px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '4px', flexShrink: 0, background: p.image ? `url(${p.image}) center/cover` : 'linear-gradient(135deg, #e5e7eb, #d1d5db)' }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '10px', fontWeight: 600, color: '#111827' }}>{p.title.substring(0, 15)}...</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: '#111827' }}>{p.price}</div>
+              </div>
+              <div style={{ padding: '5px 12px', background: '#111827', color: 'white', borderRadius: '4px', fontSize: '9px', fontWeight: 600 }}>Add</div>
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'frequently-bought':
+      return (
+        <div style={{ padding: '12px' }}>
+          {previewProducts.slice(0, 2).map((p, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '6px', marginBottom: '6px' }}>
+              <div style={{ width: '50px', height: '50px', borderRadius: '4px', flexShrink: 0, background: p.image ? `url(${p.image}) center/cover` : 'linear-gradient(135deg, #e5e7eb, #d1d5db)' }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'inline-block', padding: '2px 6px', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(102, 126, 234, 0.15))', color: '#8b5cf6', fontSize: '8px', fontWeight: 700, borderRadius: '3px', marginBottom: '3px' }}>{57 - i * 8}% ADDED THIS</div>
+                <div style={{ fontSize: '10px', fontWeight: 600, color: '#111827' }}>{p.title.substring(0, 15)}...</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: '#111827' }}>{p.price}</div>
+              </div>
+              <div style={{ padding: '6px 12px', background: '#111827', color: 'white', borderRadius: '4px', fontSize: '9px', fontWeight: 600 }}>Add</div>
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'banner':
+      const bannerProduct = previewProducts[0];
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '8px', flexShrink: 0, background: bannerProduct?.image ? `url(${bannerProduct.image}) center/cover` : 'linear-gradient(135deg, #e5e7eb, #d1d5db)' }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'inline-block', padding: '2px 8px', background: '#111827', color: 'white', fontSize: '8px', fontWeight: 700, borderRadius: '10px', marginBottom: '4px' }}>SELLING FAST</div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{bannerProduct?.title}</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#111827' }}>{bannerProduct?.price}</div>
+          </div>
+          <div style={{ padding: '8px 16px', background: '#111827', color: 'white', borderRadius: '6px', fontSize: '11px', fontWeight: 600 }}>Add</div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
 }

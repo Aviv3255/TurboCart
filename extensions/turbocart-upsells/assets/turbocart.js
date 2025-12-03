@@ -21,12 +21,22 @@
   // ============================================
 
   function getShopDomain() {
-    if (window.TurboCartConfig?.shopDomain) return window.TurboCartConfig.shopDomain;
-    if (window.Shopify?.shop) return window.Shopify.shop;
-    const meta = document.querySelector('meta[name="shopify-shop-domain"]')?.content;
-    if (meta) return meta;
-    if (window.location.hostname.includes('myshopify.com')) return window.location.hostname;
-    return null;
+    try {
+      if (window.TurboCartConfig?.shopDomain) return window.TurboCartConfig.shopDomain;
+      if (window.Shopify?.shop) return window.Shopify.shop;
+      const meta = document.querySelector('meta[name="shopify-shop-domain"]')?.content;
+      if (meta) return meta;
+      if (window.location.hostname.includes('myshopify.com')) return window.location.hostname;
+      // Try to extract from current URL
+      const hostname = window.location.hostname;
+      if (hostname && hostname !== 'localhost' && !hostname.includes('127.0.0.1')) {
+        return hostname;
+      }
+      return null;
+    } catch (e) {
+      console.error('[TurboCart] Error getting shop domain:', e);
+      return null;
+    }
   }
 
   const SHOP_DOMAIN = getShopDomain();
@@ -35,7 +45,21 @@
     return;
   }
 
-  const API_URL = window.TurboCartConfig?.apiUrl || 'https://turbocart.onrender.com';
+  // Get API URL with fallback
+  function getApiUrl() {
+    try {
+      if (window.TurboCartConfig?.apiUrl) {
+        // Validate the URL
+        new URL(window.TurboCartConfig.apiUrl);
+        return window.TurboCartConfig.apiUrl;
+      }
+    } catch (e) {
+      console.warn('[TurboCart] Invalid API URL in config, using default');
+    }
+    return 'https://turbocart.onrender.com';
+  }
+
+  const API_URL = getApiUrl();
   const SESSION_ID = 'tc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
   let config = null;
