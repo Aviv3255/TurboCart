@@ -759,12 +759,26 @@
 
   async function addToCart(variantId, quantity = 1) {
     try {
+      console.log('[TurboCart] Adding to cart - variantId:', variantId, 'quantity:', quantity);
+
+      if (!variantId) {
+        console.error('[TurboCart] Cannot add to cart - no variantId');
+        return false;
+      }
+
       const response = await fetch('/cart/add.js', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: variantId, quantity })
+        body: JSON.stringify({ id: parseInt(variantId), quantity })
       });
-      if (!response.ok) throw new Error('Add to cart failed');
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[TurboCart] Add to cart failed:', response.status, errorText);
+        throw new Error('Add to cart failed: ' + response.status);
+      }
+
+      console.log('[TurboCart] Added to cart successfully');
       currentCart = await fetchCart();
       render();
       return true;
@@ -1182,20 +1196,29 @@
     document.querySelectorAll('.tc-product-btn, .tc-banner-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.preventDefault();
-        const variantId = e.target.dataset.variantId;
-        const productId = e.target.dataset.productId;
+        e.stopPropagation();
+        const button = btn;
+        const variantId = button.dataset.variantId;
+        const productId = button.dataset.productId;
 
-        e.target.disabled = true;
-        e.target.textContent = 'Adding...';
+        console.log('[TurboCart] Add clicked - variantId:', variantId, 'productId:', productId);
+
+        if (!variantId) {
+          console.error('[TurboCart] No variantId found on button');
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Adding...';
 
         const success = await addToCart(variantId);
         if (success) {
           trackEvent('add', productId);
-          e.target.textContent = 'Added!';
-          setTimeout(() => { e.target.textContent = 'Add'; e.target.disabled = false; }, 1000);
+          button.textContent = 'Added!';
+          setTimeout(() => { button.textContent = 'Add'; button.disabled = false; }, 1000);
         } else {
-          e.target.textContent = 'Error';
-          setTimeout(() => { e.target.textContent = 'Add'; e.target.disabled = false; }, 1000);
+          button.textContent = 'Error';
+          setTimeout(() => { button.textContent = 'Add'; button.disabled = false; }, 1000);
         }
       });
     });
@@ -1204,28 +1227,32 @@
     document.querySelectorAll('.tc-fbt-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.preventDefault();
-        const bundleIds = e.target.dataset.bundleIds?.split(',') || [];
+        e.stopPropagation();
+        const button = btn;
+        const bundleIds = button.dataset.bundleIds?.split(',') || [];
 
-        e.target.disabled = true;
-        e.target.textContent = 'Adding...';
+        console.log('[TurboCart] FBT clicked - bundleIds:', bundleIds);
+
+        button.disabled = true;
+        button.textContent = 'Adding...';
 
         for (const id of bundleIds) {
           await addToCart(id);
         }
 
-        e.target.textContent = 'Added!';
-        setTimeout(() => { e.target.textContent = 'Add All to Cart'; e.target.disabled = false; }, 1000);
+        button.textContent = 'Added!';
+        setTimeout(() => { button.textContent = 'Add All to Cart'; button.disabled = false; }, 1000);
       });
     });
 
     // Addon toggles (switch style)
-    document.querySelectorAll('.tc-toggle input').forEach(input => {
-      input.addEventListener('change', async (e) => {
-        const addonId = e.target.dataset.addonId;
-        const variantId = e.target.dataset.variantId;
-        const addonEl = e.target.closest('.tc-addon');
+    document.querySelectorAll('.tc-toggle input').forEach(inputEl => {
+      inputEl.addEventListener('change', async (e) => {
+        const addonId = inputEl.dataset.addonId;
+        const variantId = inputEl.dataset.variantId;
+        const addonEl = inputEl.closest('.tc-addon');
 
-        if (e.target.checked) {
+        if (inputEl.checked) {
           addedAddons.add(addonId);
           addonEl?.classList.add('active');
           if (variantId) await addToCart(variantId);
