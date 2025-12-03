@@ -36,7 +36,6 @@ export default function RootLayout({
           <a href="/" rel="home">TurboCart</a>
           <a href="/dashboard">Dashboard</a>
           <a href="/products">Products</a>
-          <a href="/cart-features">Cart Features</a>
           <a href="/analytics">Analytics</a>
           <a href="/billing">Billing</a>
           <a href="/settings">Settings</a>
